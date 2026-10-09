@@ -1,0 +1,26 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<title>AppHost — Web Application Hosting</title>
+<meta name="description" content="Browse and launch web applications online, on desktop or mobile.">
+<meta name="theme-color" content="#eef2f8" media="(prefers-color-scheme: light)">
+<meta name="theme-color" content="#0b111b" media="(prefers-color-scheme: dark)">
+<link rel="icon" href="logo.svg" type="image/svg+xml">
+<script>(function(){var t;try{t=localStorage.getItem('ah_theme')}catch(e){}if(t!=='dark'&&t!=='light')t=matchMedia('(prefers-color-scheme:dark)').matches?'dark':'light';document.documentElement.setAttribute('data-theme',t)})()</script>
+<link rel="stylesheet" href="style.css">
+</head>
+<body>
+<header class="top glass"><div class="bar">
+ <a class="brand" href="#/"><img class="logo" src="logo.svg" width="36" height="36" alt=""><span>AppHost</span></a>
+ <span class="sp"></span>
+ <nav aria-label="Main"><a href="#/" data-nav="home">Apps</a><a href="#/admin" data-nav="admin">Admin</a></nav>
+ <button class="tbtn" id="tg" type="button" aria-label="Switch theme" title="Switch theme"></button>
+</div></header>
+<main id="root"></main>
+<footer>© <span id="yr"></span> AppHost · Web Application Hosting</footer>
+<noscript><p style="padding:20px;text-align:center">Please enable JavaScript to use this site.</p></noscript>
+<script src="app.js"></script>
+</body>
+</html>
