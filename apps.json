@@ -1,3 +1,14 @@
 {
- "apps": []
+ "apps": [
+  {
+   "id": "xnrso5yd",
+   "name": "Statics Solver",
+   "desc": "Solve Statics Problems",
+   "file": "apps/xnrso5yd.html",
+   "icon": "apps/xnrso5yd.png",
+   "size": 88647,
+   "updated": 1791570261567,
+   "published": true
+  }
+ ]
 }
