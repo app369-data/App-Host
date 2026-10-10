@@ -1,0 +1,823 @@
+<!DOCTYPE html>
+<html lang="en" data-theme="light">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="color-scheme" content="light dark">
+<title>Engineering Unit Converter</title>
+<meta name="description" content="Precise unit conversions for mechanical and electrical engineering.">
+<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 32 32'%3E%3Cdefs%3E%3ClinearGradient id='g' x1='0' y1='0' x2='1' y2='1'%3E%3Cstop offset='0' stop-color='%236366f1'/%3E%3Cstop offset='1' stop-color='%2306b6d4'/%3E%3C/linearGradient%3E%3C/defs%3E%3Crect width='32' height='32' rx='8' fill='url(%23g)'/%3E%3Cpath d='M17.5 5 9 17h5.5L13.5 27 23 14.5h-5.8z' fill='%23fff'/%3E%3C/svg%3E">
+<style>
+:root{
+  --bg:#eef1fb;
+  --text:#14182b;
+  --muted:#5b6380;
+  --glass:rgba(255,255,255,.58);
+  --glass-strong:rgba(255,255,255,.78);
+  --border:rgba(255,255,255,.75);
+  --line:rgba(70,80,130,.16);
+  --accent:#5b5ff0;
+  --accent2:#08a8c9;
+  --accent-soft:rgba(91,95,240,.12);
+  --shadow:0 10px 40px rgba(60,70,130,.16);
+  --blob1:rgba(99,102,241,.38);
+  --blob2:rgba(6,182,212,.32);
+  --blob3:rgba(244,114,182,.22);
+  --danger:#c62f45;
+  --ok:#0e8f62;
+}
+:root[data-theme="dark"]{
+  --bg:#0a0e1d;
+  --text:#e8ebf8;
+  --muted:#9aa3c4;
+  --glass:rgba(24,30,56,.55);
+  --glass-strong:rgba(30,38,70,.78);
+  --border:rgba(255,255,255,.09);
+  --line:rgba(160,175,255,.15);
+  --accent:#8b8ffa;
+  --accent2:#34d3ee;
+  --accent-soft:rgba(139,143,250,.16);
+  --shadow:0 12px 44px rgba(0,0,0,.5);
+  --blob1:rgba(99,102,241,.35);
+  --blob2:rgba(6,182,212,.22);
+  --blob3:rgba(168,85,247,.22);
+  --danger:#ff7088;
+  --ok:#4fd8a5;
+}
+*{box-sizing:border-box}
+html{-webkit-text-size-adjust:100%}
+body{
+  margin:0;min-height:100vh;color:var(--text);background:var(--bg);
+  font-family:Inter,system-ui,-apple-system,"Segoe UI",Roboto,"Helvetica Neue",Arial,sans-serif;
+  font-size:15px;line-height:1.5;transition:background .3s,color .3s;
+}
+.bg{position:fixed;inset:0;z-index:-1;overflow:hidden;pointer-events:none}
+.bg i{position:absolute;border-radius:50%;filter:blur(70px);animation:float 22s ease-in-out infinite alternate}
+.bg i:nth-child(1){width:46vmax;height:46vmax;left:-12vmax;top:-14vmax;background:var(--blob1)}
+.bg i:nth-child(2){width:40vmax;height:40vmax;right:-10vmax;top:18vh;background:var(--blob2);animation-delay:-7s}
+.bg i:nth-child(3){width:36vmax;height:36vmax;left:25vw;bottom:-18vmax;background:var(--blob3);animation-delay:-13s}
+@keyframes float{to{transform:translate(4vmax,3vmax) scale(1.08)}}
+@media (prefers-reduced-motion:reduce){.bg i{animation:none}*{transition:none!important}}
+
+.glass{
+  background:var(--glass);border:1px solid var(--border);
+  -webkit-backdrop-filter:blur(18px) saturate(165%);backdrop-filter:blur(18px) saturate(165%);
+  box-shadow:var(--shadow);border-radius:18px;
+}
+.topbar{
+  position:sticky;top:10px;z-index:20;margin:10px auto 0;width:min(1200px,calc(100% - 24px));
+  display:flex;align-items:center;gap:12px;padding:10px 14px;
+}
+.logo{width:40px;height:40px;flex:none}
+.brand{min-width:0}
+.brand h1{margin:0;font-size:18px;line-height:1.2;letter-spacing:.2px}
+.brand p{margin:0;color:var(--muted);font-size:12.5px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.spacer{flex:1}
+.icon-btn{
+  width:40px;height:40px;border-radius:12px;border:1px solid var(--line);background:var(--glass-strong);
+  color:var(--text);display:grid;place-items:center;cursor:pointer;transition:transform .15s,border-color .2s;
+}
+.icon-btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.icon-btn svg{width:20px;height:20px}
+.sun{display:none}
+:root[data-theme="dark"] .sun{display:block}
+:root[data-theme="dark"] .moon{display:none}
+
+.wrap{width:min(1200px,calc(100% - 24px));margin:18px auto 40px}
+.toolbar{display:flex;gap:12px;flex-wrap:wrap;align-items:center;margin-bottom:14px}
+.tabs{display:inline-flex;padding:4px;gap:4px;border-radius:14px}
+.tab{
+  border:0;background:transparent;color:var(--muted);font:inherit;font-weight:600;
+  padding:9px 18px;border-radius:10px;cursor:pointer;transition:all .2s;
+}
+.tab[aria-selected="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;box-shadow:0 4px 14px rgba(80,90,240,.35)}
+.tab:not([aria-selected="true"]):hover{color:var(--text)}
+.search{flex:1;min-width:200px;position:relative}
+.search input{
+  width:100%;padding:11px 14px 11px 40px;border-radius:14px;border:1px solid var(--line);
+  background:var(--glass);color:var(--text);font:inherit;outline:none;
+  -webkit-backdrop-filter:blur(14px);backdrop-filter:blur(14px);
+}
+.search svg{position:absolute;left:13px;top:50%;transform:translateY(-50%);width:18px;height:18px;color:var(--muted)}
+input:focus-visible,select:focus-visible,button:focus-visible{outline:2px solid var(--accent);outline-offset:2px}
+
+.layout{display:grid;grid-template-columns:270px minmax(0,1fr);gap:16px;align-items:start}
+.cats{padding:10px;position:sticky;top:84px;max-height:calc(100vh - 104px);overflow:auto}
+.cats h4{margin:10px 8px 6px;font-size:11.5px;letter-spacing:.9px;text-transform:uppercase;color:var(--muted)}
+.cats h4:first-child{margin-top:4px}
+.cat{
+  display:block;width:100%;text-align:left;border:0;background:transparent;color:var(--text);font:inherit;
+  padding:8px 10px;border-radius:10px;cursor:pointer;transition:background .15s;
+}
+.cat:hover{background:var(--accent-soft)}
+.cat[aria-current="true"]{background:linear-gradient(135deg,var(--accent),var(--accent2));color:#fff;font-weight:600}
+.empty{padding:14px 10px;color:var(--muted);font-size:14px}
+
+.panel{padding:22px}
+.panel-head h2{margin:0;font-size:22px}
+.panel-head p{margin:2px 0 18px;color:var(--muted);font-size:13.5px}
+.conv{display:grid;grid-template-columns:minmax(0,1fr) auto minmax(0,1fr);gap:12px;align-items:end}
+.field label{display:block;font-size:12px;font-weight:600;letter-spacing:.5px;text-transform:uppercase;color:var(--muted);margin:0 0 6px 2px}
+.box{
+  display:flex;flex-direction:column;gap:8px;padding:12px;border-radius:16px;
+  border:1px solid var(--line);background:var(--glass-strong);
+}
+.box input,.out{
+  width:100%;min-height:50px;padding:6px 4px;border:0;background:transparent;color:var(--text);
+  font:600 26px/1.25 ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;outline:none;
+}
+.out{display:flex;align-items:center;overflow-wrap:anywhere;word-break:break-all}
+.out.dim{color:var(--muted)}
+select{
+  width:100%;padding:10px 12px;border-radius:12px;border:1px solid var(--line);
+  background:var(--glass);color:var(--text);font:inherit;cursor:pointer;
+}
+select option{background:var(--bg);color:var(--text)}
+.box:focus-within{border-color:var(--accent);box-shadow:0 0 0 3px var(--accent-soft)}
+.swap{margin-bottom:30px}
+.swap:hover svg{transform:rotate(180deg)}
+.swap svg{transition:transform .3s}
+.msg{min-height:22px;margin:10px 2px 0;font-size:13.5px;color:var(--danger)}
+.meta{display:flex;flex-wrap:wrap;gap:10px;align-items:center;justify-content:space-between;margin-top:6px}
+.ref{color:var(--muted);font-size:14px;overflow-wrap:anywhere}
+.btn{
+  display:inline-flex;align-items:center;gap:8px;padding:9px 14px;border-radius:12px;font:inherit;font-weight:600;cursor:pointer;
+  border:1px solid var(--line);background:var(--glass-strong);color:var(--text);transition:all .15s;
+}
+.btn:hover{border-color:var(--accent);transform:translateY(-1px)}
+.btn svg{width:16px;height:16px}
+.opts{display:flex;gap:12px;flex-wrap:wrap;margin:18px 0 6px}
+.opts .field{min-width:170px}
+.opts select{padding:8px 10px}
+h3{margin:22px 0 10px;font-size:16px}
+.table{border:1px solid var(--line);border-radius:14px;overflow:hidden;background:var(--glass)}
+.row{
+  display:grid;grid-template-columns:minmax(70px,.7fr) minmax(0,1.5fr) minmax(0,1.6fr);gap:10px;align-items:center;
+  width:100%;padding:9px 14px;border:0;border-bottom:1px solid var(--line);background:transparent;color:var(--text);
+  font:inherit;text-align:left;cursor:pointer;
+}
+.row:last-child{border-bottom:0}
+.row:hover{background:var(--accent-soft)}
+.row .sym{font-weight:700}
+.row .nm{color:var(--muted);font-size:13.5px}
+.row .val{font-family:ui-monospace,SFMono-Regular,Menlo,Consolas,monospace;text-align:right;overflow-wrap:anywhere}
+.row.is-to{background:var(--accent-soft);box-shadow:inset 3px 0 0 var(--accent)}
+.row.is-from .sym::after{content:" ·from";font-weight:500;font-size:11px;color:var(--muted)}
+.note{margin-top:16px;color:var(--muted);font-size:12.5px}
+footer{margin:26px 4px 0;color:var(--muted);font-size:12.5px;text-align:center}
+.toast{
+  position:fixed;left:50%;bottom:26px;transform:translate(-50%,20px);opacity:0;pointer-events:none;
+  padding:10px 18px;border-radius:12px;background:var(--glass-strong);border:1px solid var(--line);
+  -webkit-backdrop-filter:blur(16px);backdrop-filter:blur(16px);box-shadow:var(--shadow);transition:all .25s;z-index:50;
+}
+.toast.show{opacity:1;transform:translate(-50%,0)}
+
+@media (max-width:900px){
+  .layout{grid-template-columns:1fr}
+  .cats{position:static;max-height:none;display:flex;gap:6px;overflow-x:auto;padding:8px;scroll-snap-type:x proximity}
+  .cats h4{display:none}
+  .cats .grp{display:contents}
+  .cat{width:auto;flex:none;white-space:nowrap;border:1px solid var(--line);scroll-snap-align:start}
+}
+@media (max-width:640px){
+  .brand p{display:none}
+  .panel{padding:16px}
+  .conv{grid-template-columns:1fr}
+  .swap{margin:0 auto}
+  .swap svg{transform:rotate(90deg)}
+  .swap:hover svg{transform:rotate(270deg)}
+  .box input,.out{font-size:22px}
+  .row{grid-template-columns:minmax(60px,.8fr) minmax(0,1.6fr);}
+  .row .nm{display:none}
+}
+</style>
+</head>
+<body>
+<div class="bg" aria-hidden="true"><i></i><i></i><i></i></div>
+
+<header class="topbar glass">
+  <svg class="logo" viewBox="0 0 40 40" aria-hidden="true">
+    <defs><linearGradient id="lg" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#6366f1"/><stop offset="1" stop-color="#06b6d4"/></linearGradient></defs>
+    <rect width="40" height="40" rx="11" fill="url(#lg)"/>
+    <circle cx="20" cy="20" r="11" fill="none" stroke="rgba(255,255,255,.55)" stroke-width="4" stroke-dasharray="4.3 4.3"/>
+    <circle cx="20" cy="20" r="8.2" fill="rgba(255,255,255,.18)" stroke="#fff" stroke-width="1.6"/>
+    <path d="M21.4 11.5 14.6 21.2h4.4l-1 7.3 6.9-10h-4.5z" fill="#fff"/>
+  </svg>
+  <div class="brand">
+    <h1>Engineering Unit Converter</h1>
+    <p>Mechanical &amp; electrical engineering conversions</p>
+  </div>
+  <div class="spacer"></div>
+  <button class="icon-btn" id="themeBtn" type="button" aria-label="Toggle light / dark theme" title="Toggle theme">
+    <svg class="moon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 12.8A9 9 0 1 1 11.2 3a7 7 0 0 0 9.8 9.8z"/></svg>
+    <svg class="sun" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="4"/><path d="M12 2v2M12 20v2M4.9 4.9l1.4 1.4M17.7 17.7l1.4 1.4M2 12h2M20 12h2M4.9 19.1l1.4-1.4M17.7 6.3l1.4-1.4"/></svg>
+  </button>
+</header>
+
+<main class="wrap">
+  <div class="toolbar">
+    <div class="tabs glass" role="tablist" aria-label="Discipline">
+      <button class="tab" role="tab" id="tab-mech" data-g="mech" type="button">Mechanical</button>
+      <button class="tab" role="tab" id="tab-elec" data-g="elec" type="button">Electrical</button>
+    </div>
+    <div class="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"/><path d="m20 20-3.5-3.5"/></svg>
+      <input id="search" type="search" placeholder="Search quantity or unit (e.g. psi, kW, torque)…" aria-label="Search quantities and units" autocomplete="off">
+    </div>
+  </div>
+
+  <div class="layout">
+    <aside class="cats glass" id="cats" aria-label="Quantities"></aside>
+
+    <section class="panel glass" aria-labelledby="catName">
+      <div class="panel-head">
+        <h2 id="catName"></h2>
+        <p id="catDesc"></p>
+      </div>
+
+      <div class="conv">
+        <div class="field">
+          <label for="inVal">Value</label>
+          <div class="box">
+            <input id="inVal" type="text" inputmode="decimal" autocomplete="off" spellcheck="false" value="1" aria-describedby="msg">
+            <select id="fromSel" aria-label="From unit"></select>
+          </div>
+        </div>
+
+        <button class="icon-btn swap" id="swap" type="button" aria-label="Swap units" title="Swap units">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M7 4 3 8l4 4M3 8h14M17 20l4-4-4-4M21 16H7"/></svg>
+        </button>
+
+        <div class="field">
+          <label>Result</label>
+          <div class="box">
+            <div class="out" id="outVal" role="status" aria-live="polite">—</div>
+            <select id="toSel" aria-label="To unit"></select>
+          </div>
+        </div>
+      </div>
+
+      <div class="msg" id="msg" role="alert"></div>
+
+      <div class="meta">
+        <div class="ref" id="ref"></div>
+        <button class="btn" id="copyBtn" type="button">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2"/><path d="M5 15V5a2 2 0 0 1 2-2h10"/></svg>
+          Copy result
+        </button>
+      </div>
+
+      <div class="opts">
+        <div class="field">
+          <label for="prec">Significant digits</label>
+          <select id="prec">
+            <option value="4">4</option><option value="6">6</option><option value="8" selected>8</option>
+            <option value="10">10</option><option value="12">12</option>
+          </select>
+        </div>
+        <div class="field">
+          <label for="notation">Notation</label>
+          <select id="notation">
+            <option value="auto" selected>Automatic</option>
+            <option value="sci">Scientific</option>
+          </select>
+        </div>
+      </div>
+
+      <h3>Convert to every unit</h3>
+      <div class="table" id="table"></div>
+      <div class="note" id="catNote"></div>
+    </section>
+  </div>
+
+  <footer>
+    Factors follow SI and international definitions (1&nbsp;in&nbsp;=&nbsp;25.4&nbsp;mm, 1&nbsp;lb&nbsp;=&nbsp;0.45359237&nbsp;kg, g₀&nbsp;=&nbsp;9.80665&nbsp;m/s², BTU&nbsp;=&nbsp;BTU<sub>IT</sub>, cal&nbsp;=&nbsp;thermochemical calorie unless stated).
+    Always verify critical design values against your governing standard.
+  </footer>
+</main>
+<div class="toast" id="toast" role="status"></div>
+
+<script>
+// ==CORE-START==
+/* ---------- Exact reference constants ---------- */
+const IN = 0.0254, FT = 0.3048, YD = 0.9144, MI = 1609.344;
+const LB = 0.45359237, G0 = 9.80665, LBF = LB * G0;
+const BTU = 1055.05585262;              // International Table BTU, J
+const CAL = 4.184;                      // thermochemical calorie, J
+const GAL = 3.785411784e-3;             // US gallon, m³
+const UKGAL = 4.54609e-3;               // imperial gallon, m³
+const HP = 550 * FT * LBF;              // mechanical horsepower, W
+const DF = 5 / 9;                       // size of 1 °F / 1 °R in kelvin
+const CMIL = Math.PI / 4 * Math.pow(IN / 1000, 2);   // circular mil, m²
+const IN2 = IN * IN, FT2 = FT * FT, IN3 = IN * IN * IN, FT3 = FT * FT * FT;
+
+/* Linear unit: value_in_base = value * f */
+const L = (s, n, f) => ({ s, n, f });
+/* Non-linear unit: to(x) -> base, from(base) -> x */
+const N = (s, n, to, from) => ({ s, n, to, from });
+
+const CATS = [
+/* ================= MECHANICAL ================= */
+{ id:'length', name:'Length', g:'both', base:'m',
+  desc:'SI base unit: metre (m).',
+  units:[L('m','metre',1),L('km','kilometre',1e3),L('cm','centimetre',1e-2),L('mm','millimetre',1e-3),L('µm','micrometre',1e-6),L('nm','nanometre',1e-9),L('Å','ångström',1e-10),
+         L('in','inch',IN),L('ft','foot (international)',FT),L('yd','yard',YD),L('mi','mile (statute)',MI),L('nmi','nautical mile',1852),L('mil','mil / thou (0.001 in)',IN/1000),L('µin','microinch',IN/1e6)],
+  from:'in', to:'mm' },
+{ id:'area', name:'Area', g:'both', base:'m²',
+  desc:'SI derived unit: square metre (m²). Circular mil is used for wire cross-sections.',
+  units:[L('m²','square metre',1),L('km²','square kilometre',1e6),L('ha','hectare',1e4),L('cm²','square centimetre',1e-4),L('mm²','square millimetre',1e-6),L('µm²','square micrometre',1e-12),
+         L('in²','square inch',IN2),L('ft²','square foot',FT2),L('yd²','square yard',YD*YD),L('acre','acre',43560*FT2),L('mi²','square mile',MI*MI),
+         L('cmil','circular mil',CMIL),L('kcmil','kcmil (MCM)',CMIL*1000)],
+  from:'in²', to:'mm²' },
+{ id:'volume', name:'Volume', g:'mech', base:'m³',
+  desc:'SI derived unit: cubic metre (m³). US liquid and imperial gallons are both provided.',
+  units:[L('m³','cubic metre',1),L('L','litre',1e-3),L('mL','millilitre',1e-6),L('cm³','cubic centimetre',1e-6),L('mm³','cubic millimetre',1e-9),
+         L('in³','cubic inch',IN3),L('ft³','cubic foot',FT3),L('yd³','cubic yard',YD*YD*YD),
+         L('gal (US)','US liquid gallon',GAL),L('qt (US)','US liquid quart',GAL/4),L('pt (US)','US liquid pint',GAL/8),L('fl oz (US)','US fluid ounce',GAL/128),
+         L('gal (UK)','imperial gallon',UKGAL),L('pt (UK)','imperial pint',UKGAL/8),L('fl oz (UK)','imperial fluid ounce',UKGAL/160),L('bbl','oil barrel (42 US gal)',42*GAL)],
+  from:'gal (US)', to:'L' },
+{ id:'mass', name:'Mass', g:'mech', base:'kg',
+  desc:'SI base unit: kilogram (kg). lb and oz are avoirdupois mass units.',
+  units:[L('kg','kilogram',1),L('g','gram',1e-3),L('mg','milligram',1e-6),L('µg','microgram',1e-9),L('t','tonne (metric)',1e3),
+         L('lb','pound (lbm)',LB),L('oz','ounce',LB/16),L('gr','grain',LB/7000),L('slug','slug',LBF/FT),L('ton (short)','short ton (2000 lb)',2000*LB),L('ton (long)','long ton (2240 lb)',2240*LB)],
+  from:'lb', to:'kg' },
+{ id:'density', name:'Density', g:'mech', base:'kg/m³',
+  desc:'SI derived unit: kilogram per cubic metre (kg/m³).',
+  units:[L('kg/m³','kilogram per cubic metre',1),L('g/cm³','gram per cubic centimetre',1e3),L('g/mL','gram per millilitre',1e3),L('kg/L','kilogram per litre',1e3),L('t/m³','tonne per cubic metre',1e3),L('g/L','gram per litre',1),
+         L('lb/ft³','pound per cubic foot',LB/FT3),L('lb/in³','pound per cubic inch',LB/IN3),L('lb/gal (US)','pound per US gallon',LB/GAL),L('lb/gal (UK)','pound per imperial gallon',LB/UKGAL),L('slug/ft³','slug per cubic foot',(LBF/FT)/FT3)],
+  from:'lb/ft³', to:'kg/m³' },
+{ id:'force', name:'Force', g:'mech', base:'N',
+  desc:'SI derived unit: newton (N). kgf and lbf use standard gravity g₀ = 9.80665 m/s².',
+  units:[L('N','newton',1),L('mN','millinewton',1e-3),L('kN','kilonewton',1e3),L('MN','meganewton',1e6),
+         L('kgf','kilogram-force',G0),L('tf','tonne-force (metric)',1000*G0),L('lbf','pound-force',LBF),L('kip','kilopound-force',1000*LBF),L('ozf','ounce-force',LBF/16),L('ton-force (short)','short ton-force',2000*LBF),L('pdl','poundal',LB*FT),L('dyn','dyne',1e-5)],
+  from:'lbf', to:'N' },
+{ id:'pressure', name:'Pressure & Stress', g:'mech', base:'Pa',
+  desc:'SI derived unit: pascal (Pa = N/m²). Applies equally to mechanical stress. mmHg, inHg and H₂O columns use conventional definitions.',
+  units:[L('Pa','pascal',1),L('hPa','hectopascal',100),L('kPa','kilopascal',1e3),L('MPa','megapascal (= N/mm²)',1e6),L('GPa','gigapascal',1e9),
+         L('bar','bar',1e5),L('mbar','millibar',100),L('atm','standard atmosphere',101325),L('at','technical atmosphere (kgf/cm²)',G0*1e4),
+         L('psi','pound-force per square inch',LBF/IN2),L('ksi','kip per square inch',1000*LBF/IN2),L('psf','pound-force per square foot',LBF/FT2),
+         L('kgf/cm²','kilogram-force per cm²',G0*1e4),L('kgf/mm²','kilogram-force per mm²',G0*1e6),
+         L('Torr','torr (1/760 atm)',101325/760),L('mmHg','millimetre of mercury (conv.)',133.322387415),L('inHg','inch of mercury (conv.)',133.322387415*25.4),
+         L('mmH₂O','millimetre of water (conv.)',G0),L('inH₂O','inch of water (conv.)',G0*25.4)],
+  from:'psi', to:'kPa' },
+{ id:'torque', name:'Torque / Moment', g:'mech', base:'N·m',
+  desc:'SI derived unit: newton metre (N·m). For torque, 1 N·m is not expressed as joule.',
+  units:[L('N·m','newton metre',1),L('kN·m','kilonewton metre',1e3),L('mN·m','millinewton metre',1e-3),L('N·cm','newton centimetre',1e-2),L('N·mm','newton millimetre',1e-3),
+         L('kgf·m','kilogram-force metre',G0),L('kgf·cm','kilogram-force centimetre',G0/100),L('kgf·mm','kilogram-force millimetre',G0/1000),
+         L('lbf·ft','pound-force foot',LBF*FT),L('lbf·in','pound-force inch',LBF*IN),L('ozf·in','ounce-force inch',LBF*IN/16),L('dyn·cm','dyne centimetre',1e-7)],
+  from:'lbf·ft', to:'N·m' },
+{ id:'energy', name:'Energy, Work & Heat', g:'both', base:'J',
+  desc:'SI derived unit: joule (J). BTU is the International Table BTU; cal is the thermochemical calorie.',
+  units:[L('J','joule',1),L('kJ','kilojoule',1e3),L('MJ','megajoule',1e6),L('GJ','gigajoule',1e9),L('mJ','millijoule',1e-3),
+         L('Wh','watt-hour',3600),L('kWh','kilowatt-hour',3.6e6),L('MWh','megawatt-hour',3.6e9),
+         L('cal','calorie (thermochemical)',CAL),L('kcal','kilocalorie (thermochemical)',CAL*1000),L('BTU','British thermal unit (IT)',BTU),L('therm','therm (US)',1.054804e8),
+         L('ft·lbf','foot pound-force',LBF*FT),L('in·lbf','inch pound-force',LBF*IN),L('kgf·m','kilogram-force metre',G0),L('hp·h','horsepower-hour',HP*3600),
+         L('eV','electronvolt',1.602176634e-19),L('erg','erg',1e-7)],
+  from:'kWh', to:'MJ' },
+{ id:'power', name:'Power', g:'both', base:'W',
+  desc:'SI derived unit: watt (W). hp is mechanical horsepower (550 ft·lbf/s); PS is metric horsepower (75 kgf·m/s).',
+  units:[L('W','watt',1),L('mW','milliwatt',1e-3),L('µW','microwatt',1e-6),L('kW','kilowatt',1e3),L('MW','megawatt',1e6),L('GW','gigawatt',1e9),
+         L('hp','horsepower (mechanical)',HP),L('PS','metric horsepower (PS / CV)',75*G0),L('hp (elec)','electrical horsepower',746),L('hp (boiler)','boiler horsepower',33475*BTU/3600),
+         L('BTU/h','BTU (IT) per hour',BTU/3600),L('BTU/s','BTU (IT) per second',BTU),L('TR','ton of refrigeration (12 000 BTU/h)',12000*BTU/3600),
+         L('kcal/h','kilocalorie per hour',CAL*1000/3600),L('cal/s','calorie per second',CAL),L('ft·lbf/s','foot pound-force per second',LBF*FT),L('kgf·m/s','kilogram-force metre per second',G0),L('erg/s','erg per second',1e-7)],
+  from:'hp', to:'kW' },
+{ id:'time', name:'Time', g:'both', base:'s',
+  desc:'SI base unit: second (s).',
+  units:[L('s','second',1),L('ms','millisecond',1e-3),L('µs','microsecond',1e-6),L('ns','nanosecond',1e-9),L('min','minute',60),L('h','hour',3600),L('day','day',86400),L('week','week',604800),
+         L('yr (365 d)','year (365 days)',365*86400),L('yr (365.25 d)','Julian year (365.25 days)',365.25*86400)],
+  from:'h', to:'s' },
+{ id:'temp', name:'Temperature', g:'both', base:'°C',
+  desc:'Absolute temperature scales. For temperature differences use “Temperature Difference”.',
+  units:[N('°C','degree Celsius',x=>x,b=>b),
+         N('K','kelvin',x=>x-273.15,b=>b+273.15),
+         N('°F','degree Fahrenheit',x=>(x-32)*DF,b=>b/DF+32),
+         N('°R','degree Rankine',x=>(x-491.67)*DF,b=>b/DF+491.67)],
+  from:'°C', to:'°F' },
+{ id:'dtemp', name:'Temperature Difference', g:'mech', base:'K',
+  desc:'Intervals only (ΔT), no offset: 1 K = 1 °C and 1 °F = 1 °R = 5/9 K.',
+  units:[L('K','kelvin (Δ)',1),L('°C','degree Celsius (Δ)',1),L('°F','degree Fahrenheit (Δ)',DF),L('°R','degree Rankine (Δ)',DF)],
+  from:'°C', to:'°F' },
+{ id:'velocity', name:'Velocity / Speed', g:'mech', base:'m/s',
+  desc:'SI derived unit: metre per second (m/s).',
+  units:[L('m/s','metre per second',1),L('km/h','kilometre per hour',1/3.6),L('m/min','metre per minute',1/60),L('cm/s','centimetre per second',1e-2),L('mm/s','millimetre per second',1e-3),
+         L('mph','mile per hour',MI/3600),L('ft/s','foot per second',FT),L('ft/min','foot per minute',FT/60),L('in/s','inch per second',IN),L('kn','knot',1852/3600)],
+  from:'mph', to:'km/h' },
+{ id:'accel', name:'Acceleration', g:'mech', base:'m/s²',
+  desc:'SI derived unit: metre per second squared (m/s²). g₀ = 9.80665 m/s² (standard gravity).',
+  units:[L('m/s²','metre per second squared',1),L('mm/s²','millimetre per second squared',1e-3),L('cm/s² (Gal)','gal (centimetre per second squared)',1e-2),
+         L('g₀','standard gravity',G0),L('ft/s²','foot per second squared',FT),L('in/s²','inch per second squared',IN),L('km/h/s','kilometre per hour per second',1/3.6)],
+  from:'g₀', to:'m/s²' },
+{ id:'angle', name:'Plane Angle', g:'both', base:'rad',
+  desc:'SI derived unit: radian (rad). Also used for electrical phase angle.',
+  units:[L('rad','radian',1),L('mrad','milliradian',1e-3),L('°','degree',Math.PI/180),L('′','arcminute',Math.PI/10800),L('″','arcsecond',Math.PI/648000),L('grad','gradian',Math.PI/200),L('rev','revolution (turn)',2*Math.PI)],
+  from:'°', to:'rad' },
+{ id:'angvel', name:'Angular Velocity', g:'mech', base:'rad/s',
+  desc:'SI derived unit: radian per second (rad/s).',
+  units:[L('rad/s','radian per second',1),L('rpm','revolution per minute',2*Math.PI/60),L('rps','revolution per second',2*Math.PI),L('rev/h','revolution per hour',2*Math.PI/3600),L('°/s','degree per second',Math.PI/180),L('°/min','degree per minute',Math.PI/10800),L('rad/min','radian per minute',1/60)],
+  from:'rpm', to:'rad/s' },
+{ id:'freq', name:'Frequency', g:'both', base:'Hz',
+  desc:'SI derived unit: hertz (Hz = cycles per second). Angular frequency ω = 2πf (rad/s).',
+  units:[L('Hz','hertz',1),L('mHz','millihertz',1e-3),L('kHz','kilohertz',1e3),L('MHz','megahertz',1e6),L('GHz','gigahertz',1e9),L('THz','terahertz',1e12),
+         L('rpm','cycles per minute (rpm)',1/60),L('rad/s','radian per second (ω)',1/(2*Math.PI))],
+  from:'Hz', to:'rad/s' },
+{ id:'flow', name:'Volumetric Flow Rate', g:'mech', base:'m³/s',
+  desc:'SI derived unit: cubic metre per second (m³/s). CFM and GPM are US customary.',
+  units:[L('m³/s','cubic metre per second',1),L('m³/min','cubic metre per minute',1/60),L('m³/h','cubic metre per hour',1/3600),L('m³/day','cubic metre per day',1/86400),
+         L('L/s','litre per second',1e-3),L('L/min','litre per minute',1e-3/60),L('L/h','litre per hour',1e-3/3600),L('mL/min','millilitre per minute',1e-6/60),
+         L('ft³/s','cubic foot per second',FT3),L('CFM','cubic foot per minute',FT3/60),L('ft³/h','cubic foot per hour',FT3/3600),
+         L('GPM (US)','US gallon per minute',GAL/60),L('gal/h (US)','US gallon per hour',GAL/3600),L('gal/day (US)','US gallon per day',GAL/86400),L('GPM (UK)','imperial gallon per minute',UKGAL/60),L('bbl/day','oil barrel per day',42*GAL/86400)],
+  from:'GPM (US)', to:'L/min' },
+{ id:'massflow', name:'Mass Flow Rate', g:'mech', base:'kg/s',
+  desc:'SI derived unit: kilogram per second (kg/s).',
+  units:[L('kg/s','kilogram per second',1),L('kg/min','kilogram per minute',1/60),L('kg/h','kilogram per hour',1/3600),L('g/s','gram per second',1e-3),L('g/min','gram per minute',1e-3/60),
+         L('t/h','tonne per hour',1000/3600),L('lb/s','pound per second',LB),L('lb/min','pound per minute',LB/60),L('lb/h','pound per hour',LB/3600)],
+  from:'lb/h', to:'kg/h' },
+{ id:'dynvisc', name:'Dynamic Viscosity', g:'mech', base:'Pa·s',
+  desc:'SI derived unit: pascal second (Pa·s). 1 cP = 1 mPa·s.',
+  units:[L('Pa·s','pascal second',1),L('mPa·s','millipascal second',1e-3),L('cP','centipoise',1e-3),L('P','poise',0.1),L('kgf·s/m²','kilogram-force second per m²',G0),
+         L('lb/(ft·s)','pound per foot second',LB/FT),L('lb/(ft·h)','pound per foot hour',LB/FT/3600),L('lbf·s/ft²','pound-force second per ft²',LBF/FT2),L('reyn','reyn (lbf·s/in²)',LBF/IN2)],
+  from:'cP', to:'Pa·s' },
+{ id:'kinvisc', name:'Kinematic Viscosity', g:'mech', base:'m²/s',
+  desc:'SI derived unit: square metre per second (m²/s). 1 cSt = 1 mm²/s.',
+  units:[L('m²/s','square metre per second',1),L('mm²/s','square millimetre per second',1e-6),L('cSt','centistokes',1e-6),L('St','stokes',1e-4),L('cm²/s','square centimetre per second',1e-4),
+         L('m²/h','square metre per hour',1/3600),L('ft²/s','square foot per second',FT2),L('ft²/h','square foot per hour',FT2/3600),L('in²/s','square inch per second',IN2)],
+  from:'cSt', to:'m²/s' },
+{ id:'thermcond', name:'Thermal Conductivity', g:'mech', base:'W/(m·K)',
+  desc:'SI derived unit: watt per metre kelvin (W/(m·K)). BTU is BTU(IT); cal and kcal are thermochemical.',
+  units:[L('W/(m·K)','watt per metre kelvin',1),L('mW/(m·K)','milliwatt per metre kelvin',1e-3),L('kW/(m·K)','kilowatt per metre kelvin',1e3),L('W/(cm·K)','watt per centimetre kelvin',100),
+         L('BTU/(h·ft·°F)','BTU per hour foot °F',BTU/3600/(FT*DF)),L('BTU·in/(h·ft²·°F)','BTU inch per hour ft² °F',BTU/3600*IN/(FT2*DF)),
+         L('kcal/(h·m·K)','kilocalorie per hour metre kelvin',CAL*1000/3600),L('cal/(s·cm·K)','calorie per second cm kelvin',CAL*100)],
+  from:'BTU/(h·ft·°F)', to:'W/(m·K)' },
+{ id:'htc', name:'Heat Transfer Coefficient', g:'mech', base:'W/(m²·K)',
+  desc:'SI derived unit: watt per square metre kelvin (W/(m²·K)).',
+  units:[L('W/(m²·K)','watt per m² kelvin',1),L('kW/(m²·K)','kilowatt per m² kelvin',1e3),L('W/(cm²·K)','watt per cm² kelvin',1e4),
+         L('BTU/(h·ft²·°F)','BTU per hour ft² °F',BTU/3600/(FT2*DF)),L('kcal/(h·m²·K)','kilocalorie per hour m² kelvin',CAL*1000/3600),L('cal/(s·cm²·K)','calorie per second cm² kelvin',CAL*1e4)],
+  from:'BTU/(h·ft²·°F)', to:'W/(m²·K)' },
+{ id:'specheat', name:'Specific Heat Capacity', g:'mech', base:'J/(kg·K)',
+  desc:'SI derived unit: joule per kilogram kelvin (J/(kg·K)).',
+  units:[L('J/(kg·K)','joule per kilogram kelvin',1),L('kJ/(kg·K)','kilojoule per kilogram kelvin',1e3),L('J/(g·K)','joule per gram kelvin',1e3),
+         L('cal/(g·K)','calorie per gram kelvin',CAL*1000),L('kcal/(kg·K)','kilocalorie per kilogram kelvin',CAL*1000),L('BTU/(lb·°F)','BTU per pound °F',BTU/(LB*DF))],
+  from:'BTU/(lb·°F)', to:'kJ/(kg·K)' },
+{ id:'heatflux', name:'Heat Flux', g:'mech', base:'W/m²',
+  desc:'SI derived unit: watt per square metre (W/m²).',
+  units:[L('W/m²','watt per square metre',1),L('kW/m²','kilowatt per square metre',1e3),L('W/cm²','watt per square centimetre',1e4),
+         L('BTU/(h·ft²)','BTU per hour ft²',BTU/3600/FT2),L('BTU/(s·ft²)','BTU per second ft²',BTU/FT2),L('kcal/(h·m²)','kilocalorie per hour m²',CAL*1000/3600),L('cal/(s·cm²)','calorie per second cm²',CAL*1e4)],
+  from:'BTU/(h·ft²)', to:'W/m²' },
+{ id:'minertia', name:'Mass Moment of Inertia', g:'mech', base:'kg·m²',
+  desc:'SI derived unit: kilogram square metre (kg·m²).',
+  units:[L('kg·m²','kilogram square metre',1),L('kg·cm²','kilogram square centimetre',1e-4),L('kg·mm²','kilogram square millimetre',1e-6),L('g·cm²','gram square centimetre',1e-7),
+         L('lb·ft²','pound square foot',LB*FT2),L('lb·in²','pound square inch',LB*IN2),L('oz·in²','ounce square inch',LB*IN2/16),L('slug·ft²','slug square foot',(LBF/FT)*FT2),L('lbf·in·s²','pound-force inch second squared',LBF*IN)],
+  from:'lb·ft²', to:'kg·m²' },
+{ id:'areamoi', name:'Area Moment of Inertia', g:'mech', base:'m⁴',
+  desc:'Second moment of area (beam sections): SI unit metre to the fourth power (m⁴).',
+  units:[L('m⁴','metre⁴',1),L('cm⁴','centimetre⁴',1e-8),L('mm⁴','millimetre⁴',1e-12),L('in⁴','inch⁴',IN2*IN2),L('ft⁴','foot⁴',FT2*FT2)],
+  from:'in⁴', to:'cm⁴' },
+{ id:'stiff', name:'Stiffness / Spring Rate', g:'mech', base:'N/m',
+  desc:'SI derived unit: newton per metre (N/m).',
+  units:[L('N/m','newton per metre',1),L('N/cm','newton per centimetre',100),L('N/mm','newton per millimetre',1e3),L('kN/m','kilonewton per metre',1e3),L('kN/mm','kilonewton per millimetre',1e6),
+         L('kgf/cm','kilogram-force per centimetre',G0*100),L('kgf/mm','kilogram-force per millimetre',G0*1000),L('lbf/in','pound-force per inch',LBF/IN),L('lbf/ft','pound-force per foot',LBF/FT)],
+  from:'lbf/in', to:'N/mm' },
+{ id:'specenergy', name:'Specific Energy', g:'both', base:'J/kg',
+  desc:'SI derived unit: joule per kilogram (J/kg). Useful for battery pack and fuel comparisons.',
+  units:[L('J/kg','joule per kilogram',1),L('kJ/kg','kilojoule per kilogram',1e3),L('MJ/kg','megajoule per kilogram',1e6),L('Wh/kg','watt-hour per kilogram',3600),L('kWh/kg','kilowatt-hour per kilogram',3.6e6),
+         L('kcal/kg','kilocalorie per kilogram',CAL*1000),L('BTU/lb','BTU per pound',BTU/LB)],
+  from:'Wh/kg', to:'kJ/kg' },
+{ id:'energydens', name:'Energy Density', g:'both', base:'J/m³',
+  desc:'SI derived unit: joule per cubic metre (J/m³).',
+  units:[L('J/m³','joule per cubic metre',1),L('kJ/m³','kilojoule per cubic metre',1e3),L('MJ/m³','megajoule per cubic metre',1e6),L('MJ/L','megajoule per litre',1e9),
+         L('Wh/L','watt-hour per litre',3.6e6),L('kWh/m³','kilowatt-hour per cubic metre',3.6e6),L('BTU/ft³','BTU per cubic foot',BTU/FT3),L('BTU/gal (US)','BTU per US gallon',BTU/GAL)],
+  from:'Wh/L', to:'MJ/m³' },
+
+/* ================= ELECTRICAL ================= */
+{ id:'current', name:'Electric Current', g:'elec', base:'A',
+  desc:'SI base unit: ampere (A).',
+  units:[L('A','ampere',1),L('kA','kiloampere',1e3),L('mA','milliampere',1e-3),L('µA','microampere',1e-6),L('nA','nanoampere',1e-9),L('pA','picoampere',1e-12)],
+  from:'mA', to:'A' },
+{ id:'voltage', name:'Voltage (Potential)', g:'elec', base:'V',
+  desc:'SI derived unit: volt (V).',
+  units:[L('V','volt',1),L('kV','kilovolt',1e3),L('MV','megavolt',1e6),L('mV','millivolt',1e-3),L('µV','microvolt',1e-6),L('nV','nanovolt',1e-9)],
+  from:'kV', to:'V' },
+{ id:'resistance', name:'Resistance / Impedance', g:'elec', base:'Ω',
+  desc:'SI derived unit: ohm (Ω). Also applies to reactance and impedance.',
+  units:[L('Ω','ohm',1),L('mΩ','milliohm',1e-3),L('µΩ','microohm',1e-6),L('kΩ','kilohm',1e3),L('MΩ','megohm',1e6),L('GΩ','gigohm',1e9)],
+  from:'kΩ', to:'Ω' },
+{ id:'conductance', name:'Conductance / Admittance', g:'elec', base:'S',
+  desc:'SI derived unit: siemens (S = 1/Ω). Also applies to susceptance and admittance.',
+  units:[L('S','siemens (mho)',1),L('kS','kilosiemens',1e3),L('mS','millisiemens',1e-3),L('µS','microsiemens',1e-6),L('nS','nanosiemens',1e-9)],
+  from:'mS', to:'S' },
+{ id:'capacitance', name:'Capacitance', g:'elec', base:'F',
+  desc:'SI derived unit: farad (F).',
+  units:[L('F','farad',1),L('mF','millifarad',1e-3),L('µF','microfarad',1e-6),L('nF','nanofarad',1e-9),L('pF','picofarad',1e-12),L('fF','femtofarad',1e-15)],
+  from:'µF', to:'nF' },
+{ id:'inductance', name:'Inductance', g:'elec', base:'H',
+  desc:'SI derived unit: henry (H).',
+  units:[L('H','henry',1),L('mH','millihenry',1e-3),L('µH','microhenry',1e-6),L('nH','nanohenry',1e-9),L('pH','picohenry',1e-12)],
+  from:'mH', to:'µH' },
+{ id:'charge', name:'Electric Charge', g:'elec', base:'C',
+  desc:'SI derived unit: coulomb (C = A·s). Ah and mAh are common battery units.',
+  units:[L('C','coulomb',1),L('kC','kilocoulomb',1e3),L('mC','millicoulomb',1e-3),L('µC','microcoulomb',1e-6),L('nC','nanocoulomb',1e-9),L('pC','picocoulomb',1e-12),
+         L('Ah','ampere-hour',3600),L('mAh','milliampere-hour',3.6),L('kAh','kiloampere-hour',3.6e6),L('e','elementary charge',1.602176634e-19)],
+  from:'mAh', to:'C' },
+{ id:'mflux', name:'Magnetic Flux', g:'elec', base:'Wb',
+  desc:'SI derived unit: weber (Wb = V·s).',
+  units:[L('Wb','weber',1),L('mWb','milliweber',1e-3),L('µWb','microweber',1e-6),L('nWb','nanoweber',1e-9),L('V·s','volt second',1),L('Mx','maxwell',1e-8)],
+  from:'Mx', to:'µWb' },
+{ id:'fluxdens', name:'Magnetic Flux Density', g:'elec', base:'T',
+  desc:'SI derived unit: tesla (T = Wb/m²).',
+  units:[L('T','tesla',1),L('mT','millitesla',1e-3),L('µT','microtesla',1e-6),L('nT','nanotesla',1e-9),L('Wb/m²','weber per square metre',1),L('G','gauss',1e-4),L('kG','kilogauss',0.1),L('mG','milligauss',1e-7)],
+  from:'G', to:'mT' },
+{ id:'hfield', name:'Magnetic Field Strength', g:'elec', base:'A/m',
+  desc:'SI derived unit: ampere per metre (A/m). 1 Oe = 1000/(4π) A/m.',
+  units:[L('A/m','ampere per metre',1),L('kA/m','kiloampere per metre',1e3),L('A/cm','ampere per centimetre',100),L('A/mm','ampere per millimetre',1e3),L('Oe','oersted',1000/(4*Math.PI)),L('kOe','kilo-oersted',1e6/(4*Math.PI))],
+  from:'Oe', to:'A/m' },
+{ id:'mmf', name:'Magnetomotive Force', g:'elec', base:'A',
+  desc:'SI unit: ampere-turn (A·t). 1 Gb = 10/(4π) A·t.',
+  units:[L('A·t','ampere-turn',1),L('mA·t','milliampere-turn',1e-3),L('kA·t','kiloampere-turn',1e3),L('Gb','gilbert',10/(4*Math.PI))],
+  from:'Gb', to:'A·t' },
+{ id:'efield', name:'Electric Field Strength', g:'elec', base:'V/m',
+  desc:'SI derived unit: volt per metre (V/m). Also used for dielectric strength.',
+  units:[L('V/m','volt per metre',1),L('kV/m','kilovolt per metre',1e3),L('MV/m','megavolt per metre',1e6),L('V/cm','volt per centimetre',100),L('kV/cm','kilovolt per centimetre',1e5),
+         L('V/mm','volt per millimetre',1e3),L('kV/mm','kilovolt per millimetre',1e6),L('V/mil','volt per mil',1/(IN/1000)),L('kV/in','kilovolt per inch',1e3/IN)],
+  from:'kV/mm', to:'V/mil' },
+{ id:'resistivity', name:'Electrical Resistivity', g:'elec', base:'Ω·m',
+  desc:'SI derived unit: ohm metre (Ω·m). 1 Ω·mm²/m = 1 µΩ·m.',
+  units:[L('Ω·m','ohm metre',1),L('Ω·cm','ohm centimetre',1e-2),L('Ω·mm','ohm millimetre',1e-3),L('kΩ·cm','kilohm centimetre',10),L('MΩ·cm','megohm centimetre',1e4),
+         L('mΩ·m','milliohm metre',1e-3),L('µΩ·m','microohm metre',1e-6),L('µΩ·cm','microohm centimetre',1e-8),L('nΩ·m','nanoohm metre',1e-9),L('Ω·mm²/m','ohm square millimetre per metre',1e-6),
+         L('Ω·in','ohm inch',IN),L('Ω·ft','ohm foot',FT),L('Ω·cmil/ft','ohm circular mil per foot',CMIL/FT)],
+  from:'Ω·cmil/ft', to:'µΩ·cm' },
+{ id:'conductivity', name:'Electrical Conductivity', g:'elec', base:'S/m',
+  desc:'SI derived unit: siemens per metre (S/m). 100 % IACS = 5.8001 × 10⁷ S/m (annealed copper standard).',
+  units:[L('S/m','siemens per metre',1),L('kS/m','kilosiemens per metre',1e3),L('MS/m','megasiemens per metre',1e6),L('mS/m','millisiemens per metre',1e-3),L('µS/m','microsiemens per metre',1e-6),
+         L('S/cm','siemens per centimetre',100),L('mS/cm','millisiemens per centimetre',0.1),L('µS/cm','microsiemens per centimetre',1e-4),L('S/mm','siemens per millimetre',1e3),
+         L('m/(Ω·mm²)','metre per ohm square millimetre',1e6),L('% IACS','percent IACS',5.8001e5)],
+  from:'% IACS', to:'MS/m' },
+{ id:'awg', name:'Wire Gauge (AWG)', g:'elec', base:'mm²',
+  desc:'American Wire Gauge ↔ conductor cross-section and diameter (solid round wire). Enter 0000 as −3, 000 as −2, 00 as −1.',
+  units:[N('AWG','American Wire Gauge',
+            n=>Math.PI/4*Math.pow(0.127*Math.pow(92,(36-n)/39),2),
+            a=>36-39*Math.log(Math.sqrt(4*a/Math.PI)/0.127)/Math.log(92)),
+         L('mm²','cross-section (square millimetre)',1),
+         L('kcmil','cross-section (kcmil / MCM)',CMIL*1e9),
+         L('cmil','cross-section (circular mil)',CMIL*1e6),
+         N('mm (dia.)','diameter (millimetre)',d=>Math.PI/4*d*d,a=>Math.sqrt(4*a/Math.PI)),
+         N('in (dia.)','diameter (inch)',d=>Math.PI/4*Math.pow(d*25.4,2),a=>Math.sqrt(4*a/Math.PI)/25.4),
+         N('mil (dia.)','diameter (mil)',d=>Math.PI/4*Math.pow(d*0.0254,2),a=>Math.sqrt(4*a/Math.PI)/0.0254)],
+  from:'AWG', to:'mm²' },
+{ id:'powerlevel', name:'Power Level (dBW / dBm)', g:'elec', base:'W',
+  desc:'Logarithmic power levels referenced to 1 W (dBW) or 1 mW (dBm). Power must be greater than zero to express in dB.',
+  units:[L('W','watt',1),L('mW','milliwatt',1e-3),L('µW','microwatt',1e-6),L('kW','kilowatt',1e3),
+         N('dBW','decibel-watt',x=>Math.pow(10,x/10),b=>10*Math.log10(b)),
+         N('dBm','decibel-milliwatt',x=>1e-3*Math.pow(10,x/10),b=>10*Math.log10(b/1e-3))],
+  from:'dBm', to:'mW' },
+{ id:'voltlevel', name:'Voltage Level (dBV / dBµV)', g:'elec', base:'V',
+  desc:'Logarithmic voltage levels (20·log₁₀). dBV: 1 V, dBmV: 1 mV, dBµV: 1 µV, dBu: 0.7746 V (√(1 mW × 600 Ω)).',
+  units:[L('V','volt',1),L('mV','millivolt',1e-3),L('µV','microvolt',1e-6),L('kV','kilovolt',1e3),
+         N('dBV','decibel-volt',x=>Math.pow(10,x/20),b=>20*Math.log10(b)),
+         N('dBmV','decibel-millivolt',x=>1e-3*Math.pow(10,x/20),b=>20*Math.log10(b/1e-3)),
+         N('dBµV','decibel-microvolt',x=>1e-6*Math.pow(10,x/20),b=>20*Math.log10(b/1e-6)),
+         N('dBu','decibel-unloaded (0.7746 V)',x=>Math.sqrt(0.6)*Math.pow(10,x/20),b=>20*Math.log10(b/Math.sqrt(0.6)))],
+  from:'dBµV', to:'µV' },
+{ id:'gain', name:'Gain / Ratio (dB, Np)', g:'elec', base:'power ratio',
+  desc:'Power ratio, amplitude (voltage or current) ratio, decibels (10·log₁₀ P, 20·log₁₀ V) and nepers (ln V). Equal impedances assumed.',
+  units:[L('P₂/P₁','power ratio (×)',1),
+         N('V₂/V₁','amplitude ratio (×)',x=>x*x,b=>Math.sqrt(b)),
+         N('dB','decibel',x=>Math.pow(10,x/10),b=>10*Math.log10(b)),
+         N('Np','neper',x=>Math.exp(2*x),b=>Math.log(b)/2)],
+  from:'dB', to:'V₂/V₁' }
+];
+/* The "amplitude ratio" unit should only accept non-negative values; handled in validation below. */
+
+/* ---------- Conversion ---------- */
+function toBase(u, v){ return u.f !== undefined ? v * u.f : u.to(v); }
+function fromBase(u, b){ return u.f !== undefined ? b / u.f : u.from(b); }
+function convert(v, fromU, toU){
+  const b = toBase(fromU, v);
+  const r = fromBase(toU, b);
+  return Number.isFinite(r) ? r : NaN;
+}
+
+/* ---------- Parsing ---------- */
+function normalizeDigits(s){
+  return s
+    .replace(/[۰-۹]/g, c => String(c.charCodeAt(0) - 0x06F0))
+    .replace(/[٠-٩]/g, c => String(c.charCodeAt(0) - 0x0660))
+    .replace(/[٫٬]/g, m => m === '٫' ? '.' : ',')
+    .replace(/[−–—]/g, '-');
+}
+/* Returns {ok:true,value} | {ok:false,empty:true} | {ok:false,error} */
+function parseNumber(raw){
+  let s = normalizeDigits(String(raw)).replace(/[\s   _]/g, '');
+  if (s === '') return { ok:false, empty:true };
+  if (/^[+-]?\d{1,3}(,\d{3})+(\.\d*)?$/.test(s)) s = s.replace(/,/g, '');   // 1,234,567.8
+  if (!/^[+-]?(\d+\.?\d*|\.\d+)([eE][+-]?\d+)?$/.test(s))
+    return { ok:false, error:'Enter a valid number, e.g. 12.5, -3 or 1.2e3 (use “.” as decimal separator).' };
+  const v = Number(s);
+  if (!Number.isFinite(v)) return { ok:false, error:'Number is out of range.' };
+  return { ok:true, value:v };
+}
+
+/* ---------- Formatting ---------- */
+const SUP = { '0':'⁰','1':'¹','2':'²','3':'³','4':'⁴','5':'⁵','6':'⁶','7':'⁷','8':'⁸','9':'⁹','-':'⁻' };
+function group(intStr){ return intStr.replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+function fmt(v, p, mode){
+  if (!Number.isFinite(v)) return null;
+  if (v === 0) return '0';
+  const a = Math.abs(v);
+  if (mode === 'sci' || a >= 1e12 || a < 1e-6){
+    const [m, e] = v.toExponential(p - 1).split('e');
+    const mant = m.indexOf('.') >= 0 ? m.replace(/0+$/, '').replace(/\.$/, '') : m;
+    const exp = String(parseInt(e, 10)).split('').map(c => SUP[c] || c).join('');
+    return mant + ' × 10' + exp;
+  }
+  const s = Number(v.toPrecision(p)).toString();
+  const neg = s[0] === '-';
+  const [i, d] = (neg ? s.slice(1) : s).split('.');
+  return (neg ? '-' : '') + group(i) + (d ? '.' + d : '');
+}
+function plain(v){ return Number(v.toPrecision(15)).toString(); }
+// ==CORE-END==
+
+/* ---------- App ---------- */
+const $ = id => document.getElementById(id);
+const state = { g:'mech', cat:null, from:0, to:1 };
+
+function safeGet(k){ try { return localStorage.getItem(k); } catch(e){ return null; } }
+function safeSet(k, v){ try { localStorage.setItem(k, v); } catch(e){} }
+
+/* Theme */
+function applyTheme(t){ document.documentElement.setAttribute('data-theme', t); }
+(function initTheme(){
+  let t = safeGet('euc-theme');
+  if (t !== 'light' && t !== 'dark') t = (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches) ? 'dark' : 'light';
+  applyTheme(t);
+})();
+$('themeBtn').addEventListener('click', () => {
+  const t = document.documentElement.getAttribute('data-theme') === 'dark' ? 'light' : 'dark';
+  applyTheme(t); safeSet('euc-theme', t);
+});
+
+/* Category list */
+function matches(cat, q){
+  if (!q) return true;
+  q = q.toLowerCase();
+  if (cat.name.toLowerCase().includes(q)) return true;
+  return cat.units.some(u => u.s.toLowerCase().includes(q) || u.n.toLowerCase().includes(q));
+}
+function renderCats(){
+  const q = $('search').value.trim();
+  const host = $('cats');
+  host.innerHTML = '';
+  const specific = CATS.filter(c => (c.g === state.g || (state.g === 'mech' && c.g === 'both')) && matches(c, q));
+  const shared   = state.g === 'mech' ? [] : CATS.filter(c => c.g === 'both' && matches(c, q));
+  if (!specific.length && !shared.length){
+    const e = document.createElement('div'); e.className = 'empty'; e.textContent = 'No matching quantity or unit.'; host.appendChild(e); return;
+  }
+  const add = (title, list) => {
+    if (!list.length) return;
+    const h = document.createElement('h4'); h.textContent = title; host.appendChild(h);
+    const wrap = document.createElement('div'); wrap.className = 'grp';
+    list.forEach(c => {
+      const b = document.createElement('button');
+      b.type = 'button'; b.className = 'cat'; b.textContent = c.name; b.dataset.id = c.id;
+      if (state.cat && state.cat.id === c.id) b.setAttribute('aria-current', 'true');
+      b.addEventListener('click', () => selectCat(c.id));
+      wrap.appendChild(b);
+    });
+    host.appendChild(wrap);
+  };
+  add(state.g === 'mech' ? 'Mechanical' : 'Electrical', specific);
+  add('Shared quantities', shared);
+  const cur = host.querySelector('[aria-current="true"]');
+  if (cur && cur.scrollIntoView && window.innerWidth <= 900) cur.scrollIntoView({ block:'nearest', inline:'center' });
+}
+
+function unitIndex(cat, sym, fallback){
+  const i = cat.units.findIndex(u => u.s === sym);
+  return i >= 0 ? i : fallback;
+}
+function selectCat(id){
+  const cat = CATS.find(c => c.id === id);
+  state.cat = cat;
+  state.from = unitIndex(cat, cat.from, 0);
+  state.to = unitIndex(cat, cat.to, Math.min(1, cat.units.length - 1));
+  $('catName').textContent = cat.name;
+  $('catDesc').textContent = cat.desc;
+  const opts = cat.units.map((u, i) => `<option value="${i}">${esc(u.s)} — ${esc(u.n)}</option>`).join('');
+  $('fromSel').innerHTML = opts; $('toSel').innerHTML = opts;
+  $('fromSel').value = state.from; $('toSel').value = state.to;
+  const nonlinear = cat.units.some(u => u.f === undefined);
+  $('catNote').textContent = cat.id === 'temp'
+    ? 'Absolute temperatures include the scale offset (0 °C = 273.15 K = 32 °F = 491.67 °R).'
+    : (cat.base ? 'Base unit used internally: ' + cat.base + (nonlinear ? ' (non-linear units are converted through it).' : '.') : '');
+  renderCats();
+  update();
+}
+function esc(s){ return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* Validation specific to a category */
+function checkDomain(cat, fromU, v){
+  if (fromU.s === 'V₂/V₁' && v < 0) return 'Amplitude ratio must be non-negative.';
+  if (cat.id === 'awg' && ['mm²','kcmil','cmil','mm (dia.)','in (dia.)','mil (dia.)'].includes(fromU.s) && v <= 0)
+    return 'Size must be greater than zero.';
+  return null;
+}
+
+/* Main update */
+let lastPlain = null;
+function update(){
+  const cat = state.cat; if (!cat) return;
+  const fromU = cat.units[state.from], toU = cat.units[state.to];
+  const p = parseInt($('prec').value, 10), mode = $('notation').value;
+  const parsed = parseNumber($('inVal').value);
+  const out = $('outVal'), msg = $('msg');
+  lastPlain = null;
+  $('copyBtn').disabled = true;
+
+  const clear = (text) => { out.textContent = '—'; out.classList.add('dim'); msg.textContent = text || ''; $('ref').textContent = ''; renderTable(null); };
+
+  if (!parsed.ok){ clear(parsed.empty ? '' : parsed.error); return; }
+  const dom = checkDomain(cat, fromU, parsed.value);
+  if (dom){ clear(dom); return; }
+  const r = convert(parsed.value, fromU, toU);
+  const text = fmt(r, p, mode);
+  if (text === null){ clear('Result is not defined for this value (logarithmic and gauge units require a positive quantity).'); return; }
+
+  out.textContent = text; out.classList.remove('dim'); msg.textContent = '';
+  lastPlain = plain(r); $('copyBtn').disabled = false;
+
+  const one = convert(1, fromU, toU);
+  const oneTxt = (cat.units.some(u => u.f === undefined)) ? null : fmt(one, p, mode);
+  $('ref').textContent = oneTxt ? `1 ${fromU.s} = ${oneTxt} ${toU.s}` : `${$('inVal').value.trim()} ${fromU.s} = ${text} ${toU.s}`;
+  renderTable(parsed.value);
+}
+
+function renderTable(v){
+  const host = $('table'); const cat = state.cat;
+  const p = parseInt($('prec').value, 10), mode = $('notation').value;
+  const fromU = cat.units[state.from];
+  host.innerHTML = '';
+  cat.units.forEach((u, i) => {
+    let val = '—';
+    if (v !== null){
+      const r = convert(v, fromU, u);
+      const t = fmt(r, p, mode);
+      if (t !== null) val = t;
+    }
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'row' + (i === state.to ? ' is-to' : '') + (i === state.from ? ' is-from' : '');
+    b.title = 'Use as result unit';
+    b.innerHTML = `<span class="sym">${esc(u.s)}</span><span class="nm">${esc(u.n)}</span><span class="val">${esc(val)}</span>`;
+    b.addEventListener('click', () => { state.to = i; $('toSel').value = i; update(); });
+    host.appendChild(b);
+  });
+}
+
+/* Events */
+$('inVal').addEventListener('input', update);
+$('fromSel').addEventListener('change', e => { state.from = +e.target.value; update(); });
+$('toSel').addEventListener('change', e => { state.to = +e.target.value; update(); });
+$('prec').addEventListener('change', update);
+$('notation').addEventListener('change', update);
+$('swap').addEventListener('click', () => {
+  // Keep the displayed result as the new input when valid, so the swap is a true reversal.
+  if (lastPlain !== null) $('inVal').value = lastPlain;
+  [state.from, state.to] = [state.to, state.from];
+  $('fromSel').value = state.from; $('toSel').value = state.to;
+  update();
+});
+$('search').addEventListener('input', renderCats);
+
+function toast(t){
+  const el = $('toast'); el.textContent = t; el.classList.add('show');
+  clearTimeout(toast._t); toast._t = setTimeout(() => el.classList.remove('show'), 1600);
+}
+$('copyBtn').addEventListener('click', async () => {
+  if (lastPlain === null) return;
+  try { await navigator.clipboard.writeText(lastPlain); toast('Copied: ' + lastPlain); }
+  catch(e){
+    const ta = document.createElement('textarea'); ta.value = lastPlain; ta.style.position = 'fixed'; ta.style.opacity = '0';
+    document.body.appendChild(ta); ta.select();
+    try { document.execCommand('copy'); toast('Copied: ' + lastPlain); } catch(_){ toast('Copy failed'); }
+    ta.remove();
+  }
+});
+
+/* Tabs */
+function setTab(g){
+  state.g = g;
+  document.querySelectorAll('.tab').forEach(t => t.setAttribute('aria-selected', t.dataset.g === g ? 'true' : 'false'));
+  const first = CATS.find(c => c.g === g || (g === 'mech' && c.g === 'both'));
+  if (!state.cat || !(state.cat.g === g || state.cat.g === 'both')) selectCat(first.id);
+  else renderCats();
+}
+document.querySelectorAll('.tab').forEach(t => t.addEventListener('click', () => {
+  state.cat = (state.cat && state.cat.g === 'both') ? state.cat : null;
+  setTab(t.dataset.g);
+}));
+
+setTab('mech');
+selectCat('length');
+</script>
+</body>
+</html>
