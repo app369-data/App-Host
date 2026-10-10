@@ -1,6 +1,16 @@
 {
  "apps": [
   {
+   "id": "6mq7y1hb",
+   "name": "engineering unit converter",
+   "desc": "⚙️ A fast and easy tool for converting mechanical and electrical engineering units — all in one web app! ⚡",
+   "file": "apps/6mq7y1hb.html",
+   "icon": "apps/6mq7y1hb.png",
+   "size": 51810,
+   "updated": 1791599271163,
+   "published": true
+  },
+  {
    "id": "xnrso5yd",
    "name": "Statics Solver",
    "desc": "Solve Statics Problems",
