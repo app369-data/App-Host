@@ -1,6 +1,16 @@
 {
  "apps": [
   {
+   "id": "0b8josor",
+   "name": "MINI CAD",
+   "desc": "Draw your ideas. Design your world.",
+   "file": "apps/0b8josor.html",
+   "icon": "apps/0b8josor.png",
+   "size": 85519,
+   "updated": 1791684500644,
+   "published": true
+  },
+  {
    "id": "6mq7y1hb",
    "name": "engineering unit converter",
    "desc": "⚙️ A fast and easy tool for converting mechanical and electrical engineering units — all in one web app! ⚡",
