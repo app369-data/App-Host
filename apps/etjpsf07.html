@@ -1,0 +1,4908 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=5.0, user-scalable=yes">
+  <title>Engineering Formula Calculator Pro</title>
+  <style>
+    /* ===== CSS RESET & VARIABLES ===== */
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+    }
+
+    :root {
+      /* Dark theme (default) */
+      --bg-primary: #0b1420;
+      --bg-secondary: #121e2f;
+      --bg-card: #1a2a3f;
+      --bg-input: #0f1a2b;
+      --bg-hover: #243b55;
+      --border: #2a3f5a;
+      --border-light: #3a5470;
+      --text-primary: #e8eef7;
+      --text-secondary: #9bb0c9;
+      --text-muted: #6b8099;
+      --accent: #3b9eff;
+      --accent-hover: #5aadff;
+      --accent-glow: rgba(59, 158, 255, 0.15);
+      --success: #2ecc71;
+      --success-bg: rgba(46, 204, 113, 0.1);
+      --error: #e74c3c;
+      --error-bg: rgba(231, 76, 60, 0.1);
+      --warning: #f39c12;
+      --warning-bg: rgba(243, 156, 18, 0.1);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.3);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.4);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.5);
+      --radius-sm: 6px;
+      --radius-md: 10px;
+      --radius-lg: 16px;
+      --transition: 0.2s ease;
+      --font-mono: 'SF Mono', 'Cascadia Code', 'Consolas', 'Monaco', monospace;
+      --font-sans: -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, sans-serif;
+    }
+
+    [data-theme="light"] {
+      --bg-primary: #f0f4fa;
+      --bg-secondary: #ffffff;
+      --bg-card: #ffffff;
+      --bg-input: #f5f7fc;
+      --bg-hover: #e8eef7;
+      --border: #d4dde8;
+      --border-light: #b8c6d8;
+      --text-primary: #1a2a3f;
+      --text-secondary: #4a5e78;
+      --text-muted: #7a8ea8;
+      --accent: #1a7eff;
+      --accent-hover: #0066e0;
+      --accent-glow: rgba(26, 126, 255, 0.1);
+      --success: #1ea85a;
+      --success-bg: rgba(30, 168, 90, 0.08);
+      --error: #d63d2e;
+      --error-bg: rgba(214, 61, 46, 0.08);
+      --warning: #d48a0e;
+      --warning-bg: rgba(212, 138, 14, 0.08);
+      --shadow-sm: 0 2px 8px rgba(0, 0, 0, 0.08);
+      --shadow-md: 0 4px 16px rgba(0, 0, 0, 0.1);
+      --shadow-lg: 0 8px 32px rgba(0, 0, 0, 0.12);
+    }
+
+    @media (prefers-reduced-motion: reduce) {
+      * {
+        transition-duration: 0.01ms !important;
+        animation-duration: 0.01ms !important;
+      }
+    }
+
+    html {
+      scroll-behavior: smooth;
+    }
+
+    body {
+      font-family: var(--font-sans);
+      background: var(--bg-primary);
+      color: var(--text-primary);
+      line-height: 1.5;
+      min-height: 100vh;
+      -webkit-font-smoothing: antialiased;
+      transition: background var(--transition), color var(--transition);
+    }
+
+    /* ===== HEADER ===== */
+    .app-header {
+      background: var(--bg-secondary);
+      border-bottom: 1px solid var(--border);
+      padding: 10px 16px;
+      position: sticky;
+      top: 0;
+      z-index: 100;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .header-inner {
+      display: flex;
+      align-items: center;
+      gap: 12px;
+      max-width: 1600px;
+      margin: 0 auto;
+    }
+
+    .logo {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      flex-shrink: 0;
+      text-decoration: none;
+      color: inherit;
+    }
+
+    .logo svg {
+      width: 34px;
+      height: 34px;
+      flex-shrink: 0;
+    }
+
+    .logo-text {
+      font-size: 16px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      white-space: nowrap;
+    }
+
+    .logo-text span {
+      color: var(--accent);
+    }
+
+    .search-container {
+      flex: 1;
+      position: relative;
+      max-width: 480px;
+      min-width: 0;
+    }
+
+    .search-container svg {
+      position: absolute;
+      left: 12px;
+      top: 50%;
+      transform: translateY(-50%);
+      width: 16px;
+      height: 16px;
+      color: var(--text-muted);
+      pointer-events: none;
+    }
+
+    .search-input {
+      width: 100%;
+      padding: 9px 12px 9px 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-sans);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .search-input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .search-input::placeholder {
+      color: var(--text-muted);
+    }
+
+    .header-actions {
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      flex-shrink: 0;
+    }
+
+    .btn-icon {
+      width: 38px;
+      height: 38px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      transition: all var(--transition);
+      flex-shrink: 0;
+      position: relative;
+    }
+
+    .btn-icon:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+      border-color: var(--border-light);
+    }
+
+    .btn-icon.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .btn-icon svg {
+      width: 18px;
+      height: 18px;
+    }
+
+    .badge {
+      position: absolute;
+      top: -4px;
+      right: -4px;
+      background: var(--accent);
+      color: #fff;
+      font-size: 9px;
+      font-weight: 700;
+      min-width: 16px;
+      height: 16px;
+      border-radius: 8px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 0 4px;
+      pointer-events: none;
+    }
+
+    /* ===== LAYOUT ===== */
+    .app-body {
+      display: flex;
+      max-width: 1600px;
+      margin: 0 auto;
+      min-height: calc(100vh - 60px);
+    }
+
+    /* ===== SIDEBAR ===== */
+    .sidebar {
+      width: 260px;
+      flex-shrink: 0;
+      background: var(--bg-secondary);
+      border-right: 1px solid var(--border);
+      padding: 12px;
+      overflow-y: auto;
+      max-height: calc(100vh - 60px);
+      position: sticky;
+      top: 60px;
+    }
+
+    .sidebar-title {
+      font-size: 11px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.8px;
+      color: var(--text-muted);
+      padding: 8px 10px 6px;
+    }
+
+    .cat-item {
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      padding: 10px 12px;
+      border-radius: var(--radius-sm);
+      cursor: pointer;
+      transition: background var(--transition);
+      border: 1px solid transparent;
+      user-select: none;
+    }
+
+    .cat-item:hover {
+      background: var(--bg-hover);
+    }
+
+    .cat-item.active {
+      background: var(--accent-glow);
+      border-color: var(--accent);
+    }
+
+    .cat-item svg {
+      width: 18px;
+      height: 18px;
+      flex-shrink: 0;
+      color: var(--accent);
+    }
+
+    .cat-item-text {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .cat-item-name {
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .cat-item-count {
+      font-size: 11px;
+      color: var(--text-muted);
+    }
+
+    /* ===== MAIN WORKSPACE ===== */
+    .workspace {
+      flex: 1;
+      padding: 20px 24px 60px;
+      min-width: 0;
+      overflow-x: hidden;
+    }
+
+    .category-header {
+      margin-bottom: 20px;
+    }
+
+    .category-header h2 {
+      font-size: 22px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+
+    .category-header p {
+      font-size: 14px;
+      color: var(--text-secondary);
+      max-width: 640px;
+    }
+
+    /* ===== FORMULA GRID ===== */
+    .formula-grid {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 12px;
+    }
+
+    .formula-card {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      cursor: pointer;
+      transition: all var(--transition);
+      position: relative;
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+    }
+
+    .formula-card:hover {
+      border-color: var(--accent);
+      box-shadow: var(--shadow-md);
+      transform: translateY(-2px);
+    }
+
+    .formula-card-top {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 8px;
+    }
+
+    .formula-card-name {
+      font-size: 15px;
+      font-weight: 600;
+      color: var(--text-primary);
+      line-height: 1.3;
+    }
+
+    .formula-card-fav {
+      width: 28px;
+      height: 28px;
+      border: none;
+      background: transparent;
+      cursor: pointer;
+      color: var(--text-muted);
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      border-radius: 4px;
+      flex-shrink: 0;
+      transition: all var(--transition);
+    }
+
+    .formula-card-fav:hover {
+      background: var(--bg-hover);
+      color: var(--warning);
+    }
+
+    .formula-card-fav.active {
+      color: var(--warning);
+    }
+
+    .formula-card-fav svg {
+      width: 16px;
+      height: 16px;
+    }
+
+    .formula-card-eq {
+      font-family: var(--font-mono);
+      font-size: 12px;
+      color: var(--accent);
+      background: var(--bg-input);
+      padding: 6px 10px;
+      border-radius: 4px;
+      overflow-x: auto;
+      white-space: nowrap;
+    }
+
+    .formula-card-desc {
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.4;
+    }
+
+    /* ===== CALCULATOR PANEL ===== */
+    .calc-panel {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      padding: 24px;
+      margin-top: 8px;
+      box-shadow: var(--shadow-sm);
+    }
+
+    .calc-header {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 16px;
+      margin-bottom: 16px;
+      flex-wrap: wrap;
+    }
+
+    .calc-header-info h3 {
+      font-size: 20px;
+      font-weight: 700;
+      letter-spacing: -0.3px;
+      margin-bottom: 4px;
+    }
+
+    .calc-header-info p {
+      font-size: 13px;
+      color: var(--text-secondary);
+      max-width: 600px;
+    }
+
+    .calc-header-actions {
+      display: flex;
+      gap: 6px;
+      flex-wrap: wrap;
+    }
+
+    .calc-equation {
+      font-family: var(--font-mono);
+      font-size: 15px;
+      color: var(--accent);
+      background: var(--bg-input);
+      padding: 12px 16px;
+      border-radius: var(--radius-sm);
+      margin-bottom: 20px;
+      overflow-x: auto;
+      white-space: nowrap;
+      border-left: 3px solid var(--accent);
+    }
+
+    .calc-body {
+      display: grid;
+      grid-template-columns: 1fr 1fr;
+      gap: 24px;
+    }
+
+    .calc-body.full-width {
+      grid-template-columns: 1fr;
+    }
+
+    .calc-inputs h4,
+    .calc-results h4 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+    }
+
+    .input-group {
+      margin-bottom: 12px;
+    }
+
+    .input-group label {
+      display: block;
+      font-size: 13px;
+      font-weight: 500;
+      color: var(--text-secondary);
+      margin-bottom: 4px;
+    }
+
+    .input-group label .unit-hint {
+      font-weight: 400;
+      color: var(--text-muted);
+      font-size: 11px;
+      margin-left: 4px;
+    }
+
+    .input-row {
+      display: flex;
+      gap: 8px;
+      align-items: stretch;
+    }
+
+    .input-row input {
+      flex: 1;
+      min-width: 0;
+      padding: 9px 12px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 14px;
+      font-family: var(--font-mono);
+      outline: none;
+      transition: border-color var(--transition), box-shadow var(--transition);
+    }
+
+    .input-row input:focus {
+      border-color: var(--accent);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .input-row input.error {
+      border-color: var(--error);
+      box-shadow: 0 0 0 3px var(--error-bg);
+    }
+
+    .input-row select {
+      padding: 9px 8px;
+      border: 1px solid var(--border);
+      border-radius: var(--radius-sm);
+      background: var(--bg-input);
+      color: var(--text-primary);
+      font-size: 12px;
+      font-family: var(--font-sans);
+      outline: none;
+      cursor: pointer;
+      max-width: 110px;
+      transition: border-color var(--transition);
+    }
+
+    .input-row select:focus {
+      border-color: var(--accent);
+    }
+
+    .input-error-msg {
+      font-size: 11px;
+      color: var(--error);
+      margin-top: 3px;
+      min-height: 14px;
+    }
+
+    .calc-actions {
+      display: flex;
+      gap: 8px;
+      margin-top: 20px;
+      flex-wrap: wrap;
+    }
+
+    .btn {
+      padding: 10px 20px;
+      border: none;
+      border-radius: var(--radius-sm);
+      font-size: 13px;
+      font-weight: 600;
+      cursor: pointer;
+      transition: all var(--transition);
+      font-family: var(--font-sans);
+      display: inline-flex;
+      align-items: center;
+      gap: 6px;
+      white-space: nowrap;
+    }
+
+    .btn svg {
+      width: 15px;
+      height: 15px;
+    }
+
+    .btn-primary {
+      background: var(--accent);
+      color: #fff;
+    }
+
+    .btn-primary:hover {
+      background: var(--accent-hover);
+      box-shadow: 0 0 0 3px var(--accent-glow);
+    }
+
+    .btn-secondary {
+      background: var(--bg-input);
+      color: var(--text-primary);
+      border: 1px solid var(--border);
+    }
+
+    .btn-secondary:hover {
+      background: var(--bg-hover);
+      border-color: var(--border-light);
+    }
+
+    .btn-sm {
+      padding: 6px 12px;
+      font-size: 12px;
+    }
+
+    /* ===== RESULTS ===== */
+    .result-card {
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 16px;
+      min-height: 60px;
+    }
+
+    .result-placeholder {
+      color: var(--text-muted);
+      font-size: 13px;
+      text-align: center;
+      padding: 20px 0;
+    }
+
+    .result-main {
+      font-family: var(--font-mono);
+      font-size: 24px;
+      font-weight: 700;
+      color: var(--accent);
+      word-break: break-all;
+      line-height: 1.2;
+      margin-bottom: 4px;
+    }
+
+    .result-unit {
+      font-size: 14px;
+      color: var(--text-secondary);
+      font-family: var(--font-sans);
+    }
+
+    .result-detail {
+      font-size: 13px;
+      color: var(--text-secondary);
+      margin-top: 8px;
+      padding-top: 8px;
+      border-top: 1px solid var(--border);
+    }
+
+    .result-detail .kv {
+      display: flex;
+      justify-content: space-between;
+      padding: 3px 0;
+      gap: 12px;
+    }
+
+    .result-detail .kv .k {
+      color: var(--text-muted);
+    }
+
+    .result-detail .kv .v {
+      font-family: var(--font-mono);
+      color: var(--text-primary);
+      text-align: right;
+      word-break: break-all;
+    }
+
+    /* ===== STEPS ===== */
+    .steps-section {
+      margin-top: 24px;
+      border-top: 1px solid var(--border);
+      padding-top: 20px;
+    }
+
+    .steps-section h4 {
+      font-size: 13px;
+      font-weight: 700;
+      text-transform: uppercase;
+      letter-spacing: 0.6px;
+      color: var(--text-muted);
+      margin-bottom: 12px;
+      cursor: pointer;
+      display: flex;
+      align-items: center;
+      gap: 6px;
+      user-select: none;
+    }
+
+    .steps-section h4 svg {
+      width: 14px;
+      height: 14px;
+      transition: transform var(--transition);
+    }
+
+    .steps-section h4.collapsed svg {
+      transform: rotate(-90deg);
+    }
+
+    .steps-content {
+      font-family: var(--font-mono);
+      font-size: 13px;
+      line-height: 1.7;
+      color: var(--text-secondary);
+      background: var(--bg-input);
+      border-radius: var(--radius-sm);
+      padding: 16px;
+      white-space: pre-wrap;
+      word-break: break-word;
+      overflow-x: auto;
+    }
+
+    .steps-content .step-num {
+      color: var(--accent);
+      font-weight: 700;
+    }
+
+    .steps-content .step-value {
+      color: var(--success);
+    }
+
+    .steps-content .step-highlight {
+      color: var(--warning);
+    }
+
+    .assumptions {
+      margin-top: 16px;
+      padding: 12px 16px;
+      background: var(--warning-bg);
+      border: 1px solid var(--warning);
+      border-radius: var(--radius-sm);
+      font-size: 12px;
+      color: var(--text-secondary);
+      line-height: 1.6;
+    }
+
+    .assumptions strong {
+      color: var(--warning);
+    }
+
+    /* ===== EMPTY STATE ===== */
+    .empty-state {
+      text-align: center;
+      padding: 60px 20px;
+      color: var(--text-muted);
+    }
+
+    .empty-state svg {
+      width: 48px;
+      height: 48px;
+      margin-bottom: 16px;
+      opacity: 0.4;
+    }
+
+    .empty-state h3 {
+      font-size: 18px;
+      margin-bottom: 8px;
+      color: var(--text-secondary);
+    }
+
+    .empty-state p {
+      font-size: 14px;
+      max-width: 400px;
+      margin: 0 auto;
+    }
+
+    /* ===== MODAL ===== */
+    .modal-overlay {
+      position: fixed;
+      inset: 0;
+      background: rgba(0, 0, 0, 0.6);
+      z-index: 200;
+      display: none;
+      align-items: center;
+      justify-content: center;
+      padding: 20px;
+      backdrop-filter: blur(4px);
+    }
+
+    .modal-overlay.open {
+      display: flex;
+    }
+
+    .modal {
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-lg);
+      width: 100%;
+      max-width: 520px;
+      max-height: 80vh;
+      display: flex;
+      flex-direction: column;
+      box-shadow: var(--shadow-lg);
+    }
+
+    .modal-header {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      padding: 16px 20px;
+      border-bottom: 1px solid var(--border);
+    }
+
+    .modal-header h3 {
+      font-size: 16px;
+      font-weight: 700;
+    }
+
+    .modal-close {
+      width: 32px;
+      height: 32px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      font-size: 18px;
+    }
+
+    .modal-close:hover {
+      background: var(--bg-hover);
+      color: var(--text-primary);
+    }
+
+    .modal-body {
+      padding: 16px 20px;
+      overflow-y: auto;
+      flex: 1;
+    }
+
+    .modal-body .history-item {
+      display: flex;
+      align-items: flex-start;
+      justify-content: space-between;
+      gap: 12px;
+      padding: 10px 0;
+      border-bottom: 1px solid var(--border);
+      cursor: pointer;
+    }
+
+    .modal-body .history-item:hover {
+      background: var(--bg-hover);
+      margin: 0 -8px;
+      padding: 10px 8px;
+      border-radius: 4px;
+    }
+
+    .modal-body .history-item:last-child {
+      border-bottom: none;
+    }
+
+    .history-item-info {
+      flex: 1;
+      min-width: 0;
+    }
+
+    .history-item-name {
+      font-size: 13px;
+      font-weight: 600;
+      color: var(--text-primary);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-detail {
+      font-size: 11px;
+      color: var(--text-muted);
+      font-family: var(--font-mono);
+      white-space: nowrap;
+      overflow: hidden;
+      text-overflow: ellipsis;
+    }
+
+    .history-item-del {
+      width: 24px;
+      height: 24px;
+      border: none;
+      background: transparent;
+      color: var(--text-muted);
+      cursor: pointer;
+      border-radius: 4px;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      flex-shrink: 0;
+    }
+
+    .history-item-del:hover {
+      color: var(--error);
+      background: var(--error-bg);
+    }
+
+    .modal-footer {
+      padding: 12px 20px;
+      border-top: 1px solid var(--border);
+      display: flex;
+      justify-content: flex-end;
+      gap: 8px;
+    }
+
+    /* ===== TOAST ===== */
+    .toast {
+      position: fixed;
+      bottom: 24px;
+      left: 50%;
+      transform: translateX(-50%) translateY(100px);
+      background: var(--bg-card);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px 20px;
+      font-size: 13px;
+      color: var(--text-primary);
+      box-shadow: var(--shadow-lg);
+      z-index: 300;
+      opacity: 0;
+      transition: all 0.3s ease;
+      pointer-events: none;
+      max-width: 90vw;
+    }
+
+    .toast.show {
+      transform: translateX(-50%) translateY(0);
+      opacity: 1;
+    }
+
+    .toast.success {
+      border-color: var(--success);
+    }
+
+    .toast.error {
+      border-color: var(--error);
+    }
+
+    /* ===== MOBILE CATEGORY CHIPS ===== */
+    .mobile-cats {
+      display: none;
+      overflow-x: auto;
+      gap: 8px;
+      padding: 10px 0;
+      -webkit-overflow-scrolling: touch;
+      scrollbar-width: none;
+    }
+
+    .mobile-cats::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      padding: 7px 14px;
+      border: 1px solid var(--border);
+      border-radius: 20px;
+      background: var(--bg-card);
+      color: var(--text-secondary);
+      font-size: 12px;
+      font-weight: 500;
+      white-space: nowrap;
+      cursor: pointer;
+      transition: all var(--transition);
+      flex-shrink: 0;
+    }
+
+    .chip.active {
+      background: var(--accent);
+      color: #fff;
+      border-color: var(--accent);
+    }
+
+    .chip:hover {
+      border-color: var(--accent);
+    }
+
+    /* ===== SVG DIAGRAM ===== */
+    .diagram-container {
+      margin-top: 16px;
+      background: var(--bg-input);
+      border: 1px solid var(--border);
+      border-radius: var(--radius-md);
+      padding: 12px;
+      overflow: hidden;
+    }
+
+    .diagram-container svg {
+      width: 100%;
+      height: auto;
+      display: block;
+      max-height: 240px;
+    }
+
+    .diagram-label {
+      font-size: 10px;
+      font-family: var(--font-mono);
+      fill: var(--text-secondary);
+    }
+
+    .diagram-dim {
+      stroke: var(--text-muted);
+      stroke-width: 1;
+      stroke-dasharray: 4 2;
+    }
+
+    /* ===== RESPONSIVE ===== */
+    @media (max-width: 1024px) {
+      .calc-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    @media (max-width: 768px) {
+      .sidebar {
+        display: none;
+      }
+
+      .mobile-cats {
+        display: flex;
+      }
+
+      .workspace {
+        padding: 12px 14px 80px;
+      }
+
+      .header-inner {
+        flex-wrap: wrap;
+        gap: 8px;
+      }
+
+      .logo-text {
+        font-size: 14px;
+      }
+
+      .search-container {
+        order: 3;
+        flex-basis: 100%;
+        max-width: none;
+      }
+
+      .formula-grid {
+        grid-template-columns: 1fr;
+      }
+
+      .calc-panel {
+        padding: 16px;
+      }
+
+      .calc-header-info h3 {
+        font-size: 17px;
+      }
+
+      .result-main {
+        font-size: 20px;
+      }
+
+      .calc-actions .btn {
+        flex: 1;
+        justify-content: center;
+      }
+
+      .input-row select {
+        max-width: 90px;
+        font-size: 11px;
+      }
+
+      .modal {
+        max-height: 90vh;
+      }
+    }
+
+    @media (max-width: 480px) {
+      .logo-text {
+        display: none;
+      }
+
+      .header-actions .btn-icon {
+        width: 34px;
+        height: 34px;
+      }
+
+      .btn {
+        padding: 9px 14px;
+        font-size: 12px;
+      }
+    }
+
+    /* ===== SCROLLBAR ===== */
+    ::-webkit-scrollbar {
+      width: 8px;
+      height: 8px;
+    }
+
+    ::-webkit-scrollbar-track {
+      background: transparent;
+    }
+
+    ::-webkit-scrollbar-thumb {
+      background: var(--border);
+      border-radius: 4px;
+    }
+
+    ::-webkit-scrollbar-thumb:hover {
+      background: var(--border-light);
+    }
+
+    /* ===== FOCUS VISIBLE ===== */
+    :focus-visible {
+      outline: 2px solid var(--accent);
+      outline-offset: 2px;
+    }
+
+    /* ===== PRINT ===== */
+    @media print {
+      .app-header,
+      .sidebar,
+      .mobile-cats,
+      .calc-actions,
+      .calc-header-actions,
+      .formula-grid,
+      .category-header,
+      .modal-overlay,
+      .toast {
+        display: none !important;
+      }
+
+      .workspace {
+        padding: 0;
+      }
+
+      .calc-panel {
+        border: none;
+        box-shadow: none;
+        padding: 0;
+      }
+
+      .result-main {
+        color: #000;
+      }
+
+      body {
+        background: #fff;
+        color: #000;
+      }
+
+      .calc-body {
+        grid-template-columns: 1fr;
+      }
+    }
+
+    /* ===== UTILITY ===== */
+    .hidden {
+      display: none !important;
+    }
+
+    .sr-only {
+      position: absolute;
+      width: 1px;
+      height: 1px;
+      padding: 0;
+      margin: -1px;
+      overflow: hidden;
+      clip: rect(0, 0, 0, 0);
+      border: 0;
+    }
+
+    .mt-16 {
+      margin-top: 16px;
+    }
+
+    .flex-between {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+    }
+
+/* ===== POLISHED GLASS UI ===== */
+:root {
+  --radius-sm: 9px;
+  --radius-md: 14px;
+  --radius-lg: 20px;
+}
+body {
+  background:
+    radial-gradient(900px 500px at 10% -10%, rgba(59,158,255,.12), transparent 60%),
+    radial-gradient(700px 420px at 100% 0%, rgba(98,76,230,.10), transparent 58%),
+    var(--bg-primary);
+}
+.app-header {
+  background: color-mix(in srgb, var(--bg-secondary) 82%, transparent);
+  -webkit-backdrop-filter: blur(18px) saturate(145%);
+  backdrop-filter: blur(18px) saturate(145%);
+  border-bottom-color: color-mix(in srgb, var(--border) 72%, transparent);
+}
+.sidebar {
+  background: color-mix(in srgb, var(--bg-secondary) 88%, transparent);
+  -webkit-backdrop-filter: blur(14px);
+  backdrop-filter: blur(14px);
+}
+.formula-card, .calc-panel, .result-card, .diagram-container {
+  box-shadow: 0 8px 24px rgba(0,0,0,.08);
+}
+.formula-card {
+  border-radius: 16px;
+  padding: 18px;
+  min-height: 150px;
+}
+.formula-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 12px 30px rgba(59,158,255,.13);
+}
+.formula-card:focus-visible, .cat-item:focus-visible, .chip:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 3px;
+}
+.calc-panel {
+  background: color-mix(in srgb, var(--bg-card) 92%, transparent);
+  border-radius: 20px;
+}
+.calc-equation {
+  border-radius: 10px;
+  background: color-mix(in srgb, var(--accent-glow) 65%, var(--bg-input));
+}
+.input-row input, .input-row select, .search-input {
+  min-height: 42px;
+  border-radius: 10px;
+}
+.btn, .btn-icon, .chip {
+  -webkit-tap-highlight-color: transparent;
+}
+.btn { border-radius: 10px; min-height: 40px; }
+.btn-primary { box-shadow: 0 5px 14px rgba(59,158,255,.18); }
+.btn:active, .btn-icon:active, .chip:active { transform: scale(.98); }
+.result-card { border-radius: 14px; }
+.result-main { overflow-wrap: anywhere; }
+.steps-section h4 { padding: 5px 0; }
+.modal {
+  -webkit-backdrop-filter: blur(20px);
+  backdrop-filter: blur(20px);
+}
+@media (min-width: 769px) {
+  .formula-grid { gap: 16px; }
+  .workspace { padding-top: 26px; }
+}
+@media (max-width: 768px) {
+  .app-header { padding: 10px 12px; }
+  .workspace { padding: 12px 12px calc(32px + env(safe-area-inset-bottom)); }
+  .mobile-cats { margin: 0 -2px 10px; padding: 8px 2px 12px; }
+  .chip { min-height: 38px; padding: 8px 14px; }
+  .formula-card { min-height: auto; padding: 15px; }
+  .calc-panel { padding: 15px; }
+  .calc-actions { display: grid; grid-template-columns: 1fr 1fr; }
+  .calc-actions #calcBtn { grid-column: 1 / -1; }
+  .result-main { font-size: clamp(19px, 5vw, 25px); }
+}
+@media (max-width: 380px) {
+  .header-actions { gap: 4px; }
+  .header-actions .btn-icon { width: 32px; height: 32px; }
+  .calc-header-actions { width: 100%; }
+  .calc-header-actions .btn { flex: 1; justify-content: center; }
+}
+@media (prefers-reduced-motion: no-preference) {
+  .formula-card, .calc-panel { animation: rise-in .24s ease both; }
+  @keyframes rise-in {
+    from { opacity: .65; transform: translateY(5px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+}
+
+  </style>
+</head>
+<body>
+
+<!-- ===== HEADER ===== -->
+<header class="app-header" role="banner">
+  <div class="header-inner">
+    <a class="logo" href="#" onclick="App.goHome(); return false;" aria-label="Engineering Formula Calculator Pro Home">
+      <svg viewBox="0 0 40 40" fill="none" xmlns="http://www.w3.org/2000/svg" aria-hidden="true">
+        <rect x="2" y="2" width="36" height="36" rx="8" stroke="currentColor" stroke-width="2.5" fill="none" opacity="0.3"/>
+        <path d="M12 28V12h4l4 8 4-8h4v16" stroke="#3b9eff" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round" fill="none"/>
+        <circle cx="28" cy="14" r="3" fill="#3b9eff" opacity="0.8"/>
+        <path d="M8 32h24" stroke="#3b9eff" stroke-width="2" stroke-linecap="round" opacity="0.5"/>
+      </svg>
+      <span class="logo-text">Engineering <span>Calc Pro</span></span>
+    </a>
+
+    <div class="search-container" role="search">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+        <circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/>
+      </svg>
+      <input type="search" class="search-input" id="globalSearch" placeholder="Search formulas, variables, categories..." autocomplete="off" aria-label="Search formulas">
+    </div>
+
+    <div class="header-actions">
+      <button class="btn-icon" id="themeToggle" title="Toggle theme" aria-label="Toggle dark/light theme">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M21 12.79A9 9 0 1111.21 3 7 7 0 0021 12.79z"/>
+        </svg>
+      </button>
+      <button class="btn-icon" id="favoritesBtn" title="Favorites" aria-label="View favorites">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/>
+        </svg>
+        <span class="badge hidden" id="favBadge">0</span>
+      </button>
+      <button class="btn-icon" id="historyBtn" title="History" aria-label="View calculation history">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <circle cx="12" cy="12" r="10"/><path d="M12 6v6l4 2"/>
+        </svg>
+        <span class="badge hidden" id="historyBadge">0</span>
+      </button>
+      <button class="btn-icon" id="clearAllBtn" title="Clear all data" aria-label="Clear all data">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" aria-hidden="true">
+          <path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/>
+        </svg>
+      </button>
+    </div>
+  </div>
+</header>
+
+<!-- ===== BODY ===== -->
+<div class="app-body">
+  <!-- Sidebar -->
+  <nav class="sidebar" id="sidebar" aria-label="Formula categories">
+    <div class="sidebar-title">Categories</div>
+    <div id="sidebarCats"></div>
+  </nav>
+
+  <!-- Workspace -->
+  <main class="workspace" id="workspace" role="main">
+    <!-- Mobile category chips -->
+    <div class="mobile-cats" id="mobileCats"></div>
+
+    <!-- Category view -->
+    <div id="categoryView">
+      <div class="category-header" id="catHeader">
+        <h2 id="catTitle">Basic Mathematics</h2>
+        <p id="catDesc">Fundamental mathematical operations and equations.</p>
+      </div>
+      <div class="formula-grid" id="formulaGrid"></div>
+    </div>
+
+    <!-- Calculator view -->
+    <div id="calcView" class="hidden"></div>
+
+    <!-- Search view -->
+    <div id="searchView" class="hidden"></div>
+
+    <!-- Favorites view -->
+    <div id="favView" class="hidden"></div>
+
+    <!-- History view -->
+    <div id="historyView" class="hidden"></div>
+  </main>
+</div>
+
+<!-- ===== MODAL ===== -->
+<div class="modal-overlay" id="modalOverlay" role="dialog" aria-modal="true">
+  <div class="modal">
+    <div class="modal-header">
+      <h3 id="modalTitle">Favorites</h3>
+      <button class="modal-close" id="modalClose" aria-label="Close modal">&times;</button>
+    </div>
+    <div class="modal-body" id="modalBody"></div>
+    <div class="modal-footer" id="modalFooter"></div>
+  </div>
+</div>
+
+<!-- ===== TOAST ===== -->
+<div class="toast" id="toast" role="status" aria-live="polite"></div>
+
+<script>
+/* ============================================================
+   ENGINEERING FORMULA CALCULATOR PRO
+   Complete standalone implementation
+   ============================================================ */
+'use strict';
+
+/* ============================================================
+   UNIT SYSTEM
+   ============================================================ */
+const Units = {
+  // Length: base = meter
+  length: {
+    m: 1, mm: 0.001, cm: 0.01, km: 1000, in: 0.0254, ft: 0.3048, yd: 0.9144, mi: 1609.344
+  },
+  // Area: base = m²
+  area: {
+    'm2': 1, 'mm2': 1e-6, 'cm2': 1e-4, 'km2': 1e6, 'in2': 0.00064516, 'ft2': 0.09290304
+  },
+  // Volume: base = m³
+  volume: {
+    'm3': 1, 'mm3': 1e-9, 'cm3': 1e-6, 'L': 0.001, 'mL': 1e-6, 'in3': 1.6387064e-5, 'ft3': 0.028316846592, 'galUS': 0.003785411784, 'galUK': 0.00454609
+  },
+  // Mass: base = kg
+  mass: {
+    kg: 1, g: 0.001, mg: 1e-6, t: 1000, lb: 0.45359237, oz: 0.028349523125, slug: 14.5939029372
+  },
+  // Force: base = N
+  force: {
+    N: 1, kN: 1000, MN: 1e6, lbf: 4.4482216152605, kgf: 9.80665, dyn: 1e-5
+  },
+  // Pressure: base = Pa
+  pressure: {
+    Pa: 1, kPa: 1000, MPa: 1e6, GPa: 1e9, bar: 1e5, atm: 101325, psi: 6894.757293168, torr: 133.322368421, mmHg: 133.322387415, 'N/mm2': 1e6, 'N/m2': 1
+  },
+  // Energy: base = J
+  energy: {
+    J: 1, kJ: 1000, MJ: 1e6, cal: 4.184, kcal: 4184, Wh: 3600, kWh: 3.6e6, BTU: 1055.05585262, 'ft·lbf': 1.3558179483314
+  },
+  // Power: base = W
+  power: {
+    W: 1, kW: 1000, MW: 1e6, hp: 745.69987158227, 'hp(M)': 735.49875, 'ft·lbf/s': 1.3558179483314, 'BTU/h': 0.29307107017222
+  },
+  // Torque: base = N·m
+  torque: {
+    'N·m': 1, 'kN·m': 1000, 'N·mm': 0.001, 'lbf·ft': 1.3558179483314, 'lbf·in': 0.11298482902762, 'kgf·m': 9.80665
+  },
+  // Temperature: base = K (absolute) - special handling
+  temperature: {
+    K: 1, '°C': 'celsius', '°F': 'fahrenheit', R: 'rankine'
+  },
+  // Temperature difference: base = K
+  tempDiff: {
+    K: 1, '°C': 1, '°F': 5/9, R: 5/9
+  },
+  // Velocity: base = m/s
+  velocity: {
+    'm/s': 1, 'km/h': 0.27777777777778, 'ft/s': 0.3048, 'mph': 0.44704, 'knot': 0.51444444444444
+  },
+  // Acceleration: base = m/s²
+  acceleration: {
+    'm/s2': 1, 'ft/s2': 0.3048, 'g': 9.80665
+  },
+  // Volumetric flow: base = m³/s
+  volFlow: {
+    'm3/s': 1, 'm3/h': 1/3600, 'L/s': 0.001, 'L/min': 0.001/60, 'L/h': 0.001/3600, 'ft3/s': 0.028316846592, 'ft3/min': 0.028316846592/60, 'gal/min': 0.003785411784/60, 'galUS/min': 0.003785411784/60
+  },
+  // Mass flow: base = kg/s
+  massFlow: {
+    'kg/s': 1, 'kg/h': 1/3600, 'g/s': 0.001, 't/h': 1000/3600, 'lb/s': 0.45359237, 'lb/h': 0.45359237/3600
+  },
+  // Density: base = kg/m³
+  density: {
+    'kg/m3': 1, 'g/cm3': 1000, 'kg/L': 1000, 'lb/ft3': 16.01846337396, 'lb/in3': 27679.904710203, 't/m3': 1000
+  },
+  // Dynamic viscosity: base = Pa·s
+  viscosity: {
+    'Pa·s': 1, 'mPa·s': 0.001, 'cP': 0.001, 'P': 0.1, 'lbf·s/ft2': 47.880258980335, 'lb/(ft·h)': 0.000413378873
+  },
+  // Angular velocity: base = rad/s
+  angVel: {
+    'rad/s': 1, 'rpm': 2*Math.PI/60, 'deg/s': Math.PI/180, 'Hz': 2*Math.PI
+  },
+  // Voltage: base = V
+  voltage: {
+    V: 1, mV: 0.001, kV: 1000, MV: 1e6
+  },
+  // Current: base = A
+  current: {
+    A: 1, mA: 0.001, kA: 1000, uA: 1e-6
+  },
+  // Resistance: base = Ω
+  resistance: {
+    'Ω': 1, 'mΩ': 0.001, 'kΩ': 1000, 'MΩ': 1e6
+  },
+  // Thermal conductivity: base = W/(m·K)
+  thermalCond: {
+    'W/(m·K)': 1, 'W/(m·°C)': 1, 'BTU/(h·ft·°F)': 1.73073467, 'kcal/(h·m·°C)': 1.163
+  },
+  // Specific heat: base = J/(kg·K)
+  specificHeat: {
+    'J/(kg·K)': 1, 'J/(kg·°C)': 1, 'kJ/(kg·K)': 1000, 'cal/(g·°C)': 4184, 'BTU/(lb·°F)': 4186.8
+  },
+  // Dimensionless
+  dimensionless: { '': 1, '%': 0.01, 'ppm': 1e-6 }
+};
+
+// Convert value from unit to base
+function toBase(value, unit, type) {
+  if (type === 'temperature') {
+    // Special: absolute temperature -> Kelvin
+    switch(unit) {
+      case 'K': return value;
+      case '°C': return value + 273.15;
+      case '°F': return (value - 32) * 5/9 + 273.15;
+      case 'R': return value * 5/9;
+      default: return value;
+    }
+  }
+  if (type === 'tempDiff') {
+    switch(unit) {
+      case 'K': return value;
+      case '°C': return value;
+      case '°F': return value * 5/9;
+      case 'R': return value * 5/9;
+      default: return value;
+    }
+  }
+  const table = Units[type];
+  if (!table) return value;
+  const factor = table[unit];
+  if (factor === undefined) return value;
+  return value * factor;
+}
+
+// Convert value from base to unit
+function fromBase(value, unit, type) {
+  if (type === 'temperature') {
+    switch(unit) {
+      case 'K': return value;
+      case '°C': return value - 273.15;
+      case '°F': return (value - 273.15) * 9/5 + 32;
+      case 'R': return value * 9/5;
+      default: return value;
+    }
+  }
+  if (type === 'tempDiff') {
+    switch(unit) {
+      case 'K': return value;
+      case '°C': return value;
+      case '°F': return value * 9/5;
+      case 'R': return value * 9/5;
+      default: return value;
+    }
+  }
+  const table = Units[type];
+  if (!table) return value;
+  const factor = table[unit];
+  if (factor === undefined || factor === 0) return value;
+  return value / factor;
+}
+
+// Get unit options for a type
+function getUnitOptions(type) {
+  if (type === 'temperature') return ['K', '°C', '°F', 'R'];
+  if (type === 'tempDiff') return ['K', '°C', '°F', 'R'];
+  const table = Units[type];
+  if (!table) return [''];
+  return Object.keys(table);
+}
+
+/* ============================================================
+   FORMATTING
+   ============================================================ */
+function fmtNum(v, sig) {
+  if (v === null || v === undefined || !isFinite(v)) return '—';
+  if (v === 0) return '0';
+  sig = sig || 6;
+  const abs = Math.abs(v);
+  if (abs >= 1e12 || abs < 1e-6) {
+    return v.toExponential(Math.max(2, sig - 2));
+  }
+  let s = v.toPrecision(sig);
+  if (s.includes('.')) {
+    s = s.replace(/\.?0+$/, '');
+  }
+  return s;
+}
+
+function fmtSci(v, digits) {
+  if (!isFinite(v)) return '—';
+  digits = digits || 4;
+  return v.toExponential(digits - 1);
+}
+
+function escapeHtml(s) {
+  return String(s).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
+}
+
+/* ============================================================
+   STORAGE
+   ============================================================ */
+const Storage = {
+  available: (function() {
+    try {
+      const k = '__test__';
+      localStorage.setItem(k, '1');
+      localStorage.removeItem(k);
+      return true;
+    } catch(e) { return false; }
+  })(),
+  get(key, def) {
+    if (!this.available) return def;
+    try {
+      const v = localStorage.getItem(key);
+      return v ? JSON.parse(v) : def;
+    } catch(e) { return def; }
+  },
+  set(key, val) {
+    if (!this.available) return false;
+    try {
+      localStorage.setItem(key, JSON.stringify(val));
+      return true;
+    } catch(e) { return false; }
+  },
+  remove(key) {
+    if (!this.available) return;
+    try { localStorage.removeItem(key); } catch(e) {}
+  }
+};
+
+/* ============================================================
+   SVG ICONS
+   ============================================================ */
+const Icons = {
+  math: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 4h6v6H4zM14 4h6v6h-6zM4 14h6v6H4zM14 14h6v6h-6z"/></svg>',
+  geometry: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><path d="M12 3v18M3 12h18"/></svg>',
+  statics: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2v20M4 8l8-6 8 6"/><circle cx="12" cy="12" r="3"/></svg>',
+  strength: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 20V8l8-6 8 6v12"/><path d="M4 14h16"/></svg>',
+  beam: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 18h20M6 18v-8M18 18v-8M6 10h12"/></svg>',
+  fluid: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2C8 8 4 12 4 16a8 8 0 0016 0c0-4-4-8-8-14z"/></svg>',
+  thermo: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 14.76V3.5a2.5 2.5 0 00-5 0v11.26a4.5 4.5 0 105 0z"/><path d="M12 9v6"/></svg>',
+  heat: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M8 2v4M12 2v4M16 2v4M4 8h16v12a2 2 0 01-2 2H6a2 2 0 01-2-2V8z"/><path d="M8 13h8"/></svg>',
+  electrical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L4 14h6l-1 8 9-12h-6l1-8z"/></svg>',
+  mechanical: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M12 2v3M12 19v3M2 12h3M19 12h3M4.9 4.9l2.1 2.1M17 17l2.1 2.1M4.9 19.1l2.1-2.1M17 7l2.1-2.1"/></svg>',
+  machine: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="3"/><path d="M12 4v2M12 18v2M4 12h2M18 12h2"/></svg>',
+  industrial: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M2 20h20M4 20V8l6 4V8l6 4V4l4 4v12"/></svg>',
+  search: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><path d="M21 21l-4.35-4.35"/></svg>',
+  star: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+  starFill: '<svg viewBox="0 0 24 24" fill="currentColor" stroke="currentColor" stroke-width="1"><path d="M12 2l3.09 6.26L22 9.27l-5 4.87 1.18 6.88L12 17.77l-6.18 3.25L7 14.14 2 9.27l6.91-1.01L12 2z"/></svg>',
+  close: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 6L6 18M6 6l12 12"/></svg>',
+  chevron: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9l6 6 6-6"/></svg>',
+  copy: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="9" y="9" width="13" height="13" rx="2"/><path d="M5 15H4a2 2 0 01-2-2V4a2 2 0 012-2h9a2 2 0 012 2v1"/></svg>',
+  print: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M6 9V2h12v7M6 18H4a2 2 0 01-2-2v-5a2 2 0 012-2h16a2 2 0 012 2v5a2 2 0 01-2 2h-2"/><rect x="6" y="14" width="12" height="8"/></svg>',
+  download: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M21 15v4a2 2 0 01-2 2H5a2 2 0 01-2-2v-4M7 10l5 5 5-5M12 15V3"/></svg>',
+  share: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="18" cy="5" r="3"/><circle cx="6" cy="12" r="3"/><circle cx="18" cy="19" r="3"/><path d="M8.59 13.51l6.83 3.98M15.41 6.51l-6.82 3.98"/></svg>',
+  trash: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 6h18M19 6v14a2 2 0 01-2 2H7a2 2 0 01-2-2V6m3 0V4a2 2 0 012-2h4a2 2 0 012 2v2"/></svg>',
+  back: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M19 12H5M12 19l-7-7 7-7"/></svg>',
+  example: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 00-2 2v16a2 2 0 002 2h12a2 2 0 002-2V8z"/><path d="M14 2v6h6M16 13H8M16 17H8M10 9H8"/></svg>',
+  reset: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 12a9 9 0 019-9 9.75 9.75 0 016.74 2.74L21 8"/><path d="M21 3v5h-5M21 12a9 9 0 01-9 9 9.75 9.75 0 01-6.74-2.74L3 16"/><path d="M8 16H3v5"/></svg>',
+  calculate: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="4" y="2" width="16" height="20" rx="2"/><path d="M8 6h8M8 10h8M8 14h4M8 18h4"/></svg>',
+  warning: '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M10.29 3.86L1.82 18a2 2 0 001.71 3h16.94a2 2 0 001.71-3L13.71 3.86a2 2 0 00-3.42 0z"/><path d="M12 9v4M12 17h.01"/></svg>'
+};
+
+/* ============================================================
+   CATEGORIES & FORMULA REGISTRY
+   ============================================================ */
+const CATEGORIES = [
+  { id: 'math', name: 'Basic Mathematics', desc: 'Fundamental mathematical operations and equations.', icon: 'math' },
+  { id: 'geometry', name: 'Geometry & Properties', desc: 'Area, volume, centroid, and second moment of area for standard shapes.', icon: 'geometry' },
+  { id: 'statics', name: 'Engineering Mechanics', desc: 'Newton\'s laws, forces, moments, friction, work, and energy.', icon: 'statics' },
+  { id: 'strength', name: 'Strength of Materials', desc: 'Stress, strain, deformation, torsion, and thermal effects.', icon: 'strength' },
+  { id: 'beam', name: 'Beam Analysis', desc: 'Reactions, shear, moment, and deflection for common beam cases.', icon: 'beam' },
+  { id: 'fluid', name: 'Fluid Mechanics', desc: 'Pressure, flow, Bernoulli, Reynolds number, and pipe friction.', icon: 'fluid' },
+  { id: 'thermo', name: 'Thermodynamics', desc: 'Ideal gas, sensible heat, energy balance, and power conversions.', icon: 'thermo' },
+  { id: 'heat', name: 'Heat Transfer', desc: 'Conduction, convection, radiation, and heat exchangers.', icon: 'heat' },
+  { id: 'electrical', name: 'Electrical Engineering', desc: 'Ohm\'s law, power, series/parallel, AC, and efficiency.', icon: 'electrical' },
+  { id: 'mechanical', name: 'Mechanical Power & Motion', desc: 'Velocity, acceleration, power, torque, gears, and springs.', icon: 'mechanical' },
+  { id: 'machine', name: 'Machine Elements', desc: 'Shafts, springs, gears, belts, bearings, and bolts.', icon: 'machine' },
+  { id: 'industrial', name: 'Industrial Engineering', desc: 'Mass, volume, flow, hydraulics, and unit conversions.', icon: 'industrial' }
+];
+
+/* ============================================================
+   FORMULA DEFINITIONS
+   Each formula: { id, cat, name, desc, eq, inputs, outputs, calc, steps, example, assumptions, diagram }
+   inputs: [{ id, label, unitType, defaultUnit, example }]
+   outputs: [{ id, label, unitType, defaultUnit }]
+   ============================================================ */
+const FORMULAS = [];
+
+function reg(f) { FORMULAS.push(f); }
+
+/* ===== CATEGORY 1: BASIC MATHEMATICS ===== */
+
+reg({
+  id: 'pct-change', cat: 'math', name: 'Percentage Change',
+  desc: 'Calculate percentage change between two values.',
+  eq: '% change = ((V₂ − V₁) / |V₁|) × 100%',
+  inputs: [
+    { id: 'v1', label: 'Initial Value (V₁)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'v2', label: 'Final Value (V₂)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'pct', label: 'Percentage Change', unitType: 'dimensionless', defaultUnit: '%' }],
+  example: { v1: 100, v2: 125 },
+  assumptions: 'Percentage change relative to the absolute value of V₁. V₁ must not be zero.',
+  calc: (v) => {
+    if (v.v1 === 0) throw new Error('Initial value V₁ must not be zero.');
+    const pct = ((v.v2 - v.v1) / Math.abs(v.v1)) * 100;
+    return { pct };
+  },
+  steps: (v, r) => `Formula: % change = ((V₂ − V₁) / |V₁|) × 100%\nGiven: V₁ = ${v.v1}, V₂ = ${v.v2}\nDifference: V₂ − V₁ = ${v.v2 - v.v1}\nRelative change: ${v.v2 - v.v1} / |${v.v1}| = ${((v.v2 - v.v1)/Math.abs(v.v1))}\nPercentage: ${((v.v2 - v.v1)/Math.abs(v.v1))} × 100% = ${fmtNum(r.pct)}%`
+});
+
+reg({
+  id: 'ratio', cat: 'math', name: 'Ratios and Proportions',
+  desc: 'Solve a proportion A/B = C/D for the unknown D.',
+  eq: 'A / B = C / D  →  D = (B × C) / A',
+  inputs: [
+    { id: 'a', label: 'A', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'b', label: 'B', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'c', label: 'C', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'd', label: 'D', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { a: 2, b: 5, c: 8 },
+  assumptions: 'A must not be zero. Valid for proportional relationships.',
+  calc: (v) => {
+    if (v.a === 0) throw new Error('A must not be zero.');
+    return { d: (v.b * v.c) / v.a };
+  },
+  steps: (v, r) => `Formula: A / B = C / D → D = (B × C) / A\nGiven: A = ${v.a}, B = ${v.b}, C = ${v.c}\nSubstitution: D = (${v.b} × ${v.c}) / ${v.a}\nResult: D = ${fmtNum(r.d)}`
+});
+
+reg({
+  id: 'power-root', cat: 'math', name: 'Powers and Roots',
+  desc: 'Calculate x^n or the n-th root of x.',
+  eq: 'xⁿ  or  x^(1/n)',
+  inputs: [
+    { id: 'x', label: 'Base (x)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'n', label: 'Exponent / Root Index (n)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'mode', label: 'Operation', unitType: 'select', options: ['Power (xⁿ)', 'Root (ⁿ√x)'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'result', label: 'Result', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { x: 2, n: 10, mode: 'Power (xⁿ)' },
+  assumptions: 'For roots, x must be non-negative if n is even. n must not be zero for roots.',
+  calc: (v) => {
+    if (v.mode === 'Power (xⁿ)') {
+      const r = Math.pow(v.x, v.n);
+      if (!isFinite(r)) throw new Error('Result is not finite.');
+      return { result: r };
+    } else {
+      if (v.n === 0) throw new Error('Root index n must not be zero.');
+      if (v.x < 0 && Math.abs(v.n % 2) === 0) throw new Error('Even root of a negative number is not real.');
+      const r = Math.sign(v.x) * Math.pow(Math.abs(v.x), 1/v.n);
+      return { result: r };
+    }
+  },
+  steps: (v, r) => {
+    if (v.mode === 'Power (xⁿ)') return `Formula: xⁿ\nGiven: x = ${v.x}, n = ${v.n}\nSubstitution: ${v.x}^${v.n}\nResult: ${fmtNum(r.result)}`;
+    return `Formula: ⁿ√x = x^(1/n)\nGiven: x = ${v.x}, n = ${v.n}\nSubstitution: ${v.x}^(1/${v.n})\nResult: ${fmtNum(r.result)}`;
+  }
+});
+
+reg({
+  id: 'sci-notation', cat: 'math', name: 'Scientific Notation',
+  desc: 'Convert a number to scientific notation or back.',
+  eq: 'N = a × 10^b   (1 ≤ |a| < 10)',
+  inputs: [
+    { id: 'num', label: 'Number', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'mantissa', label: 'Mantissa (a)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'exponent', label: 'Exponent (b)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { num: 0.0001234 },
+  assumptions: 'Standard scientific notation with mantissa in [1, 10).',
+  calc: (v) => {
+    if (v.num === 0) return { mantissa: 0, exponent: 0 };
+    const exp = Math.floor(Math.log10(Math.abs(v.num)));
+    const mant = v.num / Math.pow(10, exp);
+    return { mantissa: mant, exponent: exp };
+  },
+  steps: (v, r) => `Given: N = ${v.num}\nExponent: b = floor(log₁₀|N|) = ${r.exponent}\nMantissa: a = N / 10^b = ${fmtNum(r.mantissa)}\nScientific notation: ${fmtNum(r.mantissa)} × 10^${r.exponent}`
+});
+
+reg({
+  id: 'log', cat: 'math', name: 'Logarithms',
+  desc: 'Calculate natural log, base-10 log, or log of any base.',
+  eq: 'log_b(x) = ln(x) / ln(b)',
+  inputs: [
+    { id: 'x', label: 'Argument (x)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'base', label: 'Base (b)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'ln', label: 'Natural Log (ln x)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'log10', label: 'Base-10 Log', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'logb', label: 'Log Base b', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { x: 100, base: 10 },
+  assumptions: 'x > 0, b > 0, b ≠ 1.',
+  calc: (v) => {
+    if (v.x <= 0) throw new Error('Argument x must be greater than zero.');
+    if (v.base <= 0 || v.base === 1) throw new Error('Base b must be positive and not equal to 1.');
+    return {
+      ln: Math.log(v.x),
+      log10: Math.log10(v.x),
+      logb: Math.log(v.x) / Math.log(v.base)
+    };
+  },
+  steps: (v, r) => `Given: x = ${v.x}, b = ${v.base}\nln(x) = ${fmtNum(r.ln)}\nlog₁₀(x) = ${fmtNum(r.log10)}\nlog_b(x) = ln(x) / ln(b) = ${fmtNum(r.ln)} / ${fmtNum(Math.log(v.base))} = ${fmtNum(r.logb)}`
+});
+
+reg({
+  id: 'linear-eq', cat: 'math', name: 'Linear Equation',
+  desc: 'Solve ax + b = 0 for x.',
+  eq: 'x = −b / a',
+  inputs: [
+    { id: 'a', label: 'Coefficient a', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'b', label: 'Constant b', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'x', label: 'Solution x', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { a: 2, b: -8 },
+  assumptions: 'a ≠ 0. If a = 0 and b = 0, infinitely many solutions. If a = 0 and b ≠ 0, no solution.',
+  calc: (v) => {
+    if (v.a === 0) throw new Error('Coefficient a must not be zero (no unique solution).');
+    return { x: -v.b / v.a };
+  },
+  steps: (v, r) => `Equation: ${v.a}x + (${v.b}) = 0\nSolve: x = −b / a = −(${v.b}) / ${v.a}\nResult: x = ${fmtNum(r.x)}`
+});
+
+reg({
+  id: 'quadratic', cat: 'math', name: 'Quadratic Equation',
+  desc: 'Solve ax² + bx + c = 0 including complex roots.',
+  eq: 'x = [−b ± √(b² − 4ac)] / (2a)',
+  inputs: [
+    { id: 'a', label: 'Coefficient a', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'b', label: 'Coefficient b', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'c', label: 'Constant c', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'x1', label: 'Root 1', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'x2', label: 'Root 2', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'disc', label: 'Discriminant', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { a: 1, b: -3, c: 2 },
+  assumptions: 'a ≠ 0. Discriminant determines root type: Δ > 0 real distinct, Δ = 0 real repeated, Δ < 0 complex conjugate pair.',
+  calc: (v) => {
+    if (v.a === 0) throw new Error('Coefficient a must not be zero. Use linear equation for a = 0.');
+    const disc = v.b * v.b - 4 * v.a * v.c;
+    if (disc >= 0) {
+      const sq = Math.sqrt(disc);
+      const x1 = (-v.b + sq) / (2 * v.a);
+      const x2 = (-v.b - sq) / (2 * v.a);
+      return { x1, x2, disc };
+    } else {
+      const real = -v.b / (2 * v.a);
+      const imag = Math.sqrt(-disc) / (2 * v.a);
+      return { x1: `${fmtNum(real)} + ${fmtNum(Math.abs(imag))}i`, x2: `${fmtNum(real)} − ${fmtNum(Math.abs(imag))}i`, disc };
+    }
+  },
+  steps: (v, r) => {
+    const disc = v.b*v.b - 4*v.a*v.c;
+    let s = `Equation: ${v.a}x² + ${v.b}x + ${v.c} = 0\nDiscriminant: Δ = b² − 4ac = ${v.b}² − 4(${v.a})(${v.c}) = ${fmtNum(disc)}\n`;
+    if (disc >= 0) {
+      s += `Δ ≥ 0 → real roots\nx₁ = [−b + √Δ] / (2a) = ${fmtNum(r.x1)}\nx₂ = [−b − √Δ] / (2a) = ${fmtNum(r.x2)}`;
+    } else {
+      s += `Δ < 0 → complex conjugate roots\nReal part = −b/(2a) = ${fmtNum(-v.b/(2*v.a))}\nImaginary part = √(−Δ)/(2a) = ${fmtNum(Math.sqrt(-disc)/(2*v.a))}\nx₁ = ${r.x1}\nx₂ = ${r.x2}`;
+    }
+    return s;
+  }
+});
+
+reg({
+  id: 'rearrange', cat: 'math', name: 'Rearrange Simple Equation',
+  desc: 'Solve y = mx + b for a selected variable.',
+  eq: 'y = mx + b  →  solve for m, x, or b',
+  inputs: [
+    { id: 'y', label: 'y', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'm', label: 'm (slope)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'x', label: 'x', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'b', label: 'b (intercept)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'solveFor', label: 'Solve for', unitType: 'select', options: ['m', 'x', 'b'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'result', label: 'Result', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { y: 10, m: 2, x: 3, b: 4, solveFor: 'b' },
+  assumptions: 'Appropriate denominators must not be zero.',
+  calc: (v) => {
+    switch(v.solveFor) {
+      case 'm':
+        if (v.x === 0) throw new Error('x must not be zero when solving for m.');
+        return { result: (v.y - v.b) / v.x };
+      case 'x':
+        if (v.m === 0) throw new Error('m must not be zero when solving for x.');
+        return { result: (v.y - v.b) / v.m };
+      case 'b':
+        return { result: v.y - v.m * v.x };
+      default:
+        throw new Error('Select a variable to solve for.');
+    }
+  },
+  steps: (v, r) => {
+    const map = {
+      'm': `y = mx + b → m = (y − b) / x\nm = (${v.y} − ${v.b}) / ${v.x} = ${fmtNum(r.result)}`,
+      'x': `y = mx + b → x = (y − b) / m\nx = (${v.y} − ${v.b}) / ${v.m} = ${fmtNum(r.result)}`,
+      'b': `y = mx + b → b = y − mx\nb = ${v.y} − (${v.m})(${v.x}) = ${fmtNum(r.result)}`
+    };
+    return map[v.solveFor] || 'Select a variable.';
+  }
+});
+
+reg({
+  id: 'average', cat: 'math', name: 'Average and Weighted Average',
+  desc: 'Calculate simple or weighted average of values.',
+  eq: 'x̄ = Σxᵢ / n   or   x̄_w = Σ(wᵢxᵢ) / Σwᵢ',
+  inputs: [
+    { id: 'values', label: 'Values (comma-separated)', unitType: 'text', defaultUnit: '' },
+    { id: 'weights', label: 'Weights (comma-separated, optional)', unitType: 'text', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'mean', label: 'Average', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'sum', label: 'Sum', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'count', label: 'Count', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { values: '85, 90, 78, 92, 88', weights: '1, 2, 1, 2, 1' },
+  assumptions: 'Values and weights must have matching counts if weights are provided. Weights must not sum to zero.',
+  calc: (v) => {
+    const vals = String(v.values).split(',').map(s => parseFloat(s.trim())).filter(x => isFinite(x));
+    if (vals.length === 0) throw new Error('Provide at least one valid value.');
+    const sum = vals.reduce((a,b) => a+b, 0);
+    if (v.weights && String(v.weights).trim()) {
+      const wts = String(v.weights).split(',').map(s => parseFloat(s.trim())).filter(x => isFinite(x));
+      if (wts.length !== vals.length) throw new Error('Weights count must match values count.');
+      const wsum = wts.reduce((a,b) => a+b, 0);
+      if (wsum === 0) throw new Error('Sum of weights must not be zero.');
+      const wmean = vals.reduce((a,val,i) => a + val * wts[i], 0) / wsum;
+      return { mean: wmean, sum, count: vals.length };
+    }
+    return { mean: sum / vals.length, sum, count: vals.length };
+  },
+  steps: (v, r) => `Values: ${v.values}\nCount: ${r.count}\nSum: ${fmtNum(r.sum)}\nAverage: ${fmtNum(r.mean)}`
+});
+
+reg({
+  id: 'trig', cat: 'math', name: 'Basic Trigonometric Calculations',
+  desc: 'Calculate sin, cos, tan, and inverse functions.',
+  eq: 'sin θ, cos θ, tan θ, and inverses',
+  inputs: [
+    { id: 'angle', label: 'Angle', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'angleUnit', label: 'Angle Unit', unitType: 'select', options: ['Degrees', 'Radians'], defaultUnit: '' },
+    { id: 'func', label: 'Function', unitType: 'select', options: ['sin', 'cos', 'tan', 'asin', 'acos', 'atan'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'result', label: 'Result', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { angle: 30, angleUnit: 'Degrees', func: 'sin' },
+  assumptions: 'For inverse functions, input must be in valid domain: asin/acos ∈ [−1, 1].',
+  calc: (v) => {
+    let a = v.angle;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    let r;
+    switch(v.func) {
+      case 'sin': r = Math.sin(a); break;
+      case 'cos': r = Math.cos(a); break;
+      case 'tan': r = Math.tan(a); break;
+      case 'asin':
+        if (a < -1 || a > 1) throw new Error('asin domain is [−1, 1].');
+        r = Math.asin(a); break;
+      case 'acos':
+        if (a < -1 || a > 1) throw new Error('acos domain is [−1, 1].');
+        r = Math.acos(a); break;
+      case 'atan': r = Math.atan(a); break;
+      default: throw new Error('Unknown function.');
+    }
+    if (v.func.startsWith('a') && v.angleUnit === 'Degrees') r = r * 180 / Math.PI;
+    return { result: r };
+  },
+  steps: (v, r) => `Function: ${v.func}\nAngle: ${v.angle} ${v.angleUnit}\nResult: ${fmtNum(r.result)} ${v.func.startsWith('a') ? v.angleUnit : ''}`
+});
+
+reg({
+  id: 'angle-conv', cat: 'math', name: 'Angle Conversion',
+  desc: 'Convert between degrees, radians, and gradians.',
+  eq: 'rad = deg × π/180   deg = rad × 180/π',
+  inputs: [
+    { id: 'angle', label: 'Angle', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'from', label: 'From', unitType: 'select', options: ['Degrees', 'Radians', 'Gradians'], defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'deg', label: 'Degrees', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'rad', label: 'Radians', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'grad', label: 'Gradians', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { angle: 90, from: 'Degrees' },
+  assumptions: 'Standard angle conversions.',
+  calc: (v) => {
+    let deg;
+    if (v.from === 'Degrees') deg = v.angle;
+    else if (v.from === 'Radians') deg = v.angle * 180 / Math.PI;
+    else deg = v.angle * 0.9;
+    return { deg, rad: deg * Math.PI / 180, grad: deg / 0.9 };
+  },
+  steps: (v, r) => `Input: ${v.angle} ${v.from}\nDegrees: ${fmtNum(r.deg)}°\nRadians: ${fmtNum(r.rad)} rad\nGradians: ${fmtNum(r.grad)} grad`
+});
+
+/* ===== CATEGORY 2: GEOMETRY ===== */
+
+reg({
+  id: 'rect', cat: 'geometry', name: 'Rectangle',
+  desc: 'Area, perimeter, and diagonal of a rectangle.',
+  eq: 'A = w × h,  P = 2(w + h),  d = √(w² + h²)',
+  inputs: [
+    { id: 'w', label: 'Width', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'perim', label: 'Perimeter', unitType: 'length', defaultUnit: 'm' },
+    { id: 'diag', label: 'Diagonal', unitType: 'length', defaultUnit: 'm' }
+  ],
+  example: { w: 4, h: 3 },
+  assumptions: 'w > 0, h > 0.',
+  calc: (v) => ({ area: v.w * v.h, perim: 2*(v.w+v.h), diag: Math.sqrt(v.w*v.w + v.h*v.h) }),
+  steps: (v, r) => `A = w × h = ${v.w} × ${v.h} = ${fmtNum(r.area)} m²\nP = 2(w + h) = 2(${v.w} + ${v.h}) = ${fmtNum(r.perim)} m\nd = √(w² + h²) = √(${v.w}² + ${v.h}²) = ${fmtNum(r.diag)} m`
+});
+
+reg({
+  id: 'square', cat: 'geometry', name: 'Square',
+  desc: 'Area, perimeter, and diagonal of a square.',
+  eq: 'A = a²,  P = 4a,  d = a√2',
+  inputs: [{ id: 'a', label: 'Side', unitType: 'length', defaultUnit: 'm' }],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'perim', label: 'Perimeter', unitType: 'length', defaultUnit: 'm' },
+    { id: 'diag', label: 'Diagonal', unitType: 'length', defaultUnit: 'm' }
+  ],
+  example: { a: 5 },
+  assumptions: 'a > 0.',
+  calc: (v) => ({ area: v.a*v.a, perim: 4*v.a, diag: v.a*Math.sqrt(2) }),
+  steps: (v, r) => `A = a² = ${v.a}² = ${fmtNum(r.area)} m²\nP = 4a = 4 × ${v.a} = ${fmtNum(r.perim)} m\nd = a√2 = ${v.a} × √2 = ${fmtNum(r.diag)} m`
+});
+
+reg({
+  id: 'circle', cat: 'geometry', name: 'Circle',
+  desc: 'Area, circumference, and diameter of a circle.',
+  eq: 'A = πr²,  C = 2πr,  d = 2r',
+  inputs: [{ id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'm' }],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'circ', label: 'Circumference', unitType: 'length', defaultUnit: 'm' },
+    { id: 'diam', label: 'Diameter', unitType: 'length', defaultUnit: 'm' }
+  ],
+  example: { r: 2.5 },
+  assumptions: 'r > 0.',
+  calc: (v) => ({ area: Math.PI*v.r*v.r, circ: 2*Math.PI*v.r, diam: 2*v.r }),
+  steps: (v, r) => `A = πr² = π(${v.r})² = ${fmtNum(r.area)} m²\nC = 2πr = 2π(${v.r}) = ${fmtNum(r.circ)} m\nd = 2r = 2(${v.r}) = ${fmtNum(r.diam)} m`
+});
+
+reg({
+  id: 'triangle', cat: 'geometry', name: 'Triangle',
+  desc: 'Area and perimeter of a triangle.',
+  eq: 'A = ½bh,  P = a + b + c',
+  inputs: [
+    { id: 'b', label: 'Base', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' },
+    { id: 's1', label: 'Side 1', unitType: 'length', defaultUnit: 'm' },
+    { id: 's2', label: 'Side 2', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'perim', label: 'Perimeter', unitType: 'length', defaultUnit: 'm' }
+  ],
+  example: { b: 6, h: 4, s1: 5, s2: 5 },
+  assumptions: 'b > 0, h > 0. Side lengths must satisfy triangle inequality.',
+  calc: (v) => ({ area: 0.5*v.b*v.h, perim: v.s1 + v.b + v.s2 }),
+  steps: (v, r) => `A = ½bh = 0.5 × ${v.b} × ${v.h} = ${fmtNum(r.area)} m²\nP = s₁ + b + s₂ = ${v.s1} + ${v.b} + ${v.s2} = ${fmtNum(r.perim)} m`
+});
+
+reg({
+  id: 'trapezoid', cat: 'geometry', name: 'Trapezoid',
+  desc: 'Area of a trapezoid.',
+  eq: 'A = ½(a + b)h',
+  inputs: [
+    { id: 'a', label: 'Parallel Side a', unitType: 'length', defaultUnit: 'm' },
+    { id: 'b', label: 'Parallel Side b', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' }],
+  example: { a: 8, b: 5, h: 3 },
+  assumptions: 'a, b, h > 0.',
+  calc: (v) => ({ area: 0.5*(v.a+v.b)*v.h }),
+  steps: (v, r) => `A = ½(a + b)h = 0.5 × (${v.a} + ${v.b}) × ${v.h} = ${fmtNum(r.area)} m²`
+});
+
+reg({
+  id: 'cylinder', cat: 'geometry', name: 'Cylinder',
+  desc: 'Volume and surface area of a solid cylinder.',
+  eq: 'V = πr²h,  A = 2πr(r + h)',
+  inputs: [
+    { id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'vol', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' },
+    { id: 'area', label: 'Surface Area', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  example: { r: 2, h: 5 },
+  assumptions: 'r > 0, h > 0.',
+  calc: (v) => ({ vol: Math.PI*v.r*v.r*v.h, area: 2*Math.PI*v.r*(v.r+v.h) }),
+  steps: (v, r) => `V = πr²h = π(${v.r})²(${v.h}) = ${fmtNum(r.vol)} m³\nA = 2πr(r + h) = 2π(${v.r})(${v.r} + ${v.h}) = ${fmtNum(r.area)} m²`
+});
+
+reg({
+  id: 'hollow-cyl', cat: 'geometry', name: 'Hollow Cylinder',
+  desc: 'Volume of a hollow cylinder (tube).',
+  eq: 'V = π(R² − r²)h',
+  inputs: [
+    { id: 'R', label: 'Outer Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'r', label: 'Inner Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'vol', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' }],
+  example: { R: 3, r: 2, h: 5 },
+  assumptions: 'R > r > 0, h > 0.',
+  calc: (v) => {
+    if (v.R <= v.r) throw new Error('Outer radius R must be greater than inner radius r.');
+    return { vol: Math.PI*(v.R*v.R - v.r*v.r)*v.h };
+  },
+  steps: (v, r) => `V = π(R² − r²)h = π(${v.R}² − ${v.r}²)(${v.h}) = ${fmtNum(r.vol)} m³`
+});
+
+reg({
+  id: 'rect-prism', cat: 'geometry', name: 'Rectangular Prism',
+  desc: 'Volume and surface area of a rectangular prism.',
+  eq: 'V = lwh,  A = 2(lw + lh + wh)',
+  inputs: [
+    { id: 'l', label: 'Length', unitType: 'length', defaultUnit: 'm' },
+    { id: 'w', label: 'Width', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'vol', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' },
+    { id: 'area', label: 'Surface Area', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  example: { l: 4, w: 3, h: 2 },
+  assumptions: 'l, w, h > 0.',
+  calc: (v) => ({ vol: v.l*v.w*v.h, area: 2*(v.l*v.w + v.l*v.h + v.w*v.h) }),
+  steps: (v, r) => `V = lwh = ${v.l} × ${v.w} × ${v.h} = ${fmtNum(r.vol)} m³\nA = 2(lw + lh + wh) = ${fmtNum(r.area)} m²`
+});
+
+reg({
+  id: 'sphere', cat: 'geometry', name: 'Sphere',
+  desc: 'Volume and surface area of a sphere.',
+  eq: 'V = (4/3)πr³,  A = 4πr²',
+  inputs: [{ id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'm' }],
+  outputs: [
+    { id: 'vol', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' },
+    { id: 'area', label: 'Surface Area', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  example: { r: 3 },
+  assumptions: 'r > 0.',
+  calc: (v) => ({ vol: (4/3)*Math.PI*Math.pow(v.r,3), area: 4*Math.PI*v.r*v.r }),
+  steps: (v, r) => `V = (4/3)πr³ = (4/3)π(${v.r})³ = ${fmtNum(r.vol)} m³\nA = 4πr² = 4π(${v.r})² = ${fmtNum(r.area)} m²`
+});
+
+reg({
+  id: 'cone', cat: 'geometry', name: 'Cone',
+  desc: 'Volume and surface area of a right circular cone.',
+  eq: 'V = (1/3)πr²h,  A = πr(r + √(r²+h²))',
+  inputs: [
+    { id: 'r', label: 'Base Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'vol', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' },
+    { id: 'area', label: 'Surface Area', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  example: { r: 2, h: 4 },
+  assumptions: 'r > 0, h > 0.',
+  calc: (v) => {
+    const slant = Math.sqrt(v.r*v.r + v.h*v.h);
+    return { vol: (1/3)*Math.PI*v.r*v.r*v.h, area: Math.PI*v.r*(v.r + slant) };
+  },
+  steps: (v, r) => {
+    const slant = Math.sqrt(v.r*v.r + v.h*v.h);
+    return `V = (1/3)πr²h = (1/3)π(${v.r})²(${v.h}) = ${fmtNum(r.vol)} m³\nSlant = √(r² + h²) = ${fmtNum(slant)} m\nA = πr(r + slant) = ${fmtNum(r.area)} m²`;
+  }
+});
+
+reg({
+  id: 'hollow-circ', cat: 'geometry', name: 'Hollow Circular Cross-Section',
+  desc: 'Area, second moment of area, and polar second moment for a hollow circle.',
+  eq: 'A = π(R² − r²),  I = π(R⁴ − r⁴)/4,  J = π(R⁴ − r⁴)/2',
+  inputs: [
+    { id: 'R', label: 'Outer Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'r', label: 'Inner Radius', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'J', label: 'Polar Second Moment (J)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { R: 0.05, r: 0.03 },
+  assumptions: 'R > r > 0. Units: I and J in m⁴ when lengths in m.',
+  calc: (v) => {
+    if (v.R <= v.r) throw new Error('Outer radius R must be greater than inner radius r.');
+    const R4 = Math.pow(v.R,4), r4 = Math.pow(v.r,4);
+    return { area: Math.PI*(v.R*v.R - v.r*v.r), I: Math.PI*(R4 - r4)/4, J: Math.PI*(R4 - r4)/2 };
+  },
+  steps: (v, r) => `A = π(R² − r²) = ${fmtNum(r.area)} m²\nI = π(R⁴ − r⁴)/4 = ${fmtNum(r.I)} m⁴\nJ = π(R⁴ − r⁴)/2 = ${fmtNum(r.J)} m⁴`
+});
+
+reg({
+  id: 'rect-cross', cat: 'geometry', name: 'Rectangular Cross-Section',
+  desc: 'Area and second moment of area for a rectangular section.',
+  eq: 'A = bh,  I = bh³/12',
+  inputs: [
+    { id: 'b', label: 'Width (b)', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height (h)', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { b: 0.1, h: 0.2 },
+  assumptions: 'b > 0, h > 0. I about centroidal axis.',
+  calc: (v) => ({ area: v.b*v.h, I: v.b*Math.pow(v.h,3)/12 }),
+  steps: (v, r) => `A = bh = ${v.b} × ${v.h} = ${fmtNum(r.area)} m²\nI = bh³/12 = ${v.b}(${v.h})³/12 = ${fmtNum(r.I)} m⁴`
+});
+
+/* ===== CATEGORY 3: STATICS ===== */
+
+reg({
+  id: 'newton2', cat: 'statics', name: "Newton's Second Law",
+  desc: 'Force equals mass times acceleration.',
+  eq: 'F = m × a',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'a', label: 'Acceleration', unitType: 'acceleration', defaultUnit: 'm/s2' }
+  ],
+  outputs: [{ id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' }],
+  example: { m: 10, a: 5 },
+  assumptions: 'm > 0. Newtonian mechanics, constant mass.',
+  calc: (v) => ({ F: v.m * v.a }),
+  steps: (v, r) => `F = m × a = ${v.m} kg × ${v.a} m/s² = ${fmtNum(r.F)} N`
+});
+
+reg({
+  id: 'weight', cat: 'statics', name: 'Weight',
+  desc: 'Weight from mass and gravitational acceleration.',
+  eq: 'W = m × g',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'g', label: 'Gravity (g)', unitType: 'acceleration', defaultUnit: 'm/s2' }
+  ],
+  outputs: [{ id: 'W', label: 'Weight', unitType: 'force', defaultUnit: 'N' }],
+  example: { m: 50, g: 9.80665 },
+  assumptions: 'm > 0, g > 0.',
+  calc: (v) => ({ W: v.m * v.g }),
+  steps: (v, r) => `W = m × g = ${v.m} kg × ${v.g} m/s² = ${fmtNum(r.W)} N`
+});
+
+reg({
+  id: 'torque', cat: 'statics', name: 'Torque Magnitude',
+  desc: 'Torque from force, radius, and angle.',
+  eq: 'T = r × F × sin(θ)',
+  inputs: [
+    { id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'theta', label: 'Angle (θ)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'angleUnit', label: 'Angle Unit', unitType: 'select', options: ['Degrees', 'Radians'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'T', label: 'Torque', unitType: 'torque', defaultUnit: 'N·m' }],
+  example: { r: 0.3, F: 100, theta: 90, angleUnit: 'Degrees' },
+  assumptions: 'r > 0, F > 0. Angle between force and radius vector.',
+  calc: (v) => {
+    let a = v.theta;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    return { T: v.r * v.F * Math.sin(a) };
+  },
+  steps: (v, r) => {
+    let a = v.theta;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    return `T = r × F × sin(θ)\nθ = ${v.theta} ${v.angleUnit} = ${fmtNum(a)} rad\nT = ${v.r} × ${v.F} × sin(${fmtNum(a)}) = ${fmtNum(r.T)} N·m`;
+  }
+});
+
+reg({
+  id: 'force-components', cat: 'statics', name: 'Force Components 2D',
+  desc: 'Resolve a force into x and y components.',
+  eq: 'Fx = F cos θ,  Fy = F sin θ',
+  inputs: [
+    { id: 'F', label: 'Force Magnitude', unitType: 'force', defaultUnit: 'N' },
+    { id: 'theta', label: 'Angle from +x axis', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'angleUnit', label: 'Angle Unit', unitType: 'select', options: ['Degrees', 'Radians'], defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'Fx', label: 'Fx', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fy', label: 'Fy', unitType: 'force', defaultUnit: 'N' }
+  ],
+  example: { F: 200, theta: 30, angleUnit: 'Degrees' },
+  assumptions: 'Standard angle convention from positive x-axis.',
+  calc: (v) => {
+    let a = v.theta;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    return { Fx: v.F * Math.cos(a), Fy: v.F * Math.sin(a) };
+  },
+  steps: (v, r) => `Fx = F cos θ = ${v.F} × cos(${v.theta}°) = ${fmtNum(r.Fx)} N\nFy = F sin θ = ${v.F} × sin(${v.theta}°) = ${fmtNum(r.Fy)} N`
+});
+
+reg({
+  id: 'resultant', cat: 'statics', name: 'Resultant Force 2D',
+  desc: 'Resultant of two perpendicular forces.',
+  eq: 'R = √(Fx² + Fy²),  θ = atan2(Fy, Fx)',
+  inputs: [
+    { id: 'Fx', label: 'Force x-component', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fy', label: 'Force y-component', unitType: 'force', defaultUnit: 'N' }
+  ],
+  outputs: [
+    { id: 'R', label: 'Resultant Magnitude', unitType: 'force', defaultUnit: 'N' },
+    { id: 'theta', label: 'Direction (from +x)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { Fx: 30, Fy: 40 },
+  assumptions: 'Forces are perpendicular components in 2D.',
+  calc: (v) => {
+    const R = Math.sqrt(v.Fx*v.Fx + v.Fy*v.Fy);
+    const theta = Math.atan2(v.Fy, v.Fx) * 180 / Math.PI;
+    return { R, theta };
+  },
+  steps: (v, r) => `R = √(Fx² + Fy²) = √(${v.Fx}² + ${v.Fy}²) = ${fmtNum(r.R)} N\nθ = atan2(Fy, Fx) = ${fmtNum(r.theta)}°`
+});
+
+reg({
+  id: 'vector-mag', cat: 'statics', name: 'Vector Magnitude and Direction',
+  desc: 'Magnitude and direction of a 2D vector.',
+  eq: '|V| = √(Vx² + Vy²),  θ = atan2(Vy, Vx)',
+  inputs: [
+    { id: 'Vx', label: 'x-component', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'Vy', label: 'y-component', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'mag', label: 'Magnitude', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'theta', label: 'Direction (°)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { Vx: 3, Vy: 4 },
+  assumptions: 'Standard 2D vector.',
+  calc: (v) => ({ mag: Math.sqrt(v.Vx*v.Vx + v.Vy*v.Vy), theta: Math.atan2(v.Vy, v.Vx)*180/Math.PI }),
+  steps: (v, r) => `|V| = √(${v.Vx}² + ${v.Vy}²) = ${fmtNum(r.mag)}\nθ = atan2(${v.Vy}, ${v.Vx}) = ${fmtNum(r.theta)}°`
+});
+
+reg({
+  id: 'equilibrium', cat: 'statics', name: 'Equilibrium of Forces 2D',
+  desc: 'Check equilibrium: ΣFx = 0 and ΣFy = 0.',
+  eq: 'ΣFx = 0,  ΣFy = 0',
+  inputs: [
+    { id: 'Fx1', label: 'Force 1 x', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fy1', label: 'Force 1 y', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fx2', label: 'Force 2 x', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fy2', label: 'Force 2 y', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fx3', label: 'Force 3 x', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fy3', label: 'Force 3 y', unitType: 'force', defaultUnit: 'N' }
+  ],
+  outputs: [
+    { id: 'sumFx', label: 'ΣFx', unitType: 'force', defaultUnit: 'N' },
+    { id: 'sumFy', label: 'ΣFy', unitType: 'force', defaultUnit: 'N' },
+    { id: 'balanced', label: 'Equilibrium', unitType: 'text', defaultUnit: '' }
+  ],
+  example: { Fx1: 10, Fy1: 0, Fx2: -5, Fy2: 8, Fx3: -5, Fy3: -8 },
+  assumptions: 'Sign convention: +x right, +y up. Equilibrium when both sums are approximately zero.',
+  calc: (v) => {
+    const sumFx = v.Fx1 + v.Fx2 + v.Fx3;
+    const sumFy = v.Fy1 + v.Fy2 + v.Fy3;
+    const balanced = Math.abs(sumFx) < 1e-9 && Math.abs(sumFy) < 1e-9 ? 'Yes' : 'No';
+    return { sumFx, sumFy, balanced };
+  },
+  steps: (v, r) => `ΣFx = ${v.Fx1} + ${v.Fx2} + ${v.Fx3} = ${fmtNum(r.sumFx)} N\nΣFy = ${v.Fy1} + ${v.Fy2} + ${v.Fy3} = ${fmtNum(r.sumFy)} N\nEquilibrium: ${r.balanced}`
+});
+
+reg({
+  id: 'friction', cat: 'statics', name: 'Friction Force',
+  desc: 'Static or kinetic friction force.',
+  eq: 'F_f = μ × N',
+  inputs: [
+    { id: 'mu', label: 'Coefficient of Friction (μ)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'N', label: 'Normal Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'type', label: 'Friction Type', unitType: 'select', options: ['Static', 'Kinetic'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'Ff', label: 'Friction Force', unitType: 'force', defaultUnit: 'N' }],
+  example: { mu: 0.4, N: 500, type: 'Static' },
+  assumptions: 'μ ≥ 0. Static friction acts up to μsN; kinetic friction acts during sliding.',
+  calc: (v) => ({ Ff: v.mu * v.N }),
+  steps: (v, r) => `${v.type} friction: F_f = μ × N = ${v.mu} × ${v.N} = ${fmtNum(r.Ff)} N`
+});
+
+reg({
+  id: 'incline', cat: 'statics', name: 'Inclined Plane',
+  desc: 'Forces on an inclined plane.',
+  eq: 'F_parallel = W sin θ,  F_normal = W cos θ',
+  inputs: [
+    { id: 'W', label: 'Weight', unitType: 'force', defaultUnit: 'N' },
+    { id: 'theta', label: 'Incline Angle', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'angleUnit', label: 'Angle Unit', unitType: 'select', options: ['Degrees', 'Radians'], defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'Fpar', label: 'Parallel Component', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Fnorm', label: 'Normal Component', unitType: 'force', defaultUnit: 'N' }
+  ],
+  example: { W: 100, theta: 30, angleUnit: 'Degrees' },
+  assumptions: 'W > 0. Frictionless plane unless combined with friction calculator.',
+  calc: (v) => {
+    let a = v.theta;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    return { Fpar: v.W * Math.sin(a), Fnorm: v.W * Math.cos(a) };
+  },
+  steps: (v, r) => `F_parallel = W sin θ = ${v.W} × sin(${v.theta}°) = ${fmtNum(r.Fpar)} N\nF_normal = W cos θ = ${v.W} × cos(${v.theta}°) = ${fmtNum(r.Fnorm)} N`
+});
+
+reg({
+  id: 'work', cat: 'statics', name: 'Work',
+  desc: 'Work done by a force over a distance.',
+  eq: 'W = F × s × cos(θ)',
+  inputs: [
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 's', label: 'Displacement', unitType: 'length', defaultUnit: 'm' },
+    { id: 'theta', label: 'Angle', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'angleUnit', label: 'Angle Unit', unitType: 'select', options: ['Degrees', 'Radians'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'W', label: 'Work', unitType: 'energy', defaultUnit: 'J' }],
+  example: { F: 50, s: 10, theta: 0, angleUnit: 'Degrees' },
+  assumptions: 'Constant force, straight-line displacement.',
+  calc: (v) => {
+    let a = v.theta;
+    if (v.angleUnit === 'Degrees') a = a * Math.PI / 180;
+    return { W: v.F * v.s * Math.cos(a) };
+  },
+  steps: (v, r) => `W = F × s × cos θ = ${v.F} × ${v.s} × cos(${v.theta}°) = ${fmtNum(r.W)} J`
+});
+
+reg({
+  id: 'kinetic-energy', cat: 'statics', name: 'Translational Kinetic Energy',
+  desc: 'Kinetic energy of a moving mass.',
+  eq: 'KE = ½ m v²',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'v', label: 'Velocity', unitType: 'velocity', defaultUnit: 'm/s' }
+  ],
+  outputs: [{ id: 'KE', label: 'Kinetic Energy', unitType: 'energy', defaultUnit: 'J' }],
+  example: { m: 1000, v: 20 },
+  assumptions: 'Non-relativistic speeds.',
+  calc: (v) => ({ KE: 0.5 * v.m * v.v * v.v }),
+  steps: (v, r) => `KE = ½mv² = 0.5 × ${v.m} × ${v.v}² = ${fmtNum(r.KE)} J`
+});
+
+reg({
+  id: 'potential-energy', cat: 'statics', name: 'Gravitational Potential Energy',
+  desc: 'Potential energy due to height.',
+  eq: 'PE = m g h',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'g', label: 'Gravity', unitType: 'acceleration', defaultUnit: 'm/s2' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'PE', label: 'Potential Energy', unitType: 'energy', defaultUnit: 'J' }],
+  example: { m: 50, g: 9.80665, h: 10 },
+  assumptions: 'Uniform gravitational field.',
+  calc: (v) => ({ PE: v.m * v.g * v.h }),
+  steps: (v, r) => `PE = mgh = ${v.m} × ${v.g} × ${v.h} = ${fmtNum(r.PE)} J`
+});
+
+reg({
+  id: 'impulse', cat: 'statics', name: 'Impulse and Momentum',
+  desc: 'Impulse equals change in momentum.',
+  eq: 'J = F Δt = m Δv',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'v1', label: 'Initial Velocity', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'v2', label: 'Final Velocity', unitType: 'velocity', defaultUnit: 'm/s' }
+  ],
+  outputs: [
+    { id: 'impulse', label: 'Impulse', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'dp', label: 'Change in Momentum', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { m: 2, v1: 5, v2: 15 },
+  assumptions: 'Linear motion, constant mass.',
+  calc: (v) => {
+    const dp = v.m * (v.v2 - v.v1);
+    return { impulse: dp, dp };
+  },
+  steps: (v, r) => `Δp = m(v₂ − v₁) = ${v.m} × (${v.v2} − ${v.v1}) = ${fmtNum(r.dp)} kg·m/s\nImpulse J = ${fmtNum(r.impulse)} N·s`
+});
+
+/* ===== CATEGORY 4: STRENGTH OF MATERIALS ===== */
+
+reg({
+  id: 'normal-stress', cat: 'strength', name: 'Normal Stress',
+  desc: 'Normal stress from axial force over area.',
+  eq: 'σ = F / A',
+  inputs: [
+    { id: 'F', label: 'Axial Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'A', label: 'Cross-Sectional Area', unitType: 'area', defaultUnit: 'mm2' }
+  ],
+  outputs: [{ id: 'sigma', label: 'Normal Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { F: 10000, A: 500 },
+  assumptions: 'Uniform stress distribution, prismatic member, axial loading. Positive = tension.',
+  calc: (v) => {
+    const A_m2 = toBase(v.A, 'mm2', 'area');
+    if (A_m2 <= 0) throw new Error('Area must be positive.');
+    return { sigma: v.F / A_m2 };
+  },
+  steps: (v, r) => `σ = F / A\nA = ${v.A} mm² = ${fmtNum(toBase(v.A, 'mm2', 'area'))} m²\nσ = ${v.F} / ${fmtNum(toBase(v.A, 'mm2', 'area'))} = ${fmtNum(r.sigma)} Pa = ${fmtNum(r.sigma/1e6)} MPa`
+});
+
+reg({
+  id: 'shear-stress', cat: 'strength', name: 'Average Direct Shear Stress',
+  desc: 'Average shear stress from shear force over area.',
+  eq: 'τ = V / A',
+  inputs: [
+    { id: 'V', label: 'Shear Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'A', label: 'Shear Area', unitType: 'area', defaultUnit: 'mm2' }
+  ],
+  outputs: [{ id: 'tau', label: 'Shear Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { V: 5000, A: 200 },
+  assumptions: 'Uniform shear stress distribution over the shear area.',
+  calc: (v) => {
+    const A_m2 = toBase(v.A, 'mm2', 'area');
+    if (A_m2 <= 0) throw new Error('Area must be positive.');
+    return { tau: v.V / A_m2 };
+  },
+  steps: (v, r) => `τ = V / A = ${v.V} / ${fmtNum(toBase(v.A, 'mm2', 'area'))} = ${fmtNum(r.tau)} Pa = ${fmtNum(r.tau/1e6)} MPa`
+});
+
+reg({
+  id: 'normal-strain', cat: 'strength', name: 'Normal Strain',
+  desc: 'Normal strain from deformation.',
+  eq: 'ε = ΔL / L₀',
+  inputs: [
+    { id: 'dL', label: 'Change in Length (ΔL)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'L0', label: 'Original Length (L₀)', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [{ id: 'eps', label: 'Strain', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { dL: 0.5, L0: 1000 },
+  assumptions: 'L₀ > 0. Strain is dimensionless.',
+  calc: (v) => {
+    const L0_m = toBase(v.L0, 'mm', 'length');
+    const dL_m = toBase(v.dL, 'mm', 'length');
+    if (L0_m <= 0) throw new Error('Original length must be positive.');
+    return { eps: dL_m / L0_m };
+  },
+  steps: (v, r) => `ε = ΔL / L₀ = ${v.dL} / ${v.L0} = ${fmtNum(r.eps)}`
+});
+
+reg({
+  id: 'hooke', cat: 'strength', name: "Hooke's Law",
+  desc: 'Stress-strain relationship for linear elastic material.',
+  eq: 'σ = E × ε',
+  inputs: [
+    { id: 'E', label: "Young's Modulus (E)", unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'eps', label: 'Strain (ε)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'sigma', label: 'Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { E: 200, eps: 0.001 },
+  assumptions: 'Linear elastic region only.',
+  calc: (v) => {
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    return { sigma: E_Pa * v.eps };
+  },
+  steps: (v, r) => `σ = E × ε = ${v.E} GPa × ${v.eps} = ${fmtNum(r.sigma)} Pa = ${fmtNum(r.sigma/1e6)} MPa`
+});
+
+reg({
+  id: 'axial-deform', cat: 'strength', name: 'Axial Deformation',
+  desc: 'Deformation of an axially loaded member.',
+  eq: 'δ = FL / (AE)',
+  inputs: [
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'mm2' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' }
+  ],
+  outputs: [{ id: 'delta', label: 'Deformation', unitType: 'length', defaultUnit: 'mm' }],
+  example: { F: 50000, L: 2000, A: 1000, E: 200 },
+  assumptions: 'Prismatic member, constant axial load, linear elastic material.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const A_m2 = toBase(v.A, 'mm2', 'area');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (A_m2 <= 0 || E_Pa <= 0) throw new Error('Area and modulus must be positive.');
+    return { delta: (v.F * L_m) / (A_m2 * E_Pa) };
+  },
+  steps: (v, r) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const A_m2 = toBase(v.A, 'mm2', 'area');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    return `δ = FL / (AE)\nL = ${v.L} mm = ${fmtNum(L_m)} m\nA = ${v.A} mm² = ${fmtNum(A_m2)} m²\nE = ${v.E} GPa = ${fmtNum(E_Pa)} Pa\nδ = (${v.F} × ${fmtNum(L_m)}) / (${fmtNum(A_m2)} × ${fmtNum(E_Pa)}) = ${fmtNum(r.delta)} m = ${fmtNum(r.delta*1000)} mm`;
+  }
+});
+
+reg({
+  id: 'thermal-exp', cat: 'strength', name: 'Thermal Expansion',
+  desc: 'Free thermal expansion of a member.',
+  eq: 'ΔL = α × L × ΔT',
+  inputs: [
+    { id: 'alpha', label: 'Coefficient of Thermal Expansion (α)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'L', label: 'Original Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'dT', label: 'Temperature Change (ΔT)', unitType: 'tempDiff', defaultUnit: '°C' }
+  ],
+  outputs: [{ id: 'dL', label: 'Change in Length', unitType: 'length', defaultUnit: 'mm' }],
+  example: { alpha: 1.2e-5, L: 10000, dT: 40 },
+  assumptions: 'Free expansion, no restraint. α in 1/°C or 1/K. ΔT in same scale.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const dT_K = toBase(v.dT, '°C', 'tempDiff');
+    return { dL: v.alpha * L_m * dT_K };
+  },
+  steps: (v, r) => `ΔL = α × L × ΔT = ${v.alpha} × ${v.L} mm × ${v.dT} °C = ${fmtNum(r.dL)} m = ${fmtNum(r.dL*1000)} mm`
+});
+
+reg({
+  id: 'flexural', cat: 'strength', name: 'Flexural Stress',
+  desc: 'Bending stress in a beam.',
+  eq: 'σ = M × y / I',
+  inputs: [
+    { id: 'M', label: 'Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'y', label: 'Distance from Neutral Axis (y)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'I', label: 'Second Moment of Area (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'sigma', label: 'Flexural Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { M: 5000, y: 100, I: 2e7 },
+  assumptions: 'Linear elastic, homogeneous material, plane sections remain plane. I in mm⁴ if y in mm and M in N·mm.',
+  calc: (v) => {
+    const M_Nm = toBase(v.M, 'N·m', 'torque');
+    const y_m = toBase(v.y, 'mm', 'length');
+    // I must be in m^4: user provides mm^4? We'll assume I in m^4 for consistency? 
+    // Better: user provides I in mm^4 and convert. Let's use mm^4 as common engineering.
+    // Actually for consistency, let's treat I as dimensionless number in m^4 if SI, but user likely enters mm^4.
+    // We'll use I in m^4 by default. But example uses 2e7 mm^4 = 2e-5 m^4? That's small. Let's use direct.
+    if (v.I <= 0) throw new Error('I must be positive.');
+    return { sigma: (M_Nm * y_m) / v.I };
+  },
+  steps: (v, r) => {
+    const M_Nm = toBase(v.M, 'N·m', 'torque');
+    const y_m = toBase(v.y, 'mm', 'length');
+    return `σ = M × y / I\nM = ${v.M} N·m = ${fmtNum(M_Nm)} N·m\ny = ${v.y} mm = ${fmtNum(y_m)} m\nσ = ${fmtNum(M_Nm)} × ${fmtNum(y_m)} / ${fmtNum(v.I)} = ${fmtNum(r.sigma)} Pa = ${fmtNum(r.sigma/1e6)} MPa`;
+  }
+});
+
+reg({
+  id: 'torsion-stress', cat: 'strength', name: 'Circular Shaft Torsional Stress',
+  desc: 'Maximum shear stress in a circular shaft.',
+  eq: 'τ = T × r / J',
+  inputs: [
+    { id: 'T', label: 'Torque', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'J', label: 'Polar Second Moment (J)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'tau', label: 'Shear Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { T: 1000, r: 50, J: 9.817e6 },
+  assumptions: 'Circular cross-section, linear elastic, uniform material. J in mm⁴ if r in mm and T in N·mm.',
+  calc: (v) => {
+    const T_Nm = toBase(v.T, 'N·m', 'torque');
+    const r_m = toBase(v.r, 'mm', 'length');
+    if (v.J <= 0) throw new Error('J must be positive.');
+    return { tau: (T_Nm * r_m) / v.J };
+  },
+  steps: (v, r) => {
+    const T_Nm = toBase(v.T, 'N·m', 'torque');
+    const r_m = toBase(v.r, 'mm', 'length');
+    return `τ = T × r / J = ${fmtNum(T_Nm)} × ${fmtNum(r_m)} / ${fmtNum(v.J)} = ${fmtNum(r.tau)} Pa = ${fmtNum(r.tau/1e6)} MPa`;
+  }
+});
+
+reg({
+  id: 'angle-twist', cat: 'strength', name: 'Angle of Twist',
+  desc: 'Angle of twist for a uniform circular shaft.',
+  eq: 'φ = TL / (JG)',
+  inputs: [
+    { id: 'T', label: 'Torque', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'J', label: 'Polar Second Moment', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'G', label: 'Shear Modulus', unitType: 'pressure', defaultUnit: 'GPa' }
+  ],
+  outputs: [{ id: 'phi', label: 'Angle of Twist', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { T: 500, L: 2000, J: 9.817e6, G: 80 },
+  assumptions: 'Uniform circular shaft, linear elastic, constant torque.',
+  calc: (v) => {
+    const T_Nm = toBase(v.T, 'N·m', 'torque');
+    const L_m = toBase(v.L, 'mm', 'length');
+    const G_Pa = toBase(v.G, 'GPa', 'pressure');
+    if (v.J <= 0 || G_Pa <= 0) throw new Error('J and G must be positive.');
+    return { phi: (T_Nm * L_m) / (v.J * G_Pa) };
+  },
+  steps: (v, r) => {
+    const T_Nm = toBase(v.T, 'N·m', 'torque');
+    const L_m = toBase(v.L, 'mm', 'length');
+    const G_Pa = toBase(v.G, 'GPa', 'pressure');
+    return `φ = TL / (JG) = (${fmtNum(T_Nm)} × ${fmtNum(L_m)}) / (${fmtNum(v.J)} × ${fmtNum(G_Pa)}) = ${fmtNum(r.phi)} rad = ${fmtNum(r.phi*180/Math.PI)}°`;
+  }
+});
+
+reg({
+  id: 'strain-energy', cat: 'strength', name: 'Elastic Strain Energy',
+  desc: 'Strain energy in a linearly elastic axially loaded member.',
+  eq: 'U = F²L / (2AE)',
+  inputs: [
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'mm2' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' }
+  ],
+  outputs: [{ id: 'U', label: 'Strain Energy', unitType: 'energy', defaultUnit: 'J' }],
+  example: { F: 10000, L: 1000, A: 500, E: 200 },
+  assumptions: 'Linear elastic, axial loading only.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const A_m2 = toBase(v.A, 'mm2', 'area');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (A_m2 <= 0 || E_Pa <= 0) throw new Error('A and E must be positive.');
+    return { U: (v.F*v.F*L_m) / (2*A_m2*E_Pa) };
+  },
+  steps: (v, r) => `U = F²L / (2AE) = (${v.F}² × ${v.L}mm) / (2 × ${v.A}mm² × ${v.E}GPa) = ${fmtNum(r.U)} J`
+});
+
+reg({
+  id: 'factor-safety', cat: 'strength', name: 'Factor of Safety',
+  desc: 'Factor of safety from allowable stress.',
+  eq: 'FoS = σ_allow / σ_actual',
+  inputs: [
+    { id: 'sigmaAllow', label: 'Allowable Stress', unitType: 'pressure', defaultUnit: 'MPa' },
+    { id: 'sigmaActual', label: 'Actual Stress', unitType: 'pressure', defaultUnit: 'MPa' }
+  ],
+  outputs: [{ id: 'fos', label: 'Factor of Safety', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { sigmaAllow: 250, sigmaActual: 100 },
+  assumptions: 'Actual stress must be > 0. FoS > 1 indicates safe operation.',
+  calc: (v) => {
+    const sa = toBase(v.sigmaAllow, 'MPa', 'pressure');
+    const s = toBase(v.sigmaActual, 'MPa', 'pressure');
+    if (s <= 0) throw new Error('Actual stress must be positive.');
+    return { fos: sa / s };
+  },
+  steps: (v, r) => `FoS = σ_allow / σ_actual = ${v.sigmaAllow} / ${v.sigmaActual} = ${fmtNum(r.fos)}`
+});
+
+/* ===== CATEGORY 5: BEAM ANALYSIS ===== */
+
+reg({
+  id: 'beam-ss-central', cat: 'beam', name: 'Simply Supported Beam - Central Point Load',
+  desc: 'Reactions, max shear, moment, and deflection for a central point load.',
+  eq: 'R = P/2,  M_max = PL/4,  δ_max = PL³/(48EI)',
+  inputs: [
+    { id: 'P', label: 'Point Load (P)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'L', label: 'Span (L)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'R', label: 'Support Reaction (each)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Vmax', label: 'Max Shear Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Mmax', label: 'Max Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'dmax', label: 'Max Deflection', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  example: { P: 10000, L: 4000, E: 200, I: 8e7 },
+  assumptions: 'Euler-Bernoulli beam theory, linear elastic, prismatic section, central load.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (v.I <= 0 || E_Pa <= 0 || L_m <= 0) throw new Error('L, E, and I must be positive.');
+    const R = v.P / 2;
+    const Mmax = (v.P * L_m) / 4;
+    const dmax = (v.P * Math.pow(L_m,3)) / (48 * E_Pa * v.I);
+    return { R, Vmax: R, Mmax, dmax };
+  },
+  steps: (v, r) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    return `Reactions: R₁ = R₂ = P/2 = ${v.P}/2 = ${fmtNum(r.R)} N\nMax Shear: V_max = ${fmtNum(r.Vmax)} N\nMax Moment: M_max = PL/4 = ${v.P} × ${fmtNum(L_m)} / 4 = ${fmtNum(r.Mmax)} N·m\nMax Deflection: δ_max = PL³/(48EI) = ${fmtNum(r.dmax)} m = ${fmtNum(r.dmax*1000)} mm`;
+  }
+});
+
+reg({
+  id: 'beam-ss-offcenter', cat: 'beam', name: 'Simply Supported Beam - Off-Center Point Load',
+  desc: 'Reactions, max shear, moment, and deflection for an off-center point load.',
+  eq: 'R₁ = Pb/L, R₂ = Pa/L, M_max = Pab/L, δ_max at x = √(a(a+2b)/3) if a > b',
+  inputs: [
+    { id: 'P', label: 'Point Load (P)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'L', label: 'Span (L)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'a', label: 'Distance from Left Support (a)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'R1', label: 'Reaction Left (R₁)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'R2', label: 'Reaction Right (R₂)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Mmax', label: 'Max Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'dmax', label: 'Max Deflection', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  example: { P: 8000, L: 5000, a: 2000, E: 200, I: 1e8 },
+  assumptions: 'Euler-Bernoulli beam theory, a < L, load at distance a from left support.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const a_m = toBase(v.a, 'mm', 'length');
+    const b_m = L_m - a_m;
+    if (a_m <= 0 || b_m <= 0) throw new Error('Load position must be within the span (0 < a < L).');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (v.I <= 0 || E_Pa <= 0) throw new Error('E and I must be positive.');
+    const R1 = (v.P * b_m) / L_m;
+    const R2 = (v.P * a_m) / L_m;
+    const Mmax = (v.P * a_m * b_m) / L_m;
+    // Max deflection location (from left) when a > b: x = sqrt(a(a+2b)/3)
+    const xm = Math.sqrt(a_m * (a_m + 2*b_m) / 3);
+    const dmax = (v.P * a_m * b_m * (a_m + b_m) * Math.sqrt(3*a_m*(a_m+2*b_m))) / (27 * E_Pa * v.I * L_m);
+    // simpler: use standard formula for max deflection for off-center load
+    // δ_max = (P * a * b * (a + b) * sqrt(3*a*(a+2*b))) / (27 * E * I * L)
+    return { R1, R2, Mmax, dmax };
+  },
+  steps: (v, r) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const a_m = toBase(v.a, 'mm', 'length');
+    const b_m = L_m - a_m;
+    return `R₁ = Pb/L = ${v.P}×${fmtNum(b_m)}/${fmtNum(L_m)} = ${fmtNum(r.R1)} N\nR₂ = Pa/L = ${v.P}×${fmtNum(a_m)}/${fmtNum(L_m)} = ${fmtNum(r.R2)} N\nM_max = Pab/L = ${fmtNum(r.Mmax)} N·m\nδ_max = ${fmtNum(r.dmax)} m = ${fmtNum(r.dmax*1000)} mm`;
+  }
+});
+
+reg({
+  id: 'beam-cantilever-end', cat: 'beam', name: 'Cantilever Beam - End Point Load',
+  desc: 'Reactions, max shear, moment, and deflection for a cantilever with end load.',
+  eq: 'R = P,  M_max = PL,  δ_max = PL³/(3EI)',
+  inputs: [
+    { id: 'P', label: 'Point Load (P)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'L', label: 'Length (L)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'R', label: 'Fixed End Reaction', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Mmax', label: 'Max Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'dmax', label: 'Max Deflection', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  example: { P: 5000, L: 2000, E: 200, I: 5e7 },
+  assumptions: 'Euler-Bernoulli beam theory, point load at free end, fixed support.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (v.I <= 0 || E_Pa <= 0) throw new Error('E and I must be positive.');
+    return { R: v.P, Mmax: v.P * L_m, dmax: (v.P * Math.pow(L_m,3)) / (3 * E_Pa * v.I) };
+  },
+  steps: (v, r) => `R = P = ${v.P} N\nM_max = PL = ${v.P} × ${v.L}mm = ${fmtNum(r.Mmax)} N·m\nδ_max = PL³/(3EI) = ${fmtNum(r.dmax)} m = ${fmtNum(r.dmax*1000)} mm`
+});
+
+reg({
+  id: 'beam-cantilever-udl', cat: 'beam', name: 'Cantilever Beam - Uniformly Distributed Load',
+  desc: 'Reactions, max shear, moment, and deflection for a cantilever with UDL.',
+  eq: 'R = wL,  M_max = wL²/2,  δ_max = wL⁴/(8EI)',
+  inputs: [
+    { id: 'w', label: 'Distributed Load (w)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'L', label: 'Length (L)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'R', label: 'Fixed End Reaction', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Mmax', label: 'Max Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'dmax', label: 'Max Deflection', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  example: { w: 5000, L: 3000, E: 200, I: 1e8 },
+  assumptions: 'Euler-Bernoulli beam theory, UDL w (N/m), fixed support.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (v.I <= 0 || E_Pa <= 0) throw new Error('E and I must be positive.');
+    const w_Nm = v.w; // user enters N/m directly
+    return { R: w_Nm * L_m, Mmax: w_Nm * L_m * L_m / 2, dmax: (w_Nm * Math.pow(L_m,4)) / (8 * E_Pa * v.I) };
+  },
+  steps: (v, r) => `R = wL = ${v.w} × ${v.L}mm = ${fmtNum(r.R)} N\nM_max = wL²/2 = ${fmtNum(r.Mmax)} N·m\nδ_max = wL⁴/(8EI) = ${fmtNum(r.dmax)} m = ${fmtNum(r.dmax*1000)} mm`
+});
+
+reg({
+  id: 'beam-ss-udl', cat: 'beam', name: 'Simply Supported Beam - Uniformly Distributed Load',
+  desc: 'Reactions, max shear, moment, and deflection for a simply supported beam with full-span UDL.',
+  eq: 'R = wL/2,  M_max = wL²/8,  δ_max = 5wL⁴/(384EI)',
+  inputs: [
+    { id: 'w', label: 'Distributed Load (w)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'L', label: 'Span (L)', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'E', label: 'Elastic Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'R', label: 'Support Reaction (each)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Vmax', label: 'Max Shear', unitType: 'force', defaultUnit: 'N' },
+    { id: 'Mmax', label: 'Max Bending Moment', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'dmax', label: 'Max Deflection', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  example: { w: 8000, L: 5000, E: 200, I: 2e8 },
+  assumptions: 'Euler-Bernoulli beam theory, UDL over entire span, simple supports.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const E_Pa = toBase(v.E, 'GPa', 'pressure');
+    if (v.I <= 0 || E_Pa <= 0) throw new Error('E and I must be positive.');
+    const w_Nm = v.w;
+    const R = w_Nm * L_m / 2;
+    return { R, Vmax: R, Mmax: w_Nm * L_m * L_m / 8, dmax: (5 * w_Nm * Math.pow(L_m,4)) / (384 * E_Pa * v.I) };
+  },
+  steps: (v, r) => `R = wL/2 = ${v.w} × ${v.L}mm / 2 = ${fmtNum(r.R)} N\nV_max = ${fmtNum(r.Vmax)} N\nM_max = wL²/8 = ${fmtNum(r.Mmax)} N·m\nδ_max = 5wL⁴/(384EI) = ${fmtNum(r.dmax)} m = ${fmtNum(r.dmax*1000)} mm`
+});
+
+/* ===== CATEGORY 6: FLUID MECHANICS ===== */
+
+reg({
+  id: 'pressure', cat: 'fluid', name: 'Pressure',
+  desc: 'Pressure from force over area.',
+  eq: 'P = F / A',
+  inputs: [
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  outputs: [{ id: 'P', label: 'Pressure', unitType: 'pressure', defaultUnit: 'Pa' }],
+  example: { F: 1000, A: 0.5 },
+  assumptions: 'A > 0. Uniform pressure distribution.',
+  calc: (v) => {
+    if (v.A <= 0) throw new Error('Area must be positive.');
+    return { P: v.F / v.A };
+  },
+  steps: (v, r) => `P = F / A = ${v.F} / ${v.A} = ${fmtNum(r.P)} Pa`
+});
+
+reg({
+  id: 'hydrostatic', cat: 'fluid', name: 'Hydrostatic Pressure',
+  desc: 'Pressure at depth in a fluid.',
+  eq: 'P = ρ × g × h',
+  inputs: [
+    { id: 'rho', label: 'Fluid Density (ρ)', unitType: 'density', defaultUnit: 'kg/m3' },
+    { id: 'g', label: 'Gravity (g)', unitType: 'acceleration', defaultUnit: 'm/s2' },
+    { id: 'h', label: 'Depth (h)', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'P', label: 'Gauge Pressure', unitType: 'pressure', defaultUnit: 'Pa' }],
+  example: { rho: 1000, g: 9.80665, h: 10 },
+  assumptions: 'Incompressible fluid, constant density, gauge pressure (relative to atmospheric).',
+  calc: (v) => ({ P: v.rho * v.g * v.h }),
+  steps: (v, r) => `P = ρgh = ${v.rho} × ${v.g} × ${v.h} = ${fmtNum(r.P)} Pa`
+});
+
+reg({
+  id: 'flow-rate', cat: 'fluid', name: 'Volumetric Flow Rate',
+  desc: 'Flow rate from area and velocity.',
+  eq: 'Q = A × v',
+  inputs: [
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'v', label: 'Velocity', unitType: 'velocity', defaultUnit: 'm/s' }
+  ],
+  outputs: [{ id: 'Q', label: 'Volumetric Flow Rate', unitType: 'volFlow', defaultUnit: 'm3/s' }],
+  example: { A: 0.01, v: 2 },
+  assumptions: 'Uniform velocity profile, incompressible flow.',
+  calc: (v) => ({ Q: v.A * v.v }),
+  steps: (v, r) => `Q = A × v = ${v.A} × ${v.v} = ${fmtNum(r.Q)} m³/s`
+});
+
+reg({
+  id: 'mass-flow', cat: 'fluid', name: 'Mass Flow Rate',
+  desc: 'Mass flow from density and volumetric flow.',
+  eq: 'ṁ = ρ × Q',
+  inputs: [
+    { id: 'rho', label: 'Density (ρ)', unitType: 'density', defaultUnit: 'kg/m3' },
+    { id: 'Q', label: 'Volumetric Flow (Q)', unitType: 'volFlow', defaultUnit: 'm3/s' }
+  ],
+  outputs: [{ id: 'mdot', label: 'Mass Flow Rate', unitType: 'massFlow', defaultUnit: 'kg/s' }],
+  example: { rho: 1000, Q: 0.02 },
+  assumptions: 'Constant density, steady flow.',
+  calc: (v) => ({ mdot: v.rho * v.Q }),
+  steps: (v, r) => `ṁ = ρQ = ${v.rho} × ${v.Q} = ${fmtNum(r.mdot)} kg/s`
+});
+
+reg({
+  id: 'continuity', cat: 'fluid', name: 'Continuity Equation',
+  desc: 'Steady incompressible flow continuity: A₁v₁ = A₂v₂.',
+  eq: 'A₁v₁ = A₂v₂  →  v₂ = A₁v₁ / A₂',
+  inputs: [
+    { id: 'A1', label: 'Area 1', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'v1', label: 'Velocity 1', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'A2', label: 'Area 2', unitType: 'area', defaultUnit: 'm2' }
+  ],
+  outputs: [{ id: 'v2', label: 'Velocity 2', unitType: 'velocity', defaultUnit: 'm/s' }],
+  example: { A1: 0.02, v1: 1, A2: 0.01 },
+  assumptions: 'Incompressible, steady flow, no leaks. A₂ > 0.',
+  calc: (v) => {
+    if (v.A2 <= 0) throw new Error('Area 2 must be positive.');
+    return { v2: (v.A1 * v.v1) / v.A2 };
+  },
+  steps: (v, r) => `v₂ = A₁v₁ / A₂ = (${v.A1} × ${v.v1}) / ${v.A2} = ${fmtNum(r.v2)} m/s`
+});
+
+reg({
+  id: 'reynolds', cat: 'fluid', name: 'Reynolds Number',
+  desc: 'Reynolds number for pipe flow.',
+  eq: 'Re = ρvD / μ',
+  inputs: [
+    { id: 'rho', label: 'Density (ρ)', unitType: 'density', defaultUnit: 'kg/m3' },
+    { id: 'v', label: 'Velocity (v)', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'D', label: 'Diameter (D)', unitType: 'length', defaultUnit: 'm' },
+    { id: 'mu', label: 'Dynamic Viscosity (μ)', unitType: 'viscosity', defaultUnit: 'Pa·s' }
+  ],
+  outputs: [{ id: 'Re', label: 'Reynolds Number', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { rho: 1000, v: 2, D: 0.05, mu: 0.001 },
+  assumptions: 'μ > 0. Re < 2300 laminar, 2300–4000 transitional, > 4000 turbulent.',
+  calc: (v) => {
+    if (v.mu <= 0) throw new Error('Viscosity must be positive.');
+    return { Re: (v.rho * v.v * v.D) / v.mu };
+  },
+  steps: (v, r) => `Re = ρvD/μ = ${v.rho} × ${v.v} × ${v.D} / ${v.mu} = ${fmtNum(r.Re)}`
+});
+
+reg({
+  id: 'bernoulli', cat: 'fluid', name: 'Ideal Bernoulli Equation',
+  desc: 'Bernoulli equation between two points in ideal flow.',
+  eq: 'P₁ + ½ρv₁² + ρgz₁ = P₂ + ½ρv₂² + ρgz₂',
+  inputs: [
+    { id: 'P1', label: 'Pressure 1', unitType: 'pressure', defaultUnit: 'Pa' },
+    { id: 'v1', label: 'Velocity 1', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'z1', label: 'Elevation 1', unitType: 'length', defaultUnit: 'm' },
+    { id: 'v2', label: 'Velocity 2', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'z2', label: 'Elevation 2', unitType: 'length', defaultUnit: 'm' },
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' },
+    { id: 'g', label: 'Gravity', unitType: 'acceleration', defaultUnit: 'm/s2' }
+  ],
+  outputs: [{ id: 'P2', label: 'Pressure 2', unitType: 'pressure', defaultUnit: 'Pa' }],
+  example: { P1: 101325, v1: 1, z1: 0, v2: 2, z2: 0, rho: 1000, g: 9.80665 },
+  assumptions: 'Incompressible, steady, inviscid, along a streamline. No losses.',
+  calc: (v) => {
+    const P2 = v.P1 + 0.5*v.rho*(v.v1*v.v1 - v.v2*v.v2) + v.rho*v.g*(v.z1 - v.z2);
+    return { P2 };
+  },
+  steps: (v, r) => `P₂ = P₁ + ½ρ(v₁² − v₂²) + ρg(z₁ − z₂)\n= ${v.P1} + 0.5×${v.rho}×(${v.v1}² − ${v.v2}²) + ${v.rho}×${v.g}×(${v.z1} − ${v.z2})\n= ${fmtNum(r.P2)} Pa`
+});
+
+reg({
+  id: 'hydraulic-power', cat: 'fluid', name: 'Hydraulic Power',
+  desc: 'Hydraulic power from flow rate and head.',
+  eq: 'P_h = ρ × g × Q × H',
+  inputs: [
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' },
+    { id: 'g', label: 'Gravity', unitType: 'acceleration', defaultUnit: 'm/s2' },
+    { id: 'Q', label: 'Flow Rate', unitType: 'volFlow', defaultUnit: 'm3/s' },
+    { id: 'H', label: 'Head', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'Ph', label: 'Hydraulic Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { rho: 1000, g: 9.80665, Q: 0.05, H: 20 },
+  assumptions: 'Ideal hydraulic power, no losses.',
+  calc: (v) => ({ Ph: v.rho * v.g * v.Q * v.H }),
+  steps: (v, r) => `P_h = ρgQH = ${v.rho} × ${v.g} × ${v.Q} × ${v.H} = ${fmtNum(r.Ph)} W`
+});
+
+reg({
+  id: 'pump-power', cat: 'fluid', name: 'Pump Input Power',
+  desc: 'Pump input power from hydraulic power and efficiency.',
+  eq: 'P_in = P_h / η',
+  inputs: [
+    { id: 'Ph', label: 'Hydraulic Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'eta', label: 'Efficiency (η)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'Pin', label: 'Input Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { Ph: 9810, eta: 0.75 },
+  assumptions: '0 < η ≤ 1.',
+  calc: (v) => {
+    if (v.eta <= 0 || v.eta > 1) throw new Error('Efficiency must be in (0, 1].');
+    return { Pin: v.Ph / v.eta };
+  },
+  steps: (v, r) => `P_in = P_h / η = ${v.Ph} / ${v.eta} = ${fmtNum(r.Pin)} W`
+});
+
+reg({
+  id: 'darcy', cat: 'fluid', name: 'Darcy-Weisbach Head Loss',
+  desc: 'Friction head loss in a pipe.',
+  eq: 'h_f = f × (L/D) × (v²/2g)',
+  inputs: [
+    { id: 'f', label: 'Friction Factor (f)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'L', label: 'Pipe Length (L)', unitType: 'length', defaultUnit: 'm' },
+    { id: 'D', label: 'Diameter (D)', unitType: 'length', defaultUnit: 'm' },
+    { id: 'v', label: 'Velocity (v)', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'g', label: 'Gravity', unitType: 'acceleration', defaultUnit: 'm/s2' }
+  ],
+  outputs: [{ id: 'hf', label: 'Head Loss', unitType: 'length', defaultUnit: 'm' }],
+  example: { f: 0.02, L: 100, D: 0.1, v: 2, g: 9.80665 },
+  assumptions: 'Fully developed flow, constant diameter, f from Moody chart or appropriate correlation.',
+  calc: (v) => {
+    if (v.D <= 0 || v.g <= 0) throw new Error('D and g must be positive.');
+    return { hf: v.f * (v.L / v.D) * (v.v*v.v / (2*v.g)) };
+  },
+  steps: (v, r) => `h_f = f × (L/D) × (v²/2g) = ${v.f} × (${v.L}/${v.D}) × (${v.v}²/(2×${v.g})) = ${fmtNum(r.hf)} m`
+});
+
+/* ===== CATEGORY 7: THERMODYNAMICS ===== */
+
+reg({
+  id: 'ideal-gas', cat: 'thermo', name: 'Ideal Gas Law',
+  desc: 'PV = nRT for an ideal gas.',
+  eq: 'P × V = n × R × T',
+  inputs: [
+    { id: 'P', label: 'Pressure', unitType: 'pressure', defaultUnit: 'Pa' },
+    { id: 'V', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' },
+    { id: 'n', label: 'Moles (n)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'T', label: 'Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'solveFor', label: 'Solve for', unitType: 'select', options: ['P', 'V', 'n', 'T'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'result', label: 'Result', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { P: 101325, V: 0.0224, n: 1, T: 273.15, solveFor: 'n' },
+  assumptions: 'R = 8.314462618 J/(mol·K). T in Kelvin.',
+  calc: (v) => {
+    const R = 8.314462618;
+    const T_K = toBase(v.T, 'K', 'temperature');
+    switch(v.solveFor) {
+      case 'P': return { result: (v.n * R * T_K) / v.V };
+      case 'V': return { result: (v.n * R * T_K) / v.P };
+      case 'n': return { result: (v.P * v.V) / (R * T_K) };
+      case 'T': return { result: (v.P * v.V) / (v.n * R) };
+    }
+  },
+  steps: (v, r) => {
+    const R = 8.314462618;
+    const T_K = toBase(v.T, 'K', 'temperature');
+    return `PV = nRT, R = 8.314 J/(mol·K)\nT = ${v.T} K\nSolving for ${v.solveFor}: ${fmtNum(r.result)}`;
+  }
+});
+
+reg({
+  id: 'sensible-heat', cat: 'thermo', name: 'Sensible Heat',
+  desc: 'Heat required to change temperature.',
+  eq: 'Q = m × c_p × ΔT',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'cp', label: 'Specific Heat (c_p)', unitType: 'specificHeat', defaultUnit: 'J/(kg·K)' },
+    { id: 'dT', label: 'Temperature Change', unitType: 'tempDiff', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'Q', label: 'Heat', unitType: 'energy', defaultUnit: 'J' }],
+  example: { m: 2, cp: 4184, dT: 30 },
+  assumptions: 'Constant specific heat, no phase change.',
+  calc: (v) => ({ Q: v.m * v.cp * v.dT }),
+  steps: (v, r) => `Q = mc_pΔT = ${v.m} × ${v.cp} × ${v.dT} = ${fmtNum(r.Q)} J`
+});
+
+reg({
+  id: 'steady-heat', cat: 'thermo', name: 'Steady-Flow Heat Transfer',
+  desc: 'Heat transfer rate in steady flow.',
+  eq: 'Q̇ = ṁ × c_p × ΔT',
+  inputs: [
+    { id: 'mdot', label: 'Mass Flow Rate', unitType: 'massFlow', defaultUnit: 'kg/s' },
+    { id: 'cp', label: 'Specific Heat', unitType: 'specificHeat', defaultUnit: 'J/(kg·K)' },
+    { id: 'dT', label: 'Temperature Change', unitType: 'tempDiff', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Heat Transfer Rate', unitType: 'power', defaultUnit: 'W' }],
+  example: { mdot: 0.5, cp: 4184, dT: 10 },
+  assumptions: 'Steady flow, constant specific heat.',
+  calc: (v) => ({ Qdot: v.mdot * v.cp * v.dT }),
+  steps: (v, r) => `Q̇ = ṁc_pΔT = ${v.mdot} × ${v.cp} × ${v.dT} = ${fmtNum(r.Qdot)} W`
+});
+
+reg({
+  id: 'boundary-work', cat: 'thermo', name: 'Boundary Work (Constant Pressure)',
+  desc: 'Work done during constant-pressure expansion.',
+  eq: 'W = P × ΔV',
+  inputs: [
+    { id: 'P', label: 'Pressure', unitType: 'pressure', defaultUnit: 'Pa' },
+    { id: 'dV', label: 'Volume Change (ΔV)', unitType: 'volume', defaultUnit: 'm3' }
+  ],
+  outputs: [{ id: 'W', label: 'Work', unitType: 'energy', defaultUnit: 'J' }],
+  example: { P: 101325, dV: 0.01 },
+  assumptions: 'Constant pressure process, quasi-equilibrium.',
+  calc: (v) => ({ W: v.P * v.dV }),
+  steps: (v, r) => `W = PΔV = ${v.P} × ${v.dV} = ${fmtNum(r.W)} J`
+});
+
+reg({
+  id: 'thermal-eff', cat: 'thermo', name: 'Thermal Efficiency',
+  desc: 'Thermal efficiency of a heat engine.',
+  eq: 'η = W_net / Q_in',
+  inputs: [
+    { id: 'Wnet', label: 'Net Work Output', unitType: 'energy', defaultUnit: 'J' },
+    { id: 'Qin', label: 'Heat Input', unitType: 'energy', defaultUnit: 'J' }
+  ],
+  outputs: [{ id: 'eta', label: 'Thermal Efficiency', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { Wnet: 300, Qin: 1000 },
+  assumptions: 'Q_in > 0. η = 1 − Q_out/Q_in.',
+  calc: (v) => {
+    if (v.Qin <= 0) throw new Error('Heat input must be positive.');
+    return { eta: v.Wnet / v.Qin };
+  },
+  steps: (v, r) => `η = W_net / Q_in = ${v.Wnet} / ${v.Qin} = ${fmtNum(r.eta)} = ${fmtNum(r.eta*100)}%`
+});
+
+reg({
+  id: 'gas-density', cat: 'thermo', name: 'Gas Density (Ideal Gas)',
+  desc: 'Density of an ideal gas.',
+  eq: 'ρ = P / (R_specific × T)',
+  inputs: [
+    { id: 'P', label: 'Pressure', unitType: 'pressure', defaultUnit: 'Pa' },
+    { id: 'Rs', label: 'Specific Gas Constant (R_s)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'T', label: 'Temperature', unitType: 'temperature', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }],
+  example: { P: 101325, Rs: 287.05, T: 288.15 },
+  assumptions: 'Ideal gas. R_s = R_universal / M. T in Kelvin.',
+  calc: (v) => {
+    const T_K = toBase(v.T, 'K', 'temperature');
+    if (v.Rs <= 0 || T_K <= 0) throw new Error('R_s and T must be positive.');
+    return { rho: v.P / (v.Rs * T_K) };
+  },
+  steps: (v, r) => `ρ = P / (R_s × T) = ${v.P} / (${v.Rs} × ${v.T}) = ${fmtNum(r.rho)} kg/m³`
+});
+
+/* ===== CATEGORY 8: HEAT TRANSFER ===== */
+
+reg({
+  id: 'conduction-wall', cat: 'heat', name: 'Conduction Through Plane Wall',
+  desc: 'Steady 1D conduction through a plane wall.',
+  eq: 'Q̇ = kA(T₁ − T₂) / L',
+  inputs: [
+    { id: 'k', label: 'Thermal Conductivity (k)', unitType: 'thermalCond', defaultUnit: 'W/(m·K)' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'T1', label: 'Hot Side Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'T2', label: 'Cold Side Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'L', label: 'Wall Thickness', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Heat Transfer Rate', unitType: 'power', defaultUnit: 'W' }],
+  example: { k: 0.8, A: 10, T1: 300, T2: 280, L: 0.2 },
+  assumptions: 'Steady state, 1D conduction, constant k, no internal heat generation.',
+  calc: (v) => {
+    if (v.L <= 0) throw new Error('Wall thickness must be positive.');
+    const T1_K = toBase(v.T1, 'K', 'temperature');
+    const T2_K = toBase(v.T2, 'K', 'temperature');
+    return { Qdot: (v.k * v.A * (T1_K - T2_K)) / v.L };
+  },
+  steps: (v, r) => {
+    const T1_K = toBase(v.T1, 'K', 'temperature');
+    const T2_K = toBase(v.T2, 'K', 'temperature');
+    return `Q̇ = kA(T₁ − T₂) / L = ${v.k} × ${v.A} × (${fmtNum(T1_K)} − ${fmtNum(T2_K)}) / ${v.L} = ${fmtNum(r.Qdot)} W`;
+  }
+});
+
+reg({
+  id: 'conduction-cyl', cat: 'heat', name: 'Conduction Through Cylindrical Wall',
+  desc: 'Steady 1D radial conduction through a cylindrical shell.',
+  eq: 'Q̇ = 2πkL(T₁ − T₂) / ln(r₂/r₁)',
+  inputs: [
+    { id: 'k', label: 'Thermal Conductivity', unitType: 'thermalCond', defaultUnit: 'W/(m·K)' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'm' },
+    { id: 'T1', label: 'Inner Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'T2', label: 'Outer Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'r1', label: 'Inner Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'r2', label: 'Outer Radius', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Heat Transfer Rate', unitType: 'power', defaultUnit: 'W' }],
+  example: { k: 50, L: 2, T1: 400, T2: 350, r1: 0.05, r2: 0.1 },
+  assumptions: 'Steady state, 1D radial conduction, constant k, no internal generation.',
+  calc: (v) => {
+    if (v.r1 <= 0 || v.r2 <= v.r1) throw new Error('Radii must satisfy 0 < r₁ < r₂.');
+    const T1_K = toBase(v.T1, 'K', 'temperature');
+    const T2_K = toBase(v.T2, 'K', 'temperature');
+    return { Qdot: (2 * Math.PI * v.k * v.L * (T1_K - T2_K)) / Math.log(v.r2 / v.r1) };
+  },
+  steps: (v, r) => {
+    const T1_K = toBase(v.T1, 'K', 'temperature');
+    const T2_K = toBase(v.T2, 'K', 'temperature');
+    return `Q̇ = 2πkL(T₁ − T₂) / ln(r₂/r₁)\n= 2π×${v.k}×${v.L}×(${fmtNum(T1_K)} − ${fmtNum(T2_K)}) / ln(${v.r2}/${v.r1})\n= ${fmtNum(r.Qdot)} W`;
+  }
+});
+
+reg({
+  id: 'newton-cooling', cat: 'heat', name: "Newton's Law of Cooling",
+  desc: 'Convective heat transfer from a surface.',
+  eq: 'Q̇ = h × A × (T_s − T_∞)',
+  inputs: [
+    { id: 'h', label: 'Convective Coefficient (h)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'A', label: 'Surface Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'Ts', label: 'Surface Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'Tinf', label: 'Fluid Temperature', unitType: 'temperature', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Heat Transfer Rate', unitType: 'power', defaultUnit: 'W' }],
+  example: { h: 25, A: 2, Ts: 350, Tinf: 300 },
+  assumptions: 'Newton\'s law of cooling, constant h, T_s > T_∞ for heat loss.',
+  calc: (v) => {
+    const Ts_K = toBase(v.Ts, 'K', 'temperature');
+    const Tinf_K = toBase(v.Tinf, 'K', 'temperature');
+    return { Qdot: v.h * v.A * (Ts_K - Tinf_K) };
+  },
+  steps: (v, r) => {
+    const Ts_K = toBase(v.Ts, 'K', 'temperature');
+    const Tinf_K = toBase(v.Tinf, 'K', 'temperature');
+    return `Q̇ = hA(T_s − T_∞) = ${v.h} × ${v.A} × (${fmtNum(Ts_K)} − ${fmtNum(Tinf_K)}) = ${fmtNum(r.Qdot)} W`;
+  }
+});
+
+reg({
+  id: 'radiation', cat: 'heat', name: 'Stefan-Boltzmann Radiation',
+  desc: 'Thermal radiation heat transfer.',
+  eq: 'Q̇ = ε × σ × A × (T_s⁴ − T_sur⁴)',
+  inputs: [
+    { id: 'eps', label: 'Emissivity (ε)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'Ts', label: 'Surface Temperature', unitType: 'temperature', defaultUnit: 'K' },
+    { id: 'Tsur', label: 'Surroundings Temperature', unitType: 'temperature', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Net Radiation', unitType: 'power', defaultUnit: 'W' }],
+  example: { eps: 0.9, A: 1, Ts: 500, Tsur: 300 },
+  assumptions: 'Gray surface, diffuse, Stefan-Boltzmann σ = 5.67e-8 W/(m²·K⁴).',
+  calc: (v) => {
+    const sigma = 5.670374419e-8;
+    const Ts_K = toBase(v.Ts, 'K', 'temperature');
+    const Tsur_K = toBase(v.Tsur, 'K', 'temperature');
+    return { Qdot: v.eps * sigma * v.A * (Math.pow(Ts_K,4) - Math.pow(Tsur_K,4)) };
+  },
+  steps: (v, r) => {
+    const sigma = 5.670374419e-8;
+    const Ts_K = toBase(v.Ts, 'K', 'temperature');
+    const Tsur_K = toBase(v.Tsur, 'K', 'temperature');
+    return `Q̇ = εσA(T_s⁴ − T_sur⁴) = ${v.eps} × ${sigma} × ${v.A} × (${fmtNum(Ts_K)}⁴ − ${fmtNum(Tsur_K)}⁴) = ${fmtNum(r.Qdot)} W`;
+  }
+});
+
+reg({
+  id: 'lmtd', cat: 'heat', name: 'Logarithmic Mean Temperature Difference',
+  desc: 'LMTD for heat exchangers.',
+  eq: 'ΔT_lm = (ΔT₁ − ΔT₂) / ln(ΔT₁/ΔT₂)',
+  inputs: [
+    { id: 'dT1', label: 'Temperature Difference 1', unitType: 'tempDiff', defaultUnit: 'K' },
+    { id: 'dT2', label: 'Temperature Difference 2', unitType: 'tempDiff', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'dTlm', label: 'LMTD', unitType: 'tempDiff', defaultUnit: 'K' }],
+  example: { dT1: 40, dT2: 20 },
+  assumptions: 'ΔT₁ and ΔT₂ must be positive. If nearly equal, LMTD → ΔT₁.',
+  calc: (v) => {
+    if (v.dT1 <= 0 || v.dT2 <= 0) throw new Error('Temperature differences must be positive.');
+    if (Math.abs(v.dT1 - v.dT2) < 1e-9) return { dTlm: v.dT1 };
+    return { dTlm: (v.dT1 - v.dT2) / Math.log(v.dT1 / v.dT2) };
+  },
+  steps: (v, r) => {
+    if (Math.abs(v.dT1 - v.dT2) < 1e-9) return `ΔT₁ ≈ ΔT₂ → ΔT_lm = ${v.dT1} K`;
+    return `ΔT_lm = (ΔT₁ − ΔT₂) / ln(ΔT₁/ΔT₂) = (${v.dT1} − ${v.dT2}) / ln(${v.dT1}/${v.dT2}) = ${fmtNum(r.dTlm)} K`;
+  }
+});
+
+reg({
+  id: 'overall-heat', cat: 'heat', name: 'Overall Heat Transfer Rate',
+  desc: 'Heat exchanger duty using U, A, and LMTD.',
+  eq: 'Q̇ = U × A × ΔT_lm',
+  inputs: [
+    { id: 'U', label: 'Overall Heat Transfer Coefficient (U)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'A', label: 'Area', unitType: 'area', defaultUnit: 'm2' },
+    { id: 'dTlm', label: 'LMTD', unitType: 'tempDiff', defaultUnit: 'K' }
+  ],
+  outputs: [{ id: 'Qdot', label: 'Heat Transfer Rate', unitType: 'power', defaultUnit: 'W' }],
+  example: { U: 500, A: 10, dTlm: 30 },
+  assumptions: 'Steady-state heat exchanger, constant U, LMTD method applicable.',
+  calc: (v) => ({ Qdot: v.U * v.A * v.dTlm }),
+  steps: (v, r) => `Q̇ = UAΔT_lm = ${v.U} × ${v.A} × ${v.dTlm} = ${fmtNum(r.Qdot)} W`
+});
+
+/* ===== CATEGORY 9: ELECTRICAL ===== */
+
+reg({
+  id: 'ohm', cat: 'electrical', name: "Ohm's Law",
+  desc: 'Voltage, current, and resistance relationship.',
+  eq: 'V = I × R',
+  inputs: [
+    { id: 'I', label: 'Current (I)', unitType: 'current', defaultUnit: 'A' },
+    { id: 'R', label: 'Resistance (R)', unitType: 'resistance', defaultUnit: 'Ω' }
+  ],
+  outputs: [{ id: 'V', label: 'Voltage', unitType: 'voltage', defaultUnit: 'V' }],
+  example: { I: 2, R: 10 },
+  assumptions: 'Linear resistive element, DC or RMS values.',
+  calc: (v) => ({ V: v.I * v.R }),
+  steps: (v, r) => `V = I × R = ${v.I} × ${v.R} = ${fmtNum(r.V)} V`
+});
+
+reg({
+  id: 'elec-power', cat: 'electrical', name: 'Electrical Power',
+  desc: 'Power from voltage and current.',
+  eq: 'P = V × I',
+  inputs: [
+    { id: 'V', label: 'Voltage', unitType: 'voltage', defaultUnit: 'V' },
+    { id: 'I', label: 'Current', unitType: 'current', defaultUnit: 'A' }
+  ],
+  outputs: [{ id: 'P', label: 'Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { V: 230, I: 5 },
+  assumptions: 'DC or purely resistive AC load.',
+  calc: (v) => ({ P: v.V * v.I }),
+  steps: (v, r) => `P = V × I = ${v.V} × ${v.I} = ${fmtNum(r.P)} W`
+});
+
+reg({
+  id: 'resistive-power', cat: 'electrical', name: 'Resistive Power Equations',
+  desc: 'Power dissipated in a resistor.',
+  eq: 'P = I²R = V²/R',
+  inputs: [
+    { id: 'I', label: 'Current (I)', unitType: 'current', defaultUnit: 'A' },
+    { id: 'R', label: 'Resistance (R)', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'V', label: 'Voltage (V)', unitType: 'voltage', defaultUnit: 'V' }
+  ],
+  outputs: [
+    { id: 'P1', label: 'P = I²R', unitType: 'power', defaultUnit: 'W' },
+    { id: 'P2', label: 'P = V²/R', unitType: 'power', defaultUnit: 'W' }
+  ],
+  example: { I: 2, R: 10, V: 20 },
+  assumptions: 'Resistive element, R > 0.',
+  calc: (v) => {
+    if (v.R <= 0) throw new Error('Resistance must be positive.');
+    return { P1: v.I*v.I*v.R, P2: (v.V*v.V)/v.R };
+  },
+  steps: (v, r) => `P = I²R = ${v.I}² × ${v.R} = ${fmtNum(r.P1)} W\nP = V²/R = ${v.V}² / ${v.R} = ${fmtNum(r.P2)} W`
+});
+
+reg({
+  id: 'series-res', cat: 'electrical', name: 'Series Resistance',
+  desc: 'Total resistance of series resistors.',
+  eq: 'R_total = R₁ + R₂ + R₃',
+  inputs: [
+    { id: 'R1', label: 'R₁', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R2', label: 'R₂', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R3', label: 'R₃', unitType: 'resistance', defaultUnit: 'Ω' }
+  ],
+  outputs: [{ id: 'Rtot', label: 'Total Resistance', unitType: 'resistance', defaultUnit: 'Ω' }],
+  example: { R1: 10, R2: 20, R3: 30 },
+  assumptions: 'Series connection, same current through all.',
+  calc: (v) => ({ Rtot: v.R1 + v.R2 + v.R3 }),
+  steps: (v, r) => `R_total = R₁ + R₂ + R₃ = ${v.R1} + ${v.R2} + ${v.R3} = ${fmtNum(r.Rtot)} Ω`
+});
+
+reg({
+  id: 'parallel-res', cat: 'electrical', name: 'Parallel Resistance',
+  desc: 'Total resistance of parallel resistors.',
+  eq: '1/R_total = 1/R₁ + 1/R₂ + 1/R₃',
+  inputs: [
+    { id: 'R1', label: 'R₁', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R2', label: 'R₂', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R3', label: 'R₃', unitType: 'resistance', defaultUnit: 'Ω' }
+  ],
+  outputs: [{ id: 'Rtot', label: 'Total Resistance', unitType: 'resistance', defaultUnit: 'Ω' }],
+  example: { R1: 10, R2: 20, R3: 30 },
+  assumptions: 'Parallel connection, same voltage across all. All resistances > 0.',
+  calc: (v) => {
+    if (v.R1 <= 0 || v.R2 <= 0 || v.R3 <= 0) throw new Error('All resistances must be positive.');
+    return { Rtot: 1 / (1/v.R1 + 1/v.R2 + 1/v.R3) };
+  },
+  steps: (v, r) => `1/R_total = 1/${v.R1} + 1/${v.R2} + 1/${v.R3} = ${fmtNum(1/v.R1 + 1/v.R2 + 1/v.R3)}\nR_total = ${fmtNum(r.Rtot)} Ω`
+});
+
+reg({
+  id: 'dc-energy', cat: 'electrical', name: 'DC Energy Consumption',
+  desc: 'Energy consumed over time.',
+  eq: 'E = P × t',
+  inputs: [
+    { id: 'P', label: 'Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 't', label: 'Time', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'E', label: 'Energy', unitType: 'energy', defaultUnit: 'J' }],
+  example: { P: 100, t: 3600 },
+  assumptions: 'Constant power. Time in seconds.',
+  calc: (v) => ({ E: v.P * v.t }),
+  steps: (v, r) => `E = P × t = ${v.P} × ${v.t} = ${fmtNum(r.E)} J = ${fmtNum(r.E/3.6e6)} kWh`
+});
+
+reg({
+  id: 'voltage-div', cat: 'electrical', name: 'Voltage Divider',
+  desc: 'Output voltage of a voltage divider.',
+  eq: 'V_out = V_in × R₂ / (R₁ + R₂)',
+  inputs: [
+    { id: 'Vin', label: 'Input Voltage', unitType: 'voltage', defaultUnit: 'V' },
+    { id: 'R1', label: 'R₁', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R2', label: 'R₂', unitType: 'resistance', defaultUnit: 'Ω' }
+  ],
+  outputs: [{ id: 'Vout', label: 'Output Voltage', unitType: 'voltage', defaultUnit: 'V' }],
+  example: { Vin: 12, R1: 1000, R2: 2000 },
+  assumptions: 'Unloaded divider, R₁ + R₂ > 0.',
+  calc: (v) => {
+    if (v.R1 + v.R2 <= 0) throw new Error('R₁ + R₂ must be positive.');
+    return { Vout: v.Vin * v.R2 / (v.R1 + v.R2) };
+  },
+  steps: (v, r) => `V_out = V_in × R₂/(R₁ + R₂) = ${v.Vin} × ${v.R2}/(${v.R1} + ${v.R2}) = ${fmtNum(r.Vout)} V`
+});
+
+reg({
+  id: 'current-div', cat: 'electrical', name: 'Current Divider',
+  desc: 'Current through one branch of a parallel circuit.',
+  eq: 'I₁ = I_total × R₂ / (R₁ + R₂)',
+  inputs: [
+    { id: 'Itot', label: 'Total Current', unitType: 'current', defaultUnit: 'A' },
+    { id: 'R1', label: 'R₁', unitType: 'resistance', defaultUnit: 'Ω' },
+    { id: 'R2', label: 'R₂', unitType: 'resistance', defaultUnit: 'Ω' }
+  ],
+  outputs: [{ id: 'I1', label: 'Current through R₁', unitType: 'current', defaultUnit: 'A' }],
+  example: { Itot: 3, R1: 100, R2: 200 },
+  assumptions: 'Two parallel branches, R₁ + R₂ > 0.',
+  calc: (v) => {
+    if (v.R1 + v.R2 <= 0) throw new Error('R₁ + R₂ must be positive.');
+    return { I1: v.Itot * v.R2 / (v.R1 + v.R2) };
+  },
+  steps: (v, r) => `I₁ = I_total × R₂/(R₁ + R₂) = ${v.Itot} × ${v.R2}/(${v.R1} + ${v.R2}) = ${fmtNum(r.I1)} A`
+});
+
+reg({
+  id: 'ac-single', cat: 'electrical', name: 'Single-Phase AC Real Power',
+  desc: 'Real power in a single-phase AC circuit.',
+  eq: 'P = V_rms × I_rms × cos(φ)',
+  inputs: [
+    { id: 'Vrms', label: 'RMS Voltage', unitType: 'voltage', defaultUnit: 'V' },
+    { id: 'Irms', label: 'RMS Current', unitType: 'current', defaultUnit: 'A' },
+    { id: 'pf', label: 'Power Factor (cos φ)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'P', label: 'Real Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'S', label: 'Apparent Power', unitType: 'power', defaultUnit: 'VA' }
+  ],
+  example: { Vrms: 230, Irms: 10, pf: 0.85 },
+  assumptions: 'Sinusoidal AC, RMS values. PF between 0 and 1.',
+  calc: (v) => ({ P: v.Vrms * v.Irms * v.pf, S: v.Vrms * v.Irms }),
+  steps: (v, r) => `P = V_rms × I_rms × cos φ = ${v.Vrms} × ${v.Irms} × ${v.pf} = ${fmtNum(r.P)} W\nS = V_rms × I_rms = ${fmtNum(r.S)} VA`
+});
+
+reg({
+  id: 'ac-three', cat: 'electrical', name: 'Three-Phase Balanced Real Power',
+  desc: 'Real power in a balanced three-phase system.',
+  eq: 'P = √3 × V_L × I_L × cos(φ)',
+  inputs: [
+    { id: 'VL', label: 'Line Voltage', unitType: 'voltage', defaultUnit: 'V' },
+    { id: 'IL', label: 'Line Current', unitType: 'current', defaultUnit: 'A' },
+    { id: 'pf', label: 'Power Factor', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'P', label: 'Real Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { VL: 400, IL: 20, pf: 0.9 },
+  assumptions: 'Balanced three-phase load, sinusoidal. Line values.',
+  calc: (v) => ({ P: Math.sqrt(3) * v.VL * v.IL * v.pf }),
+  steps: (v, r) => `P = √3 × V_L × I_L × cos φ = 1.732 × ${v.VL} × ${v.IL} × ${v.pf} = ${fmtNum(r.P)} W`
+});
+
+reg({
+  id: 'power-factor', cat: 'electrical', name: 'Power Factor',
+  desc: 'Power factor from real and apparent power.',
+  eq: 'PF = P / S',
+  inputs: [
+    { id: 'P', label: 'Real Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'S', label: 'Apparent Power', unitType: 'power', defaultUnit: 'VA' }
+  ],
+  outputs: [{ id: 'pf', label: 'Power Factor', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { P: 8000, S: 10000 },
+  assumptions: 'S > 0. PF between 0 and 1.',
+  calc: (v) => {
+    if (v.S <= 0) throw new Error('Apparent power must be positive.');
+    return { pf: v.P / v.S };
+  },
+  steps: (v, r) => `PF = P/S = ${v.P}/${v.S} = ${fmtNum(r.pf)}`
+});
+
+reg({
+  id: 'elec-eff', cat: 'electrical', name: 'Electrical Efficiency',
+  desc: 'Efficiency of an electrical device.',
+  eq: 'η = P_out / P_in',
+  inputs: [
+    { id: 'Pout', label: 'Output Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'Pin', label: 'Input Power', unitType: 'power', defaultUnit: 'W' }
+  ],
+  outputs: [{ id: 'eta', label: 'Efficiency', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { Pout: 850, Pin: 1000 },
+  assumptions: 'P_in > 0.',
+  calc: (v) => {
+    if (v.Pin <= 0) throw new Error('Input power must be positive.');
+    return { eta: v.Pout / v.Pin };
+  },
+  steps: (v, r) => `η = P_out/P_in = ${v.Pout}/${v.Pin} = ${fmtNum(r.eta)} = ${fmtNum(r.eta*100)}%`
+});
+
+/* ===== CATEGORY 10: MECHANICAL POWER AND MOTION ===== */
+
+reg({
+  id: 'linear-vel', cat: 'mechanical', name: 'Linear Velocity and Acceleration',
+  desc: 'Velocity and acceleration from motion parameters.',
+  eq: 'v = v₀ + at,  s = v₀t + ½at²,  v² = v₀² + 2as',
+  inputs: [
+    { id: 'v0', label: 'Initial Velocity (v₀)', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 'a', label: 'Acceleration (a)', unitType: 'acceleration', defaultUnit: 'm/s2' },
+    { id: 't', label: 'Time (t)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'v', label: 'Final Velocity', unitType: 'velocity', defaultUnit: 'm/s' },
+    { id: 's', label: 'Displacement', unitType: 'length', defaultUnit: 'm' }
+  ],
+  example: { v0: 0, a: 2, t: 5 },
+  assumptions: 'Constant acceleration, 1D motion.',
+  calc: (v) => ({ v: v.v0 + v.a * v.t, s: v.v0 * v.t + 0.5 * v.a * v.t * v.t }),
+  steps: (v, r) => `v = v₀ + at = ${v.v0} + ${v.a}×${v.t} = ${fmtNum(r.v)} m/s\ns = v₀t + ½at² = ${v.v0}×${v.t} + 0.5×${v.a}×${v.t}² = ${fmtNum(r.s)} m`
+});
+
+reg({
+  id: 'angular-vel', cat: 'mechanical', name: 'Angular Velocity',
+  desc: 'Angular velocity from rotational speed.',
+  eq: 'ω = 2πN / 60  (N in rpm)',
+  inputs: [
+    { id: 'N', label: 'Rotational Speed', unitType: 'angVel', defaultUnit: 'rpm' }
+  ],
+  outputs: [{ id: 'omega', label: 'Angular Velocity', unitType: 'angVel', defaultUnit: 'rad/s' }],
+  example: { N: 1500 },
+  assumptions: 'Constant rotational speed.',
+  calc: (v) => ({ omega: v.N }),
+  steps: (v, r) => `ω = ${v.N} rad/s (converted from input unit)`
+});
+
+reg({
+  id: 'rot-power', cat: 'mechanical', name: 'Rotational Power',
+  desc: 'Power from torque and angular velocity.',
+  eq: 'P = T × ω',
+  inputs: [
+    { id: 'T', label: 'Torque', unitType: 'torque', defaultUnit: 'N·m' },
+    { id: 'omega', label: 'Angular Velocity', unitType: 'angVel', defaultUnit: 'rad/s' }
+  ],
+  outputs: [{ id: 'P', label: 'Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { T: 100, omega: 157.08 },
+  assumptions: 'Constant torque and speed.',
+  calc: (v) => ({ P: v.T * v.omega }),
+  steps: (v, r) => `P = T × ω = ${v.T} × ${v.omega} = ${fmtNum(r.P)} W`
+});
+
+reg({
+  id: 'torque-power', cat: 'mechanical', name: 'Torque from Power and Speed',
+  desc: 'Torque from power and rotational speed.',
+  eq: 'T = P / ω',
+  inputs: [
+    { id: 'P', label: 'Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'omega', label: 'Angular Velocity', unitType: 'angVel', defaultUnit: 'rad/s' }
+  ],
+  outputs: [{ id: 'T', label: 'Torque', unitType: 'torque', defaultUnit: 'N·m' }],
+  example: { P: 5000, omega: 100 },
+  assumptions: 'ω > 0.',
+  calc: (v) => {
+    if (v.omega <= 0) throw new Error('Angular velocity must be positive.');
+    return { T: v.P / v.omega };
+  },
+  steps: (v, r) => `T = P/ω = ${v.P}/${v.omega} = ${fmtNum(r.T)} N·m`
+});
+
+reg({
+  id: 'linear-power', cat: 'mechanical', name: 'Linear Mechanical Power',
+  desc: 'Power from force and velocity.',
+  eq: 'P = F × v',
+  inputs: [
+    { id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' },
+    { id: 'v', label: 'Velocity', unitType: 'velocity', defaultUnit: 'm/s' }
+  ],
+  outputs: [{ id: 'P', label: 'Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { F: 500, v: 2 },
+  assumptions: 'Force and velocity in same direction.',
+  calc: (v) => ({ P: v.F * v.v }),
+  steps: (v, r) => `P = F × v = ${v.F} × ${v.v} = ${fmtNum(r.P)} W`
+});
+
+reg({
+  id: 'efficiency-motion', cat: 'mechanical', name: 'Efficiency and Input Power',
+  desc: 'Input power from output power and efficiency.',
+  eq: 'P_in = P_out / η',
+  inputs: [
+    { id: 'Pout', label: 'Output Power', unitType: 'power', defaultUnit: 'W' },
+    { id: 'eta', label: 'Efficiency (η)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'Pin', label: 'Input Power', unitType: 'power', defaultUnit: 'W' }],
+  example: { Pout: 7500, eta: 0.85 },
+  assumptions: '0 < η ≤ 1.',
+  calc: (v) => {
+    if (v.eta <= 0 || v.eta > 1) throw new Error('Efficiency must be in (0, 1].');
+    return { Pin: v.Pout / v.eta };
+  },
+  steps: (v, r) => `P_in = P_out/η = ${v.Pout}/${v.eta} = ${fmtNum(r.Pin)} W`
+});
+
+reg({
+  id: 'gear-ratio', cat: 'mechanical', name: 'Gear Ratio and Output Speed',
+  desc: 'Ideal gear ratio and output speed.',
+  eq: 'N_out = N_in × (T_in / T_out),  GR = T_out / T_in',
+  inputs: [
+    { id: 'Nin', label: 'Input Speed (rpm)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'Tin', label: 'Input Teeth', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'Tout', label: 'Output Teeth', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [
+    { id: 'GR', label: 'Gear Ratio', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'Nout', label: 'Output Speed (rpm)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { Nin: 1500, Tin: 20, Tout: 40 },
+  assumptions: 'Ideal gears, no slip. GR = T_out/T_in > 1 for speed reduction.',
+  calc: (v) => {
+    if (v.Tin <= 0 || v.Tout <= 0) throw new Error('Teeth counts must be positive.');
+    return { GR: v.Tout / v.Tin, Nout: v.Nin * (v.Tin / v.Tout) };
+  },
+  steps: (v, r) => `GR = T_out/T_in = ${v.Tout}/${v.Tin} = ${fmtNum(r.GR)}\nN_out = N_in × T_in/T_out = ${v.Nin} × ${v.Tin}/${v.Tout} = ${fmtNum(r.Nout)} rpm`
+});
+
+reg({
+  id: 'belt-speed', cat: 'mechanical', name: 'Belt Speed',
+  desc: 'Belt speed from pulley diameter and rpm.',
+  eq: 'v = π × D × N / 60',
+  inputs: [
+    { id: 'D', label: 'Pulley Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'N', label: 'Speed (rpm)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'v', label: 'Belt Speed', unitType: 'velocity', defaultUnit: 'm/s' }],
+  example: { D: 200, N: 1000 },
+  assumptions: 'No slip, D in mm, N in rpm.',
+  calc: (v) => {
+    const D_m = toBase(v.D, 'mm', 'length');
+    return { v: Math.PI * D_m * v.N / 60 };
+  },
+  steps: (v, r) => `v = πDN/60 = π × ${v.D}mm × ${v.N} / 60 = ${fmtNum(r.v)} m/s`
+});
+
+reg({
+  id: 'spring-force', cat: 'mechanical', name: 'Spring Force',
+  desc: 'Force from a linear spring.',
+  eq: 'F = k × x',
+  inputs: [
+    { id: 'k', label: 'Spring Constant (k)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'x', label: 'Displacement (x)', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [{ id: 'F', label: 'Force', unitType: 'force', defaultUnit: 'N' }],
+  example: { k: 1000, x: 20 },
+  assumptions: 'Linear elastic spring, k in N/m.',
+  calc: (v) => {
+    const x_m = toBase(v.x, 'mm', 'length');
+    return { F: v.k * x_m };
+  },
+  steps: (v, r) => `F = kx = ${v.k} × ${v.x}mm = ${fmtNum(r.F)} N`
+});
+
+reg({
+  id: 'spring-energy', cat: 'mechanical', name: 'Spring Potential Energy',
+  desc: 'Elastic potential energy stored in a spring.',
+  eq: 'E = ½ k x²',
+  inputs: [
+    { id: 'k', label: 'Spring Constant (k)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'x', label: 'Displacement (x)', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [{ id: 'E', label: 'Potential Energy', unitType: 'energy', defaultUnit: 'J' }],
+  example: { k: 2000, x: 50 },
+  assumptions: 'Linear elastic spring, k in N/m.',
+  calc: (v) => {
+    const x_m = toBase(v.x, 'mm', 'length');
+    return { E: 0.5 * v.k * x_m * x_m };
+  },
+  steps: (v, r) => `E = ½kx² = 0.5 × ${v.k} × (${v.x}mm)² = ${fmtNum(r.E)} J`
+});
+
+/* ===== CATEGORY 11: MACHINE ELEMENTS ===== */
+
+reg({
+  id: 'solid-shaft', cat: 'machine', name: 'Solid Circular Shaft Properties',
+  desc: 'Area, second moment, and polar second moment of a solid shaft.',
+  eq: 'A = πd²/4,  I = πd⁴/64,  J = πd⁴/32',
+  inputs: [
+    { id: 'd', label: 'Diameter', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'mm2' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'J', label: 'Polar Second Moment (J)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { d: 50 },
+  assumptions: 'Solid circular cross-section. I and J in mm⁴.',
+  calc: (v) => {
+    const d4 = Math.pow(v.d,4);
+    return { area: Math.PI*v.d*v.d/4, I: Math.PI*d4/64, J: Math.PI*d4/32 };
+  },
+  steps: (v, r) => `A = πd²/4 = ${fmtNum(r.area)} mm²\nI = πd⁴/64 = ${fmtNum(r.I)} mm⁴\nJ = πd⁴/32 = ${fmtNum(r.J)} mm⁴`
+});
+
+reg({
+  id: 'hollow-shaft', cat: 'machine', name: 'Hollow Circular Shaft Properties',
+  desc: 'Properties of a hollow circular shaft.',
+  eq: 'A = π(D²−d²)/4,  I = π(D⁴−d⁴)/64,  J = π(D⁴−d⁴)/32',
+  inputs: [
+    { id: 'D', label: 'Outer Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'd', label: 'Inner Diameter', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [
+    { id: 'area', label: 'Area', unitType: 'area', defaultUnit: 'mm2' },
+    { id: 'I', label: 'Second Moment (I)', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'J', label: 'Polar Second Moment (J)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  example: { D: 60, d: 40 },
+  assumptions: 'D > d > 0. I and J in mm⁴.',
+  calc: (v) => {
+    if (v.D <= v.d) throw new Error('Outer diameter must be greater than inner diameter.');
+    const D4 = Math.pow(v.D,4), d4 = Math.pow(v.d,4);
+    return { area: Math.PI*(v.D*v.D - v.d*v.d)/4, I: Math.PI*(D4-d4)/64, J: Math.PI*(D4-d4)/32 };
+  },
+  steps: (v, r) => `A = π(D²−d²)/4 = ${fmtNum(r.area)} mm²\nI = π(D⁴−d⁴)/64 = ${fmtNum(r.I)} mm⁴\nJ = π(D⁴−d⁴)/32 = ${fmtNum(r.J)} mm⁴`
+});
+
+reg({
+  id: 'spring-rate', cat: 'machine', name: 'Helical Compression Spring Rate',
+  desc: 'Spring rate for a helical compression spring.',
+  eq: 'k = G d⁴ / (8 D³ n)',
+  inputs: [
+    { id: 'G', label: 'Shear Modulus', unitType: 'pressure', defaultUnit: 'GPa' },
+    { id: 'd', label: 'Wire Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'D', label: 'Mean Coil Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'n', label: 'Active Coils', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'k', label: 'Spring Rate', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { G: 80, d: 3, D: 20, n: 10 },
+  assumptions: 'Helical compression spring, linear elastic. k in N/m.',
+  calc: (v) => {
+    const G_Pa = toBase(v.G, 'GPa', 'pressure');
+    const d_m = toBase(v.d, 'mm', 'length');
+    const D_m = toBase(v.D, 'mm', 'length');
+    if (v.n <= 0) throw new Error('Active coils must be positive.');
+    return { k: (G_Pa * Math.pow(d_m,4)) / (8 * Math.pow(D_m,3) * v.n) };
+  },
+  steps: (v, r) => `k = Gd⁴ / (8D³n) = ${v.G}GPa × (${v.d}mm)⁴ / (8 × (${v.D}mm)³ × ${v.n}) = ${fmtNum(r.k)} N/m`
+});
+
+reg({
+  id: 'bearing-life', cat: 'machine', name: 'Bearing Life Estimation',
+  desc: 'Basic bearing life using standard L10 relationship.',
+  eq: 'L₁₀ = (C / P)^p × 10⁶ revolutions',
+  inputs: [
+    { id: 'C', label: 'Dynamic Load Rating (C)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'P', label: 'Equivalent Dynamic Load (P)', unitType: 'force', defaultUnit: 'N' },
+    { id: 'p', label: 'Life Exponent (p)', unitType: 'dimensionless', defaultUnit: '' }
+  ],
+  outputs: [{ id: 'L10', label: 'L₁₀ Life (revolutions)', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { C: 30000, P: 5000, p: 3 },
+  assumptions: 'Standard bearing life equation. p = 3 for ball, 10/3 for roller bearings.',
+  calc: (v) => {
+    if (v.P <= 0 || v.C <= 0) throw new Error('Load ratings must be positive.');
+    return { L10: Math.pow(v.C / v.P, v.p) * 1e6 };
+  },
+  steps: (v, r) => `L₁₀ = (C/P)^p × 10⁶ = (${v.C}/${v.P})^${v.p} × 10⁶ = ${fmtNum(r.L10)} revolutions`
+});
+
+reg({
+  id: 'bolt-stress', cat: 'machine', name: 'Bolt Tensile Stress',
+  desc: 'Tensile stress in a bolt from axial load.',
+  eq: 'σ = F / A_t',
+  inputs: [
+    { id: 'F', label: 'Axial Load', unitType: 'force', defaultUnit: 'N' },
+    { id: 'At', label: 'Tensile Area (A_t)', unitType: 'area', defaultUnit: 'mm2' }
+  ],
+  outputs: [{ id: 'sigma', label: 'Tensile Stress', unitType: 'pressure', defaultUnit: 'MPa' }],
+  example: { F: 20000, At: 150 },
+  assumptions: 'A_t > 0. Uniform stress over tensile area.',
+  calc: (v) => {
+    const At_m2 = toBase(v.At, 'mm2', 'area');
+    if (At_m2 <= 0) throw new Error('Tensile area must be positive.');
+    return { sigma: v.F / At_m2 };
+  },
+  steps: (v, r) => `σ = F/A_t = ${v.F}/${v.At}mm² = ${fmtNum(r.sigma)} Pa = ${fmtNum(r.sigma/1e6)} MPa`
+});
+
+/* ===== CATEGORY 12: INDUSTRIAL ENGINEERING ===== */
+
+reg({
+  id: 'steel-plate-mass', cat: 'industrial', name: 'Steel Plate Mass',
+  desc: 'Mass of a steel plate from dimensions and density.',
+  eq: 'm = L × W × t × ρ',
+  inputs: [
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'W', label: 'Width', unitType: 'length', defaultUnit: 'mm' },
+    { id: 't', label: 'Thickness', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }
+  ],
+  outputs: [{ id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' }],
+  example: { L: 2000, W: 1000, t: 10, rho: 7850 },
+  assumptions: 'Rectangular plate, uniform density. Default steel density ≈ 7850 kg/m³.',
+  calc: (v) => {
+    const L_m = toBase(v.L, 'mm', 'length');
+    const W_m = toBase(v.W, 'mm', 'length');
+    const t_m = toBase(v.t, 'mm', 'length');
+    return { m: L_m * W_m * t_m * v.rho };
+  },
+  steps: (v, r) => `V = ${v.L}mm × ${v.W}mm × ${v.t}mm = ${fmtNum(toBase(v.L,'mm','length')*toBase(v.W,'mm','length')*toBase(v.t,'mm','length'))} m³\nm = V × ρ = ${fmtNum(r.m)} kg`
+});
+
+reg({
+  id: 'round-bar-mass', cat: 'industrial', name: 'Round Bar Mass',
+  desc: 'Mass of a round bar.',
+  eq: 'm = (π/4) d² L ρ',
+  inputs: [
+    { id: 'd', label: 'Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }
+  ],
+  outputs: [{ id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' }],
+  example: { d: 50, L: 1000, rho: 7850 },
+  assumptions: 'Solid circular bar, uniform density.',
+  calc: (v) => {
+    const d_m = toBase(v.d, 'mm', 'length');
+    const L_m = toBase(v.L, 'mm', 'length');
+    return { m: (Math.PI/4) * d_m * d_m * L_m * v.rho };
+  },
+  steps: (v, r) => `m = (π/4)d²Lρ = ${fmtNum(r.m)} kg`
+});
+
+reg({
+  id: 'sq-bar-mass', cat: 'industrial', name: 'Square/Rectangular Bar Mass',
+  desc: 'Mass of a square or rectangular bar.',
+  eq: 'm = w × h × L × ρ',
+  inputs: [
+    { id: 'w', label: 'Width', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }
+  ],
+  outputs: [{ id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' }],
+  example: { w: 50, h: 50, L: 1000, rho: 7850 },
+  assumptions: 'Rectangular cross-section, uniform density.',
+  calc: (v) => {
+    const w_m = toBase(v.w, 'mm', 'length');
+    const h_m = toBase(v.h, 'mm', 'length');
+    const L_m = toBase(v.L, 'mm', 'length');
+    return { m: w_m * h_m * L_m * v.rho };
+  },
+  steps: (v, r) => `m = w × h × L × ρ = ${fmtNum(r.m)} kg`
+});
+
+reg({
+  id: 'pipe-mass', cat: 'industrial', name: 'Pipe Mass',
+  desc: 'Mass of a pipe from OD, wall thickness, length, and density.',
+  eq: 'm = π(OD − t) × t × L × ρ',
+  inputs: [
+    { id: 'OD', label: 'Outside Diameter', unitType: 'length', defaultUnit: 'mm' },
+    { id: 't', label: 'Wall Thickness', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'mm' },
+    { id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }
+  ],
+  outputs: [{ id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' }],
+  example: { OD: 100, t: 5, L: 6000, rho: 7850 },
+  assumptions: 'Circular pipe, uniform wall. Approximate formula using mean diameter.',
+  calc: (v) => {
+    const OD_m = toBase(v.OD, 'mm', 'length');
+    const t_m = toBase(v.t, 'mm', 'length');
+    const L_m = toBase(v.L, 'mm', 'length');
+    const Dm = OD_m - t_m;
+    return { m: Math.PI * Dm * t_m * L_m * v.rho };
+  },
+  steps: (v, r) => `m = π(OD − t) × t × L × ρ = ${fmtNum(r.m)} kg`
+});
+
+reg({
+  id: 'tank-volume', cat: 'industrial', name: 'Rectangular Tank Volume',
+  desc: 'Volume of a rectangular tank.',
+  eq: 'V = L × W × H',
+  inputs: [
+    { id: 'L', label: 'Length', unitType: 'length', defaultUnit: 'm' },
+    { id: 'W', label: 'Width', unitType: 'length', defaultUnit: 'm' },
+    { id: 'H', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'V', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' }],
+  example: { L: 2, W: 1.5, H: 1 },
+  assumptions: 'Rectangular tank.',
+  calc: (v) => ({ V: v.L * v.W * v.H }),
+  steps: (v, r) => `V = L × W × H = ${v.L} × ${v.W} × ${v.H} = ${fmtNum(r.V)} m³`
+});
+
+reg({
+  id: 'cyl-tank-volume', cat: 'industrial', name: 'Cylindrical Tank Volume',
+  desc: 'Volume of a cylindrical tank.',
+  eq: 'V = π r² h',
+  inputs: [
+    { id: 'r', label: 'Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Height', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'V', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' }],
+  example: { r: 1, h: 2 },
+  assumptions: 'Vertical cylindrical tank.',
+  calc: (v) => ({ V: Math.PI * v.r * v.r * v.h }),
+  steps: (v, r) => `V = πr²h = π(${v.r})²(${v.h}) = ${fmtNum(r.V)} m³`
+});
+
+reg({
+  id: 'horiz-tank', cat: 'industrial', name: 'Horizontal Cylindrical Tank Volume at Depth',
+  desc: 'Volume of liquid in a partially filled horizontal cylindrical tank.',
+  eq: 'V = L × [r² cos⁻¹((r−h)/r) − (r−h)√(2rh−h²)]',
+  inputs: [
+    { id: 'r', label: 'Tank Radius', unitType: 'length', defaultUnit: 'm' },
+    { id: 'L', label: 'Tank Length', unitType: 'length', defaultUnit: 'm' },
+    { id: 'h', label: 'Liquid Depth', unitType: 'length', defaultUnit: 'm' }
+  ],
+  outputs: [{ id: 'V', label: 'Liquid Volume', unitType: 'volume', defaultUnit: 'm3' }],
+  example: { r: 1, L: 3, h: 1.2 },
+  assumptions: 'Horizontal cylinder, circular cross-section. 0 ≤ h ≤ 2r. Uses circular segment geometry.',
+  calc: (v) => {
+    if (v.h < 0 || v.h > 2*v.r) throw new Error('Liquid depth must be between 0 and 2r.');
+    const r = v.r, h = v.h;
+    const term = Math.sqrt(Math.max(0, 2*r*h - h*h));
+    const angle = Math.acos((r - h) / r);
+    return { V: v.L * (r*r*angle - (r-h)*term) };
+  },
+  steps: (v, r) => {
+    const angle = Math.acos((v.r - v.h) / v.r);
+    const term = Math.sqrt(Math.max(0, 2*v.r*v.h - v.h*v.h));
+    return `V = L × [r² cos⁻¹((r−h)/r) − (r−h)√(2rh−h²)]\nAngle = ${fmtNum(angle)} rad\nV = ${v.L} × [${v.r}² × ${fmtNum(angle)} − (${v.r}−${v.h}) × ${fmtNum(term)}] = ${fmtNum(r.V)} m³`;
+  }
+});
+
+reg({
+  id: 'material-density', cat: 'industrial', name: 'Material Density',
+  desc: 'Density from mass and volume.',
+  eq: 'ρ = m / V',
+  inputs: [
+    { id: 'm', label: 'Mass', unitType: 'mass', defaultUnit: 'kg' },
+    { id: 'V', label: 'Volume', unitType: 'volume', defaultUnit: 'm3' }
+  ],
+  outputs: [{ id: 'rho', label: 'Density', unitType: 'density', defaultUnit: 'kg/m3' }],
+  example: { m: 785, V: 0.1 },
+  assumptions: 'V > 0.',
+  calc: (v) => {
+    if (v.V <= 0) throw new Error('Volume must be positive.');
+    return { rho: v.m / v.V };
+  },
+  steps: (v, r) => `ρ = m/V = ${v.m}/${v.V} = ${fmtNum(r.rho)} kg/m³`
+});
+
+reg({
+  id: 'flow-conv', cat: 'industrial', name: 'Flow-Rate Conversions',
+  desc: 'Convert between volumetric flow units.',
+  eq: 'Unit conversion',
+  inputs: [
+    { id: 'Q', label: 'Flow Rate', unitType: 'volFlow', defaultUnit: 'm3/h' }
+  ],
+  outputs: [
+    { id: 'm3s', label: 'm³/s', unitType: 'volFlow', defaultUnit: 'm3/s' },
+    { id: 'Ls', label: 'L/s', unitType: 'volFlow', defaultUnit: 'L/s' },
+    { id: 'Lmin', label: 'L/min', unitType: 'volFlow', defaultUnit: 'L/min' },
+    { id: 'gpm', label: 'gal/min (US)', unitType: 'volFlow', defaultUnit: 'gal/min' }
+  ],
+  example: { Q: 36 },
+  assumptions: 'Standard unit conversions.',
+  calc: (v) => ({ m3s: v.Q, Ls: v.Q, Lmin: v.Q, gpm: v.Q }),
+  steps: (v, r) => `Input flow: ${v.Q} (in selected unit)\nConverted to all common units.`
+});
+
+reg({
+  id: 'hydraulic-force', cat: 'industrial', name: 'Hydraulic Cylinder Force',
+  desc: 'Ideal force from hydraulic cylinder.',
+  eq: 'F = P × A',
+  inputs: [
+    { id: 'P', label: 'Pressure', unitType: 'pressure', defaultUnit: 'bar' },
+    { id: 'D', label: 'Bore Diameter', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [{ id: 'F', label: 'Ideal Force', unitType: 'force', defaultUnit: 'N' }],
+  example: { P: 200, D: 100 },
+  assumptions: 'Ideal force, no friction or efficiency losses.',
+  calc: (v) => {
+    const P_Pa = toBase(v.P, 'bar', 'pressure');
+    const D_m = toBase(v.D, 'mm', 'length');
+    const A = Math.PI * D_m * D_m / 4;
+    return { F: P_Pa * A };
+  },
+  steps: (v, r) => `A = πD²/4 = ${fmtNum(Math.PI * Math.pow(toBase(v.D,'mm','length'),2)/4)} m²\nF = P × A = ${fmtNum(toBase(v.P,'bar','pressure'))} × A = ${fmtNum(r.F)} N`
+});
+
+reg({
+  id: 'hydraulic-speed', cat: 'industrial', name: 'Hydraulic Cylinder Speed',
+  desc: 'Extension speed from flow rate and bore area.',
+  eq: 'v = Q / A',
+  inputs: [
+    { id: 'Q', label: 'Flow Rate', unitType: 'volFlow', defaultUnit: 'L/min' },
+    { id: 'D', label: 'Bore Diameter', unitType: 'length', defaultUnit: 'mm' }
+  ],
+  outputs: [{ id: 'v', label: 'Speed', unitType: 'velocity', defaultUnit: 'm/s' }],
+  example: { Q: 20, D: 100 },
+  assumptions: 'Ideal flow, no leakage.',
+  calc: (v) => {
+    const Q_m3s = toBase(v.Q, 'L/min', 'volFlow');
+    const D_m = toBase(v.D, 'mm', 'length');
+    const A = Math.PI * D_m * D_m / 4;
+    if (A <= 0) throw new Error('Bore area must be positive.');
+    return { v: Q_m3s / A };
+  },
+  steps: (v, r) => `v = Q/A = ${fmtNum(toBase(v.Q,'L/min','volFlow'))} / ${fmtNum(Math.PI*Math.pow(toBase(v.D,'mm','length'),2)/4)} = ${fmtNum(r.v)} m/s`
+});
+
+reg({
+  id: 'hydraulic-power-ind', cat: 'industrial', name: 'Hydraulic Power (Industrial)',
+  desc: 'Hydraulic power from pressure and flow.',
+  eq: 'P = ΔP × Q',
+  inputs: [
+    { id: 'dP', label: 'Pressure Difference', unitType: 'pressure', defaultUnit: 'bar' },
+    { id: 'Q', label: 'Flow Rate', unitType: 'volFlow', defaultUnit: 'L/min' }
+  ],
+  outputs: [{ id: 'Ph', label: 'Hydraulic Power', unitType: 'power', defaultUnit: 'kW' }],
+  example: { dP: 200, Q: 20 },
+  assumptions: 'Ideal hydraulic power.',
+  calc: (v) => {
+    const dP_Pa = toBase(v.dP, 'bar', 'pressure');
+    const Q_m3s = toBase(v.Q, 'L/min', 'volFlow');
+    return { Ph: dP_Pa * Q_m3s };
+  },
+  steps: (v, r) => `P = ΔP × Q = ${fmtNum(toBase(v.dP,'bar','pressure'))} Pa × ${fmtNum(toBase(v.Q,'L/min','volFlow'))} m³/s = ${fmtNum(r.Ph)} W = ${fmtNum(r.Ph/1000)} kW`
+});
+
+reg({
+  id: 'unit-conv', cat: 'industrial', name: 'Basic Unit Conversions',
+  desc: 'Convert between common engineering units.',
+  eq: 'Unit conversion',
+  inputs: [
+    { id: 'value', label: 'Value', unitType: 'dimensionless', defaultUnit: '' },
+    { id: 'from', label: 'From', unitType: 'select', options: ['mm', 'm', 'in', 'ft', 'kg', 'lb', 'N', 'lbf', 'Pa', 'psi', 'bar', 'W', 'hp'], defaultUnit: '' },
+    { id: 'to', label: 'To', unitType: 'select', options: ['mm', 'm', 'in', 'ft', 'kg', 'lb', 'N', 'lbf', 'Pa', 'psi', 'bar', 'W', 'hp'], defaultUnit: '' }
+  ],
+  outputs: [{ id: 'result', label: 'Result', unitType: 'dimensionless', defaultUnit: '' }],
+  example: { value: 25.4, from: 'mm', to: 'in' },
+  assumptions: 'Standard conversion factors.',
+  calc: (v) => {
+    // Build a simple conversion map
+    const lengthUnits = { mm: 0.001, m: 1, in: 0.0254, ft: 0.3048 };
+    const massUnits = { kg: 1, lb: 0.45359237 };
+    const forceUnits = { N: 1, lbf: 4.4482216152605 };
+    const pressureUnits = { Pa: 1, psi: 6894.757293168, bar: 1e5 };
+    const powerUnits = { W: 1, hp: 745.69987158227 };
+
+    const allUnits = { ...lengthUnits, ...massUnits, ...forceUnits, ...pressureUnits, ...powerUnits };
+    if (!allUnits[v.from] || !allUnits[v.to]) throw new Error('Select valid units.');
+    // Determine dimension by looking up in each group
+    const groups = [lengthUnits, massUnits, forceUnits, pressureUnits, powerUnits];
+    let fromBase = null, toBaseFactor = null;
+    for (const g of groups) {
+      if (g[v.from] !== undefined) fromBase = g[v.from];
+      if (g[v.to] !== undefined) toBaseFactor = g[v.to];
+    }
+    if (fromBase === null || toBaseFactor === null) throw new Error('Incompatible unit types.');
+    // Check same group
+    let sameGroup = false;
+    for (const g of groups) {
+      if (g[v.from] !== undefined && g[v.to] !== undefined) sameGroup = true;
+    }
+    if (!sameGroup) throw new Error('Cannot convert between different physical quantities.');
+    return { result: (v.value * fromBase) / toBaseFactor };
+  },
+  steps: (v, r) => `Convert ${v.value} ${v.from} to ${v.to}\nResult: ${fmtNum(r.result)} ${v.to}`
+});
+
+/* ============================================================
+   APP STATE
+   ============================================================ */
+const App = {
+  currentView: 'category',
+  currentCategory: 'math',
+  currentFormula: null,
+  favorites: Storage.get('efc_favorites', []),
+  history: Storage.get('efc_history', []),
+  theme: Storage.get('efc_theme', 'dark'),
+  searchQuery: '',
+  inputValues: {},
+  unitValues: {},
+  lastResult: null,
+  lastSteps: null,
+  lastFormula: null
+};
+
+/* ============================================================
+   INITIALIZATION
+   ============================================================ */
+function init() {
+  applyTheme();
+  renderSidebar();
+  renderMobileCats();
+  renderCategory(App.currentCategory);
+  bindEvents();
+  updateBadges();
+}
+
+function applyTheme() {
+  document.documentElement.setAttribute('data-theme', App.theme === 'light' ? 'light' : 'dark');
+}
+
+function toggleTheme() {
+  App.theme = App.theme === 'light' ? 'dark' : 'light';
+  Storage.set('efc_theme', App.theme);
+  applyTheme();
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+function renderSidebar() {
+  const el = document.getElementById('sidebarCats');
+  if (!el) return;
+  el.innerHTML = CATEGORIES.map(c => {
+    const count = FORMULAS.filter(f => f.cat === c.id).length;
+    return `<div class="cat-item ${c.id === App.currentCategory ? 'active' : ''}" data-cat="${c.id}" tabindex="0" role="button">
+      ${Icons[c.icon] || Icons.math}
+      <div class="cat-item-text">
+        <div class="cat-item-name">${escapeHtml(c.name)}</div>
+        <div class="cat-item-count">${count} calculator${count !== 1 ? 's' : ''}</div>
+      </div>
+    </div>`;
+  }).join('');
+}
+
+function renderMobileCats() {
+  const el = document.getElementById('mobileCats');
+  if (!el) return;
+  el.innerHTML = CATEGORIES.map(c =>
+    `<button class="chip ${c.id === App.currentCategory ? 'active' : ''}" data-cat="${c.id}">${escapeHtml(c.name)}</button>`
+  ).join('');
+}
+
+function renderCategory(catId) {
+  App.currentCategory = catId;
+  App.currentView = 'category';
+  const cat = CATEGORIES.find(c => c.id === catId);
+  if (!cat) return;
+
+  document.getElementById('catTitle').textContent = cat.name;
+  document.getElementById('catDesc').textContent = cat.desc;
+  document.getElementById('categoryView').classList.remove('hidden');
+  document.getElementById('calcView').classList.add('hidden');
+  document.getElementById('searchView').classList.add('hidden');
+  document.getElementById('favView').classList.add('hidden');
+  document.getElementById('historyView').classList.add('hidden');
+
+  const formulas = FORMULAS.filter(f => f.cat === catId);
+  const grid = document.getElementById('formulaGrid');
+  grid.innerHTML = formulas.map(f => formulaCardHTML(f)).join('');
+
+  // Update active states
+  document.querySelectorAll('.cat-item').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === catId);
+  });
+  document.querySelectorAll('.chip').forEach(el => {
+    el.classList.toggle('active', el.dataset.cat === catId);
+  });
+}
+
+function formulaCardHTML(f) {
+  const isFav = App.favorites.includes(f.id);
+  return `<div class="formula-card" data-formula="${f.id}" tabindex="0" role="button">
+    <div class="formula-card-top">
+      <div class="formula-card-name">${escapeHtml(f.name)}</div>
+      <button class="formula-card-fav ${isFav ? 'active' : ''}" data-fav="${f.id}" title="${isFav ? 'Remove from' : 'Add to'} favorites" aria-label="${isFav ? 'Remove from' : 'Add to'} favorites">
+        ${isFav ? Icons.starFill : Icons.star}
+      </button>
+    </div>
+    <div class="formula-card-eq">${escapeHtml(f.eq)}</div>
+    <div class="formula-card-desc">${escapeHtml(f.desc)}</div>
+  </div>`;
+}
+
+function openFormula(id) {
+  const f = FORMULAS.find(x => x.id === id);
+  if (!f) return;
+  App.currentFormula = f;
+  App.currentView = 'calc';
+  App.inputValues = {};
+  App.unitValues = {};
+  App.lastResult = null;
+  App.lastSteps = null;
+  App.lastFormula = f;
+
+  document.getElementById('categoryView').classList.add('hidden');
+  document.getElementById('searchView').classList.add('hidden');
+  document.getElementById('favView').classList.add('hidden');
+  document.getElementById('historyView').classList.add('hidden');
+  document.getElementById('calcView').classList.remove('hidden');
+
+  renderCalculator(f);
+}
+
+function renderCalculator(f) {
+  const el = document.getElementById('calcView');
+  const isFav = App.favorites.includes(f.id);
+
+  // Build inputs
+  let inputsHTML = '';
+  f.inputs.forEach(inp => {
+    const unitOptions = inp.unitType === 'select' ? inp.options :
+                        inp.unitType === 'text' ? null :
+                        getUnitOptions(inp.unitType);
+    const defaultUnit = inp.defaultUnit || (unitOptions ? unitOptions[0] : '');
+    App.unitValues[inp.id] = defaultUnit;
+
+    if (inp.unitType === 'select') {
+      inputsHTML += `<div class="input-group">
+        <label for="inp_${inp.id}">${escapeHtml(inp.label)}</label>
+        <div class="input-row">
+          <select id="inp_${inp.id}" data-input="${inp.id}">
+            ${inp.options.map(o => `<option value="${escapeHtml(o)}">${escapeHtml(o)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="input-error-msg" id="err_${inp.id}"></div>
+      </div>`;
+    } else if (inp.unitType === 'text') {
+      inputsHTML += `<div class="input-group">
+        <label for="inp_${inp.id}">${escapeHtml(inp.label)}</label>
+        <div class="input-row">
+          <input type="text" id="inp_${inp.id}" data-input="${inp.id}" placeholder="e.g. 1, 2, 3">
+        </div>
+        <div class="input-error-msg" id="err_${inp.id}"></div>
+      </div>`;
+    } else {
+      inputsHTML += `<div class="input-group">
+        <label for="inp_${inp.id}">${escapeHtml(inp.label)} <span class="unit-hint">(${escapeHtml(defaultUnit || 'SI')})</span></label>
+        <div class="input-row">
+          <input type="number" step="any" id="inp_${inp.id}" data-input="${inp.id}" placeholder="Enter value">
+          <select data-unit="${inp.id}" aria-label="Unit for ${escapeHtml(inp.label)}">
+            ${unitOptions.map(u => `<option value="${escapeHtml(u)}" ${u === defaultUnit ? 'selected' : ''}>${escapeHtml(u)}</option>`).join('')}
+          </select>
+        </div>
+        <div class="input-error-msg" id="err_${inp.id}"></div>
+      </div>`;
+    }
+  });
+
+  // Outputs
+  let outputsHTML = '';
+  f.outputs.forEach(o => {
+    const unitOptions = o.unitType === 'text' ? null : getUnitOptions(o.unitType);
+    if (unitOptions && unitOptions.length > 0 && o.unitType !== 'text') {
+      outputsHTML += `<div class="result-detail" style="margin-top:4px;">
+        <div class="kv">
+          <span class="k">${escapeHtml(o.label)}</span>
+          <span class="v" id="out_${o.id}">—</span>
+        </div>
+      </div>`;
+    }
+  });
+
+  el.innerHTML = `<div class="calc-panel">
+    <div class="calc-header">
+      <div class="calc-header-info">
+        <h3>${escapeHtml(f.name)}</h3>
+        <p>${escapeHtml(f.desc)}</p>
+      </div>
+      <div class="calc-header-actions">
+        <button class="btn btn-secondary btn-sm" id="backBtn" title="Back to category">${Icons.back} Back</button>
+        <button class="btn btn-secondary btn-sm" id="favBtn" title="Toggle favorite">${isFav ? Icons.starFill : Icons.star} ${isFav ? 'Saved' : 'Save'}</button>
+      </div>
+    </div>
+    <div class="calc-equation">${escapeHtml(f.eq)}</div>
+    <div class="calc-body">
+      <div class="calc-inputs">
+        <h4>Inputs</h4>
+        ${inputsHTML}
+        <div class="calc-actions">
+          <button class="btn btn-primary" id="calcBtn">${Icons.calculate} Calculate</button>
+          <button class="btn btn-secondary" id="exampleBtn">${Icons.example} Load Example</button>
+          <button class="btn btn-secondary" id="resetBtn">${Icons.reset} Reset</button>
+        </div>
+      </div>
+      <div class="calc-results">
+        <h4>Results</h4>
+        <div class="result-card" id="resultCard" aria-live="polite">
+          <div class="result-placeholder">Enter values and click Calculate</div>
+        </div>
+        ${outputsHTML}
+      </div>
+    </div>
+    <div class="steps-section">
+      <h4 id="stepsToggle" class="collapsed">${Icons.chevron} Step-by-Step Solution</h4>
+      <div class="steps-content hidden" id="stepsContent"></div>
+    </div>
+    <div class="assumptions">
+      <strong>Assumptions & Limitations:</strong> ${escapeHtml(f.assumptions)}
+    </div>
+  </div>`;
+
+  // Bind events
+  document.getElementById('backBtn').addEventListener('click', () => {
+    renderCategory(App.currentCategory);
+  });
+  document.getElementById('favBtn').addEventListener('click', () => toggleFavorite(f.id));
+  document.getElementById('calcBtn').addEventListener('click', calculate);
+  document.getElementById('exampleBtn').addEventListener('click', loadExample);
+  document.getElementById('resetBtn').addEventListener('click', resetInputs);
+  document.getElementById('stepsToggle').addEventListener('click', () => {
+    const c = document.getElementById('stepsContent');
+    const t = document.getElementById('stepsToggle');
+    c.classList.toggle('hidden');
+    t.classList.toggle('collapsed');
+  });
+}
+
+function loadExample() {
+  const f = App.currentFormula;
+  if (!f || !f.example) return;
+  const ex = f.example;
+  Object.keys(ex).forEach(key => {
+    const inp = f.inputs.find(i => i.id === key);
+    if (!inp) return;
+    if (inp.unitType === 'select') {
+      const sel = document.getElementById(`inp_${key}`);
+      if (sel) sel.value = ex[key];
+    } else {
+      const el = document.getElementById(`inp_${key}`);
+      if (el) el.value = ex[key];
+    }
+  });
+  calculate();
+}
+
+function resetInputs() {
+  const f = App.currentFormula;
+  if (!f) return;
+  f.inputs.forEach(inp => {
+    if (inp.unitType === 'select') {
+      const sel = document.getElementById(`inp_${inp.id}`);
+      if (sel) sel.selectedIndex = 0;
+    } else {
+      const el = document.getElementById(`inp_${inp.id}`);
+      if (el) el.value = '';
+    }
+    const err = document.getElementById(`err_${inp.id}`);
+    if (err) err.textContent = '';
+    const inpEl = document.getElementById(`inp_${inp.id}`);
+    if (inpEl) inpEl.classList.remove('error');
+  });
+  App.lastResult = null;
+  App.lastSteps = null;
+  document.getElementById('resultCard').innerHTML = '<div class="result-placeholder">Enter values and click Calculate</div>';
+  document.getElementById('stepsContent').classList.add('hidden');
+  document.getElementById('stepsToggle').classList.add('collapsed');
+  f.outputs.forEach(o => {
+    const el = document.getElementById(`out_${o.id}`);
+    if (el) el.textContent = '—';
+  });
+}
+
+function calculate() {
+  const f = App.currentFormula;
+  if (!f) return;
+
+  // Clear errors
+  f.inputs.forEach(inp => {
+    const err = document.getElementById(`err_${inp.id}`);
+    if (err) err.textContent = '';
+    const el = document.getElementById(`inp_${inp.id}`);
+    if (el) el.classList.remove('error');
+  });
+
+  // Collect values
+  const values = {};
+  let hasError = false;
+
+  f.inputs.forEach(inp => {
+    const el = document.getElementById(`inp_${inp.id}`);
+    const errEl = document.getElementById(`err_${inp.id}`);
+    if (!el) return;
+
+    if (inp.unitType === 'select') {
+      values[inp.id] = el.value;
+    } else if (inp.unitType === 'text') {
+      values[inp.id] = el.value.trim();
+    } else {
+      const raw = el.value.trim();
+      if (raw === '') {
+        // Allow missing only if not strictly required? For simplicity, all are required
+        el.classList.add('error');
+        if (errEl) errEl.textContent = 'This field is required.';
+        hasError = true;
+        return;
+      }
+      const num = parseFloat(raw);
+      if (!isFinite(num)) {
+        el.classList.add('error');
+        if (errEl) errEl.textContent = 'Enter a valid number.';
+        hasError = true;
+        return;
+      }
+      // Get unit
+      const unitSel = document.querySelector(`[data-unit="${inp.id}"]`);
+      const unit = unitSel ? unitSel.value : inp.defaultUnit;
+      App.unitValues[inp.id] = unit;
+      // Convert to base
+      const baseVal = toBase(num, unit, inp.unitType);
+      values[inp.id] = baseVal;
+    }
+  });
+
+  if (hasError) {
+    document.getElementById('resultCard').innerHTML = '<div class="result-placeholder" style="color:var(--error)">Please fix the errors above.</div>';
+    document.getElementById('stepsContent').classList.add('hidden');
+    document.getElementById('stepsToggle').classList.add('collapsed');
+    App.lastResult = null;
+    App.lastSteps = null;
+    return;
+  }
+
+  // Run calculation
+  let result, steps;
+  try {
+    result = f.calc(values);
+    steps = f.steps(values, result);
+  } catch(e) {
+    document.getElementById('resultCard').innerHTML = `<div class="result-placeholder" style="color:var(--error)">${escapeHtml(e.message || 'Unable to calculate. Check your inputs.')}</div>`;
+    document.getElementById('stepsContent').classList.add('hidden');
+    document.getElementById('stepsToggle').classList.add('collapsed');
+    App.lastResult = null;
+    App.lastSteps = null;
+    return;
+  }
+
+  // Check for non-finite results
+  for (const key in result) {
+    const v = result[key];
+    if (typeof v === 'number' && !isFinite(v)) {
+      document.getElementById('resultCard').innerHTML = `<div class="result-placeholder" style="color:var(--error)">Calculation produced an invalid result (non-finite). Please check inputs.</div>`;
+      document.getElementById('stepsContent').classList.add('hidden');
+      document.getElementById('stepsToggle').classList.add('collapsed');
+      App.lastResult = null;
+      App.lastSteps = null;
+      return;
+    }
+  }
+
+  // Display results
+  App.lastResult = result;
+  App.lastSteps = steps;
+  App.lastFormula = f;
+
+  const resultCard = document.getElementById('resultCard');
+  let resultHTML = '';
+
+  // Determine main output: first output
+  const mainOut = f.outputs[0];
+  if (mainOut) {
+    let displayVal = result[mainOut.id];
+    let displayUnit = '';
+    if (typeof displayVal === 'number') {
+      // Convert to display unit
+      const outUnit = mainOut.defaultUnit;
+      displayUnit = outUnit;
+      if (mainOut.unitType !== 'text' && mainOut.unitType !== 'dimensionless') {
+        displayVal = fromBase(displayVal, outUnit, mainOut.unitType);
+      }
+      resultHTML = `<div class="result-main">${fmtNum(displayVal)} <span class="result-unit">${escapeHtml(displayUnit)}</span></div>`;
+    } else {
+      resultHTML = `<div class="result-main">${escapeHtml(String(displayVal))}</div>`;
+    }
+  }
+
+  // Detail outputs
+  let detailHTML = '';
+  f.outputs.forEach((o, idx) => {
+    if (idx === 0) return; // skip main
+    let v = result[o.id];
+    if (v === undefined) return;
+    let unit = o.defaultUnit;
+    if (typeof v === 'number' && o.unitType !== 'text' && o.unitType !== 'dimensionless') {
+      v = fromBase(v, unit, o.unitType);
+    }
+    detailHTML += `<div class="kv"><span class="k">${escapeHtml(o.label)}</span><span class="v">${typeof v === 'number' ? fmtNum(v) : escapeHtml(String(v))} ${escapeHtml(unit)}</span></div>`;
+  });
+
+  resultCard.innerHTML = resultHTML + (detailHTML ? `<div class="result-detail">${detailHTML}</div>` : '');
+
+  // Update inline output spans
+  f.outputs.forEach(o => {
+    const el = document.getElementById(`out_${o.id}`);
+    if (!el) return;
+    let v = result[o.id];
+    if (v === undefined) { el.textContent = '—'; return; }
+    let unit = o.defaultUnit;
+    if (typeof v === 'number' && o.unitType !== 'text' && o.unitType !== 'dimensionless') {
+      v = fromBase(v, unit, o.unitType);
+    }
+    el.textContent = (typeof v === 'number' ? fmtNum(v) : String(v)) + (unit ? ' ' + unit : '');
+  });
+
+  // Steps
+  document.getElementById('stepsContent').textContent = steps;
+  document.getElementById('stepsContent').classList.remove('hidden');
+  document.getElementById('stepsToggle').classList.remove('collapsed');
+
+  // Save to history
+  saveHistory(f, values, result);
+}
+
+/* ============================================================
+   FAVORITES
+   ============================================================ */
+function toggleFavorite(id) {
+  const idx = App.favorites.indexOf(id);
+  if (idx >= 0) {
+    App.favorites.splice(idx, 1);
+  } else {
+    App.favorites.push(id);
+  }
+  Storage.set('efc_favorites', App.favorites);
+  updateBadges();
+  // Re-render current view
+  if (App.currentView === 'category') renderCategory(App.currentCategory);
+  if (App.currentView === 'search' && App.searchQuery) performSearch(App.searchQuery);
+  if (App.currentView === 'calc' && App.currentFormula) {
+    const btn = document.getElementById('favBtn');
+    if (btn) {
+      const isFav = App.favorites.includes(App.currentFormula.id);
+      btn.innerHTML = `${isFav ? Icons.starFill : Icons.star} ${isFav ? 'Saved' : 'Save'}`;
+    }
+  }
+}
+
+function updateBadges() {
+  const favBadge = document.getElementById('favBadge');
+  const histBadge = document.getElementById('historyBadge');
+  if (favBadge) {
+    favBadge.textContent = App.favorites.length;
+    favBadge.classList.toggle('hidden', App.favorites.length === 0);
+  }
+  if (histBadge) {
+    histBadge.textContent = App.history.length;
+    histBadge.classList.toggle('hidden', App.history.length === 0);
+  }
+}
+
+/* ============================================================
+   HISTORY
+   ============================================================ */
+function saveHistory(formula, inputs, result) {
+  const entry = {
+    id: Date.now() + '_' + Math.random().toString(36).slice(2,8),
+    formulaId: formula.id,
+    formulaName: formula.name,
+    inputs: JSON.parse(JSON.stringify(inputs)),
+    result: JSON.parse(JSON.stringify(result)),
+    timestamp: Date.now()
+  };
+  App.history.unshift(entry);
+  if (App.history.length > 50) App.history.pop();
+  Storage.set('efc_history', App.history);
+  updateBadges();
+}
+
+function showHistory() {
+  const modal = document.getElementById('modalOverlay');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalBody');
+  const footer = document.getElementById('modalFooter');
+
+  title.textContent = 'Calculation History';
+  if (App.history.length === 0) {
+    body.innerHTML = '<div class="empty-state"><h3>No history yet</h3><p>Your calculations will appear here.</p></div>';
+    footer.innerHTML = '';
+  } else {
+    body.innerHTML = App.history.map(h => `
+      <div class="history-item" data-history="${h.id}">
+        <div class="history-item-info">
+          <div class="history-item-name">${escapeHtml(h.formulaName)}</div>
+          <div class="history-item-detail">${new Date(h.timestamp).toLocaleString()}</div>
+        </div>
+        <button class="history-item-del" data-del="${h.id}" title="Delete" aria-label="Delete history item">&times;</button>
+      </div>
+    `).join('');
+    footer.innerHTML = `<button class="btn btn-secondary btn-sm" id="clearHistoryBtn">Clear All</button>`;
+  }
+
+  modal.classList.add('open');
+
+  // Bind history item clicks
+  body.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.history-item-del')) return;
+      const id = el.dataset.history;
+      const entry = App.history.find(h => h.id === id);
+      if (entry) {
+        modal.classList.remove('open');
+        openFormula(entry.formulaId);
+        // Restore inputs after render
+        setTimeout(() => {
+          const f = FORMULAS.find(x => x.id === entry.formulaId);
+          if (f) {
+            f.inputs.forEach(inp => {
+              const v = entry.inputs[inp.id];
+              if (v === undefined) return;
+              const el = document.getElementById(`inp_${inp.id}`);
+              if (el) {
+                if (inp.unitType === 'select') {
+                  el.value = v;
+                } else if (inp.unitType === 'text') {
+                  el.value = v;
+                } else {
+                  // Convert back from base to display unit
+                  const unit = App.unitValues[inp.id] || inp.defaultUnit;
+                  const displayVal = fromBase(v, unit, inp.unitType);
+                  el.value = displayVal;
+                }
+              }
+            });
+            calculate();
+          }
+        }, 50);
+      }
+    });
+  });
+
+  // Delete buttons
+  body.querySelectorAll('.history-item-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      const id = btn.dataset.del;
+      App.history = App.history.filter(h => h.id !== id);
+      Storage.set('efc_history', App.history);
+      updateBadges();
+      showHistory();
+    });
+  });
+
+  // Clear all
+  const clearBtn = document.getElementById('clearHistoryBtn');
+  if (clearBtn) {
+    clearBtn.addEventListener('click', () => {
+      App.history = [];
+      Storage.set('efc_history', App.history);
+      updateBadges();
+      showHistory();
+    });
+  }
+}
+
+/* ============================================================
+   FAVORITES VIEW
+   ============================================================ */
+function showFavorites() {
+  const modal = document.getElementById('modalOverlay');
+  const title = document.getElementById('modalTitle');
+  const body = document.getElementById('modalBody');
+  const footer = document.getElementById('modalFooter');
+
+  title.textContent = 'Favorites';
+  const favFormulas = FORMULAS.filter(f => App.favorites.includes(f.id));
+  if (favFormulas.length === 0) {
+    body.innerHTML = '<div class="empty-state"><h3>No favorites yet</h3><p>Click the star icon on any formula card to save it here.</p></div>';
+  } else {
+    body.innerHTML = favFormulas.map(f => `
+      <div class="history-item" data-fav-formula="${f.id}">
+        <div class="history-item-info">
+          <div class="history-item-name">${escapeHtml(f.name)}</div>
+          <div class="history-item-detail">${escapeHtml(f.eq)}</div>
+        </div>
+        <button class="history-item-del" data-remove-fav="${f.id}" title="Remove" aria-label="Remove from favorites">&times;</button>
+      </div>
+    `).join('');
+  }
+  footer.innerHTML = '';
+
+  modal.classList.add('open');
+
+  body.querySelectorAll('.history-item').forEach(el => {
+    el.addEventListener('click', (e) => {
+      if (e.target.closest('.history-item-del')) return;
+      modal.classList.remove('open');
+      openFormula(el.dataset.favFormula);
+    });
+  });
+
+  body.querySelectorAll('.history-item-del').forEach(btn => {
+    btn.addEventListener('click', (e) => {
+      e.stopPropagation();
+      toggleFavorite(btn.dataset.removeFav);
+      showFavorites();
+    });
+  });
+}
+
+/* ============================================================
+   SEARCH
+   ============================================================ */
+function performSearch(query) {
+  App.searchQuery = query.trim().toLowerCase();
+  if (!App.searchQuery) {
+    renderCategory(App.currentCategory);
+    return;
+  }
+
+  App.currentView = 'search';
+  document.getElementById('categoryView').classList.add('hidden');
+  document.getElementById('calcView').classList.add('hidden');
+  document.getElementById('favView').classList.add('hidden');
+  document.getElementById('historyView').classList.add('hidden');
+  document.getElementById('searchView').classList.remove('hidden');
+
+  const q = App.searchQuery;
+  const results = FORMULAS.filter(f => {
+    const cat = CATEGORIES.find(c => c.id === f.cat);
+    const searchText = [
+      f.name, f.desc, f.eq, cat ? cat.name : '',
+      ...f.inputs.map(i => i.label + ' ' + i.id),
+      ...f.outputs.map(o => o.label + ' ' + o.id)
+    ].join(' ').toLowerCase();
+    return searchText.includes(q);
+  });
+
+  const el = document.getElementById('searchView');
+  if (results.length === 0) {
+    el.innerHTML = `<div class="empty-state">
+      ${Icons.search}
+      <h3>No results found</h3>
+      <p>No formulas match "${escapeHtml(query)}". Try a different term or browse categories.</p>
+    </div>`;
+    return;
+  }
+
+  el.innerHTML = `<div class="category-header">
+    <h2>Search Results</h2>
+    <p>${results.length} formula${results.length !== 1 ? 's' : ''} found for "${escapeHtml(query)}"</p>
+  </div>
+  <div class="formula-grid">
+    ${results.map(f => formulaCardHTML(f)).join('')}
+  </div>`;
+}
+
+/* ============================================================
+   EVENT BINDING
+   ============================================================ */
+function bindEvents() {
+  // Sidebar clicks
+  document.getElementById('sidebarCats').addEventListener('click', (e) => {
+    const item = e.target.closest('.cat-item');
+    if (item) renderCategory(item.dataset.cat);
+  });
+
+  // Mobile chips
+  document.getElementById('mobileCats').addEventListener('click', (e) => {
+    const chip = e.target.closest('.chip');
+    if (chip) renderCategory(chip.dataset.cat);
+  });
+
+  // Formula grid clicks (delegated)
+  document.getElementById('formulaGrid').addEventListener('click', (e) => {
+    const favBtn = e.target.closest('.formula-card-fav');
+    if (favBtn) {
+      e.stopPropagation();
+      toggleFavorite(favBtn.dataset.fav);
+      return;
+    }
+    const card = e.target.closest('.formula-card');
+    if (card) openFormula(card.dataset.formula);
+  });
+
+  // Search view clicks (delegated)
+  document.getElementById('searchView').addEventListener('click', (e) => {
+    const favBtn = e.target.closest('.formula-card-fav');
+    if (favBtn) {
+      e.stopPropagation();
+      toggleFavorite(favBtn.dataset.fav);
+      return;
+    }
+    const card = e.target.closest('.formula-card');
+    if (card) openFormula(card.dataset.formula);
+  });
+
+  // Global search
+  const searchInput = document.getElementById('globalSearch');
+  let searchTimeout;
+  searchInput.addEventListener('input', (e) => {
+    clearTimeout(searchTimeout);
+    searchTimeout = setTimeout(() => {
+      performSearch(e.target.value);
+    }, 200);
+  });
+  searchInput.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      searchInput.value = '';
+      performSearch('');
+    }
+  });
+
+  // Theme toggle
+  document.getElementById('themeToggle').addEventListener('click', toggleTheme);
+
+  // Favorites button
+  document.getElementById('favoritesBtn').addEventListener('click', showFavorites);
+
+  // History button
+  document.getElementById('historyBtn').addEventListener('click', showHistory);
+
+  // Clear all
+  document.getElementById('clearAllBtn').addEventListener('click', () => {
+    if (confirm('Clear all history and favorites? This cannot be undone.')) {
+      App.favorites = [];
+      App.history = [];
+      Storage.set('efc_favorites', []);
+      Storage.set('efc_history', []);
+      updateBadges();
+      renderCategory(App.currentCategory);
+      toast('All data cleared.', 'success');
+    }
+  });
+
+  // Modal close
+  document.getElementById('modalClose').addEventListener('click', () => {
+    document.getElementById('modalOverlay').classList.remove('open');
+  });
+  document.getElementById('modalOverlay').addEventListener('click', (e) => {
+    if (e.target === e.currentTarget) {
+      e.currentTarget.classList.remove('open');
+    }
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape') {
+      document.getElementById('modalOverlay').classList.remove('open');
+    }
+  });
+
+  // Keyboard navigation for formula cards
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Enter' && document.activeElement.classList.contains('formula-card')) {
+      openFormula(document.activeElement.dataset.formula);
+    }
+  });
+}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+function toast(msg, type) {
+  const el = document.getElementById('toast');
+  el.textContent = msg;
+  el.className = 'toast show' + (type ? ' ' + type : '');
+  clearTimeout(el._timeout);
+  el._timeout = setTimeout(() => {
+    el.classList.remove('show');
+  }, 2500);
+}
+
+/* ============================================================
+   GO HOME
+   ============================================================ */
+App.goHome = function() {
+  document.getElementById('globalSearch').value = '';
+  renderCategory(App.currentCategory || 'math');
+};
+
+/* ============================================================
+   START
+   ============================================================ */
+document.addEventListener('DOMContentLoaded', init);
+</script>
+</body>
+</html>
