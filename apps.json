@@ -1,6 +1,16 @@
 {
  "apps": [
   {
+   "id": "etjpsf07",
+   "name": "Engineering Formula Calculator",
+   "desc": "Smart engineering formulas. Fast, simple, accurate.",
+   "file": "apps/etjpsf07.html",
+   "icon": "apps/etjpsf07.png",
+   "size": 188615,
+   "updated": 1791770330491,
+   "published": true
+  },
+  {
    "id": "0b8josor",
    "name": "MINI CAD",
    "desc": "Draw your ideas. Design your world.",
