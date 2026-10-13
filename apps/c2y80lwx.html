@@ -1,0 +1,1130 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <meta name="color-scheme" content="light dark">
+  <meta name="description" content="Calculate the weight of steel and metal plates, bars, pipes, hollow and structural sections, and tank shells.">
+  <title>Steel Weight Calculator Pro</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+
+    :root {
+      --bg: #f5f7fc;
+      --surface: #ffffff;
+      --border: #dce2ec;
+      --text: #1e293b;
+      --text-secondary: #475569;
+      --accent: #3b6e9b;
+      --accent-hover: #2c557a;
+      --accent-text: #2c557a;
+      --accent-light: #e1edf7;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.04), 0 2px 6px rgba(0, 0, 0, 0.02);
+      --radius: 16px;
+      --radius-sm: 10px;
+      --input-bg: #ffffff;
+      --input-border: #cbd5e1;
+      --error: #b91c1c;
+      --diagram-stroke: #2c3e50;
+      --diagram-fill: #d9e3f0;
+    }
+
+    body.dark {
+      --bg: #121826;
+      --surface: #1e2538;
+      --border: #2d3748;
+      --text: #e2e8f0;
+      --text-secondary: #a0aec0;
+      --accent: #2f7a85;
+      --accent-hover: #3b8d99;
+      --accent-text: #7fc4cb;
+      --accent-light: #1e3a4b;
+      --shadow: 0 8px 20px rgba(0, 0, 0, 0.3);
+      --input-bg: #1a2234;
+      --input-border: #3a4a5e;
+      --error: #fc8181;
+      --diagram-stroke: #a0b8d0;
+      --diagram-fill: #2d3a4e;
+    }
+
+    body {
+      font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif;
+      background: var(--bg);
+      color: var(--text);
+      line-height: 1.5;
+      min-height: 100vh;
+      padding: 0 12px 40px;
+      overflow-x: hidden;
+    }
+    button, input, select { font-family: inherit; }
+
+    .app-container { max-width: 1440px; margin: 0 auto; width: 100%; }
+
+    /* HEADER */
+    .app-header {
+      display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between;
+      padding: 16px 0 12px; gap: 12px;
+      border-bottom: 1px solid var(--border); margin-bottom: 18px;
+    }
+    .brand { display: flex; align-items: center; gap: 10px; color: var(--accent-text); }
+    .brand svg { width: 34px; height: 34px; flex-shrink: 0; }
+    .brand h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; line-height: 1.2; color: var(--text); }
+    .brand .sub { font-size: 0.72rem; color: var(--text-secondary); display: block; margin-top: 2px; }
+    .header-actions { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+
+    .unit-selector { display: flex; border: 1px solid var(--border); border-radius: 30px; overflow: hidden; background: var(--surface); }
+    .unit-selector button {
+      background: transparent; border: none; padding: 8px 16px; font-size: 0.75rem; font-weight: 600;
+      color: var(--text-secondary); cursor: pointer; transition: background 0.15s;
+    }
+    .unit-selector button.active { background: var(--accent); color: #fff; }
+
+    .icon-btn {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 40px;
+      width: 40px; height: 40px; display: flex; align-items: center; justify-content: center;
+      cursor: pointer; color: var(--text); transition: background 0.15s, border-color 0.15s;
+      flex-shrink: 0; position: relative;
+    }
+    .icon-btn:hover { background: var(--accent-light); border-color: var(--accent); }
+    .icon-btn svg { width: 20px; height: 20px; stroke: currentColor; fill: none; stroke-width: 1.8; }
+    .badge {
+      position: absolute; top: -4px; right: -4px; background: var(--accent); color: #fff;
+      font-size: 0.6rem; min-width: 18px; height: 18px; padding: 0 4px; border-radius: 9px;
+      display: flex; align-items: center; justify-content: center;
+    }
+    :focus-visible { outline: 2px solid var(--accent-text); outline-offset: 2px; }
+
+    /* SEARCH & NAV */
+    .search-section { margin-bottom: 14px; position: relative; }
+    .search-input {
+      width: 100%; padding: 14px 18px 14px 46px; border-radius: 40px; border: 1px solid var(--border);
+      background: var(--surface); color: var(--text); font-size: 0.95rem; outline: none; box-shadow: var(--shadow);
+    }
+    .search-input:focus { border-color: var(--accent); box-shadow: 0 0 0 3px var(--accent-light); }
+    .search-icon { position: absolute; left: 16px; top: 50%; transform: translateY(-50%); width: 20px; height: 20px; stroke: var(--text-secondary); pointer-events: none; }
+
+    .category-nav { display: flex; overflow-x: auto; gap: 6px; padding-bottom: 6px; margin-bottom: 18px; scrollbar-width: none; }
+    .category-nav::-webkit-scrollbar { display: none; }
+    .cat-btn {
+      background: var(--surface); border: 1px solid var(--border); border-radius: 30px; padding: 8px 18px;
+      font-size: 0.78rem; font-weight: 500; color: var(--text-secondary); white-space: nowrap; cursor: pointer; flex-shrink: 0;
+    }
+    .cat-btn.active { background: var(--accent); color: #fff; border-color: var(--accent); }
+
+    /* CARDS */
+    .calculators-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(min(100%, 320px), 1fr)); gap: 18px; margin-bottom: 30px; align-items: start; }
+    .calc-card {
+      background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius);
+      padding: 20px 18px; box-shadow: var(--shadow); display: flex; flex-direction: column; gap: 14px; min-width: 0;
+    }
+    .card-header { display: flex; align-items: center; gap: 10px; }
+    .card-header svg { width: 24px; height: 24px; stroke: var(--accent-text); fill: none; stroke-width: 1.8; flex-shrink: 0; }
+    .card-header h3 { font-size: 1rem; font-weight: 600; }
+    .card-body { display: flex; flex-direction: column; gap: 12px; }
+    .field-group { display: flex; flex-direction: column; gap: 4px; }
+    .field-group label { font-size: 0.72rem; font-weight: 600; color: var(--text-secondary); text-transform: uppercase; letter-spacing: 0.03em; }
+
+    input, select {
+      width: 100%; padding: 10px 12px; border: 1px solid var(--input-border); border-radius: var(--radius-sm);
+      background: var(--input-bg); color: var(--text); font-size: 0.9rem; outline: none;
+    }
+    input:focus, select:focus { border-color: var(--accent); box-shadow: 0 0 0 2px var(--accent-light); }
+    input.error { border-color: var(--error); }
+    .input-with-unit { position: relative; }
+    .input-with-unit input { padding-right: 52px; }
+    .input-unit { position: absolute; right: 10px; top: 50%; transform: translateY(-50%); font-size: 0.7rem; color: var(--text-secondary); font-weight: 500; pointer-events: none; }
+    .error-msg { font-size: 0.72rem; color: var(--error); min-height: 1.1em; }
+    .custom-density.hidden { display: none; }
+
+    .btn {
+      background: var(--accent); border: 1px solid var(--accent); border-radius: 30px; padding: 11px 18px;
+      font-size: 0.85rem; font-weight: 600; color: #fff; cursor: pointer; display: flex;
+      align-items: center; justify-content: center; gap: 8px; width: 100%;
+    }
+    .btn:hover { background: var(--accent-hover); border-color: var(--accent-hover); }
+    .btn-secondary { background: var(--surface); border-color: var(--border); color: var(--text); }
+    .btn-secondary:hover { background: var(--accent-light); border-color: var(--accent); }
+    .btn-sm { padding: 8px 14px; font-size: 0.75rem; width: auto; }
+    .btn-row { display: flex; gap: 8px; }
+    .btn-row .btn { padding: 10px 12px; }
+
+    .result-panel { background: var(--accent-light); border-radius: var(--radius-sm); padding: 14px; display: flex; flex-direction: column; gap: 6px; font-size: 0.82rem; }
+    .result-row { display: flex; justify-content: space-between; align-items: baseline; gap: 12px; }
+    .result-label { color: var(--text-secondary); }
+    .result-value { font-weight: 600; font-variant-numeric: tabular-nums; text-align: right; overflow-wrap: anywhere; }
+    .result-value.highlight { font-size: 1.1rem; font-weight: 700; color: var(--accent-text); }
+    .result-note { font-size: 0.7rem; color: var(--text-secondary); line-height: 1.4; }
+    .result-empty { font-size: 0.8rem; color: var(--text-secondary); padding: 6px 2px; }
+
+    .diagram-container { display: flex; justify-content: center; width: 100%; }
+    .diagram-container svg { width: 100%; max-width: 260px; height: auto; }
+    .diagram-container text { font-family: inherit; fill: var(--text-secondary); font-size: 10px; }
+
+    .collapsible { border-top: 1px solid var(--border); padding-top: 8px; margin-top: 6px; }
+    .collapsible summary { font-size: 0.75rem; font-weight: 600; color: var(--accent-text); cursor: pointer; list-style: none; display: flex; align-items: center; gap: 6px; user-select: none; }
+    .collapsible summary::-webkit-details-marker { display: none; }
+    .collapsible summary::before { content: "▸"; transition: transform 0.15s; }
+    .collapsible[open] summary::before { transform: rotate(90deg); }
+    .steps-content {
+      font-size: 0.74rem; line-height: 1.6; color: var(--text-secondary); white-space: pre-wrap;
+      font-family: ui-monospace, 'SF Mono', Menlo, Consolas, monospace; background: var(--bg);
+      border-radius: 6px; padding: 10px; margin-top: 6px; overflow-x: auto;
+    }
+
+    .no-results { text-align: center; color: var(--text-secondary); padding: 40px 0; grid-column: 1 / -1; }
+
+    /* BATCH / HISTORY */
+    .batch-list { display: flex; flex-direction: column; gap: 8px; margin: 12px 0; }
+    .batch-item, .history-item { display: flex; flex-wrap: wrap; gap: 8px; align-items: center; background: var(--bg); padding: 10px 12px; border-radius: var(--radius-sm); font-size: 0.78rem; border: 1px solid var(--border); }
+    .batch-item .item-info, .history-item .item-info { flex: 1; min-width: 160px; }
+    .batch-item .item-sub, .history-item .item-sub { color: var(--text-secondary); font-size: 0.72rem; }
+    .batch-item .qty-edit { display: flex; align-items: center; gap: 4px; font-size: 0.72rem; color: var(--text-secondary); }
+    .batch-item .qty-edit input { width: 64px; padding: 4px 6px; font-size: 0.78rem; }
+    .item-actions { display: flex; gap: 4px; }
+    .item-actions button { background: transparent; border: 1px solid var(--border); border-radius: 20px; padding: 4px 10px; font-size: 0.72rem; cursor: pointer; color: var(--text-secondary); }
+    .item-actions button:hover { background: var(--accent-light); }
+    .history-item { margin-bottom: 8px; }
+    .history-item .hist-total { font-weight: 700; color: var(--accent-text); white-space: nowrap; }
+
+    .toast {
+      position: fixed; bottom: 20px; left: 50%; transform: translateX(-50%); background: var(--text); color: var(--bg);
+      padding: 10px 22px; border-radius: 40px; font-size: 0.85rem; font-weight: 500; box-shadow: 0 8px 24px rgba(0,0,0,0.2);
+      z-index: 9999; opacity: 0; transition: opacity 0.25s; pointer-events: none; max-width: 90vw; text-align: center;
+    }
+    .toast.show { opacity: 1; }
+
+    .modal-overlay { position: fixed; inset: 0; background: rgba(0,0,0,0.5); display: flex; align-items: center; justify-content: center; z-index: 1000; padding: 20px; opacity: 0; visibility: hidden; transition: opacity 0.2s, visibility 0.2s; }
+    .modal-overlay.active { opacity: 1; visibility: visible; }
+    .modal { background: var(--surface); border-radius: var(--radius); max-width: 720px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 24px 48px rgba(0,0,0,0.2); }
+    .modal h2 { font-size: 1.2rem; margin-bottom: 12px; }
+    .modal-close { float: right; background: none; border: none; font-size: 1.6rem; cursor: pointer; color: var(--text-secondary); line-height: 1; padding: 0 4px; }
+    .flex-row { display: flex; gap: 8px; flex-wrap: wrap; }
+    .mt-16 { margin-top: 16px; }
+    .text-sm { font-size: 0.8rem; color: var(--text-secondary); }
+    .hidden { display: none !important; }
+    .app-footer { text-align: center; font-size: 0.72rem; color: var(--text-secondary); padding: 8px 0 0; }
+
+    @media (max-width: 640px) {
+      body { padding: 0 8px 30px; }
+      .brand h1 { font-size: 1.1rem; }
+      .header-actions { width: 100%; }
+      .icon-btn { width: 36px; height: 36px; }
+      .modal { padding: 16px; }
+    }
+
+    @media print {
+      body { background: #fff; color: #000; padding: 0; }
+      .app-header, .search-section, .category-nav, .btn-row, .icon-btn, .collapsible, .toast { display: none !important; }
+      .calc-card { box-shadow: none; border: 1px solid #ccc; break-inside: avoid; }
+      .result-panel { background: #f0f0f0 !important; print-color-adjust: exact; -webkit-print-color-adjust: exact; }
+      body.print-batch .app-container > *:not(#batchModal) { display: none !important; }
+      body.print-batch #batchModal { position: static; visibility: visible; opacity: 1; background: none; padding: 0; display: block; }
+      body.print-batch .modal { max-height: none; box-shadow: none; padding: 0; }
+      body.print-batch .modal-close, body.print-batch .modal .flex-row, body.print-batch .item-actions, body.print-batch .qty-edit input { display: none !important; }
+    }
+  </style>
+</head>
+<body>
+  <div class="app-container">
+    <header class="app-header">
+      <div class="brand">
+        <svg viewBox="0 0 40 40" fill="none" aria-hidden="true">
+          <rect x="4" y="8" width="32" height="24" rx="3" stroke="currentColor" stroke-width="2"/>
+          <line x1="4" y1="16" x2="36" y2="16" stroke="currentColor" stroke-width="1.5"/>
+          <line x1="4" y1="24" x2="36" y2="24" stroke="currentColor" stroke-width="1.5"/>
+          <circle cx="12" cy="20" r="2" fill="currentColor" opacity="0.5"/>
+          <circle cx="28" cy="20" r="2" fill="currentColor" opacity="0.5"/>
+        </svg>
+        <div>
+          <h1>Steel Weight Calculator Pro</h1>
+          <span class="sub">Calculate metal weight, dimensions &amp; material requirements</span>
+        </div>
+      </div>
+      <div class="header-actions">
+        <div class="unit-selector" id="unitSelector" role="group" aria-label="Unit system">
+          <button type="button" data-unit="metric" class="active" aria-pressed="true">Metric</button>
+          <button type="button" data-unit="imperial" aria-pressed="false">Imperial</button>
+        </div>
+        <button type="button" class="icon-btn" id="batchBtn" title="Batch list" aria-label="Open batch list">
+          <svg viewBox="0 0 24 24"><line x1="8" y1="6" x2="21" y2="6"/><line x1="8" y1="12" x2="21" y2="12"/><line x1="8" y1="18" x2="21" y2="18"/><circle cx="3.5" cy="6" r="1"/><circle cx="3.5" cy="12" r="1"/><circle cx="3.5" cy="18" r="1"/></svg>
+          <span class="badge" id="batchBadge">0</span>
+        </button>
+        <button type="button" class="icon-btn" id="historyBtn" title="Calculation history" aria-label="Open calculation history">
+          <svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>
+          <span class="badge" id="historyBadge">0</span>
+        </button>
+        <button type="button" class="icon-btn" id="themeToggle" title="Toggle light/dark theme" aria-label="Toggle theme">
+          <svg viewBox="0 0 24 24"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79z"/></svg>
+        </button>
+      </div>
+    </header>
+
+    <div class="search-section">
+      <svg class="search-icon" viewBox="0 0 24 24" fill="none" stroke-width="2" aria-hidden="true"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+      <input type="search" class="search-input" id="searchInput" aria-label="Search calculators" placeholder="Search calculators (pipe, SHS, I-beam, flat bar, disc...)" autocomplete="off">
+    </div>
+
+    <nav class="category-nav" id="categoryNav" aria-label="Categories">
+      <button type="button" class="cat-btn active" data-cat="all">All</button>
+      <button type="button" class="cat-btn" data-cat="plates">Plates &amp; Sheets</button>
+      <button type="button" class="cat-btn" data-cat="pipes">Pipes &amp; Tubes</button>
+      <button type="button" class="cat-btn" data-cat="bars">Bars</button>
+      <button type="button" class="cat-btn" data-cat="structural">Structural</button>
+      <button type="button" class="cat-btn" data-cat="hollow">Hollow Sections</button>
+      <button type="button" class="cat-btn" data-cat="tanks">Tanks</button>
+      <button type="button" class="cat-btn" data-cat="tools">Tools</button>
+    </nav>
+
+    <main class="calculators-grid" id="calculatorsGrid"></main>
+
+    <p class="app-footer">Theoretical weights from nominal dimensions and typical densities. Real products vary with rolling tolerances, corner radii and alloy.</p>
+
+    <div class="modal-overlay" id="historyModal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="historyTitle">
+        <button type="button" class="modal-close" data-close="historyModal" aria-label="Close">&times;</button>
+        <h2 id="historyTitle">Calculation History</h2>
+        <div id="historyList"></div>
+        <div class="flex-row mt-16">
+          <button type="button" class="btn btn-secondary btn-sm" id="clearHistoryBtn">Clear History</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-close="historyModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="modal-overlay" id="batchModal">
+      <div class="modal" role="dialog" aria-modal="true" aria-labelledby="batchTitle">
+        <button type="button" class="modal-close" data-close="batchModal" aria-label="Close">&times;</button>
+        <h2 id="batchTitle">Batch Weight List</h2>
+        <p class="text-sm">Use “Add to batch” on any calculator to collect items and get a combined total.</p>
+        <div id="batchListContainer" class="batch-list"></div>
+        <div class="result-panel" id="batchTotals"></div>
+        <div class="flex-row mt-16">
+          <button type="button" class="btn btn-secondary btn-sm" id="exportCsvBtn">Export CSV</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="printBatchBtn">Print Summary</button>
+          <button type="button" class="btn btn-secondary btn-sm" id="clearBatchBtn">Clear All</button>
+          <button type="button" class="btn btn-secondary btn-sm" data-close="batchModal">Close</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="toast" id="toast" role="status" aria-live="polite"></div>
+  </div>
+
+  <script>
+  (function () {
+    'use strict';
+
+    // ==================== DATA ====================
+    const MATERIALS = [
+      { id: 'carbon',   name: 'Carbon Steel',          density: 7850 },
+      { id: 'ss304',    name: 'Stainless Steel 304',   density: 7930 },
+      { id: 'ss316',    name: 'Stainless Steel 316',   density: 8000 },
+      { id: 'ss316l',   name: 'Stainless Steel 316L',  density: 8000 },
+      { id: 'ss430',    name: 'Stainless Steel 430',   density: 7700 },
+      { id: 'castiron', name: 'Cast Iron',             density: 7200 },
+      { id: 'aluminum', name: 'Aluminum',              density: 2700 },
+      { id: 'copper',   name: 'Copper',                density: 8960 },
+      { id: 'brass',    name: 'Brass',                 density: 8500 },
+      { id: 'bronze',   name: 'Bronze',                density: 8800 },
+      { id: 'titanium', name: 'Titanium',              density: 4500 },
+    ];
+
+    // Exact conversion constants
+    const IN = 0.0254, FT = 0.3048, LB = 0.45359237, SHORT_TON = 907.18474;
+    const IN3 = IN ** 3, FT2 = FT ** 2, GAL = 0.003785411784;
+
+    const state = { unit: 'metric', theme: 'light', history: [], batch: [] };
+
+    // ==================== HELPERS ====================
+    const $ = (s, p = document) => p.querySelector(s);
+    const $$ = (s, p = document) => [...p.querySelectorAll(s)];
+    const esc = (s) => String(s).replace(/[&<>"']/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;', "'": '&#39;' }[c]));
+    const isImp = () => state.unit === 'imperial';
+
+    const store = {
+      get(k) { try { return localStorage.getItem(k); } catch (e) { return null; } },
+      set(k, v) { try { localStorage.setItem(k, v); } catch (e) { /* storage unavailable */ } },
+    };
+
+    function fmt(n, d = 3) {
+      if (typeof n !== 'number' || !isFinite(n)) return '—';
+      if (n === 0) return '0';
+      const a = Math.abs(n);
+      if (a < 1e-3 || a >= 1e9) return n.toExponential(3);
+      return n.toLocaleString('en-US', { maximumFractionDigits: d });
+    }
+    const sig = (n) => (typeof n === 'number' && isFinite(n)) ? String(Number(n.toPrecision(6))) : '—';
+
+    let toastTimer;
+    function showToast(msg) {
+      const t = $('#toast');
+      t.textContent = msg;
+      t.classList.add('show');
+      clearTimeout(toastTimer);
+      toastTimer = setTimeout(() => t.classList.remove('show'), 2000);
+    }
+
+    // ---- Unit system: fields are entered in mm / in (lengths) or mm² / in² (areas) ----
+    const FIELD_UNIT = {
+      len:  { metric: 'mm',  imperial: 'in' },
+      xsec: { metric: 'mm²', imperial: 'in²' },
+    };
+    function toBase(kind, v) {            // displayed value -> SI (m or m²)
+      if (kind === 'len')  return isImp() ? v * IN : v / 1000;
+      if (kind === 'xsec') return isImp() ? v * IN * IN : v * 1e-6;
+      return v;
+    }
+    function fromBase(kind, v) {          // SI -> displayed value
+      if (kind === 'len')  return isImp() ? v / IN : v * 1000;
+      if (kind === 'xsec') return isImp() ? v / (IN * IN) : v * 1e6;
+      return v;
+    }
+    const lenStr = (m) => `${fmt(fromBase('len', m), 2)} ${FIELD_UNIT.len[state.unit]}`;
+
+    // Output formatting by quantity kind. value is always SI.
+    function out(kind, v) {
+      const imp = isImp();
+      switch (kind) {
+        case 'len':   return `${fmt(imp ? v / FT : v, 3)} ${imp ? 'ft' : 'm'}`;
+        case 'xsec':  return `${fmt(fromBase('xsec', v), 2)} ${FIELD_UNIT.xsec[state.unit]}`;
+        case 'area':  return imp ? `${fmt(v / FT2)} ft²` : `${fmt(v)} m²`;
+        case 'vol':   return imp ? (v >= FT ** 3 ? `${fmt(v / FT ** 3)} ft³` : `${fmt(v / IN3)} in³`)
+                                 : (v >= 1 ? `${fmt(v)} m³` : `${fmt(v * 1e6)} cm³`);
+        case 'cap':   return imp ? `${fmt(v / GAL)} US gal` : `${fmt(v * 1000)} L`;
+        case 'mass':  return imp ? `${fmt(v / LB)} lb` : `${fmt(v)} kg`;
+        case 'linmass': return imp ? `${fmt(v * FT / LB)} lb/ft` : `${fmt(v)} kg/m`;
+        case 'areamass': return imp ? `${fmt(v * FT2 / LB)} lb/ft²` : `${fmt(v)} kg/m²`;
+        case 'ton':   return imp ? `${fmt(v / SHORT_TON)} short tons` : `${fmt(v / 1000)} t`;
+        default:      return String(v);
+      }
+    }
+
+    // ==================== DIAGRAMS ====================
+    const S = 'stroke="var(--diagram-stroke)"';
+    const FILL = 'fill="var(--diagram-fill)"';
+    const T = (x, y, s, extra = '') => `<text x="${x}" y="${y}" text-anchor="middle" ${extra}>${esc(s)}</text>`;
+    const svg = (inner) => `<svg viewBox="0 0 260 140" role="img" aria-label="Cross-section sketch">${inner}</svg>`;
+
+    // ==================== CALCULATORS ====================
+    // fields: kind 'len' | 'xsec' | 'sel'. compute() receives SI values, returns:
+    //   { volume (m³ / piece), area? (m² cross-section), length? (m), extra: [{label, kind, v}], steps: [...], note?, dims: string }
+    //   or { error: 'message' }.
+    const sharpNote = 'Idealized sharp corners — no fillets or taper.';
+
+    const calculators = [
+      {
+        id: 'plate', name: 'Steel Plate / Sheet', category: 'plates', keywords: 'plate sheet flat rectangular',
+        icon: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1"/><line x1="3" y1="10" x2="21" y2="10"/></svg>',
+        fields: [
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+          { id: 'width', label: 'Width', kind: 'len', def: 1000 },
+          { id: 'thickness', label: 'Thickness', kind: 'len', def: 10 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="30" y="30" width="200" height="70" rx="3" ${FILL} ${S} stroke-width="1.5"/>
+          <line x1="30" y1="112" x2="230" y2="112" ${S}/>${T(130, 128, 'L = ' + lenStr(p.length))}
+          ${T(130, 70, 'W = ' + lenStr(p.width))}
+          ${T(130, 20, 't = ' + lenStr(p.thickness))}`),
+        compute: (p, rho) => ({
+          volume: p.length * p.width * p.thickness,
+          extra: [
+            { label: 'Mass per area', kind: 'areamass', v: p.thickness * rho },
+            { label: 'Face area (L × W)', kind: 'area', v: p.length * p.width },
+            { label: 'Total surface area', kind: 'area', v: 2 * (p.length * p.width + p.length * p.thickness + p.width * p.thickness) },
+          ],
+          steps: [`V = L × W × t = ${sig(p.length)} × ${sig(p.width)} × ${sig(p.thickness)} = ${sig(p.length * p.width * p.thickness)} m³`],
+          dims: `${lenStr(p.length)} × ${lenStr(p.width)} × ${lenStr(p.thickness)}`,
+        }),
+      },
+      {
+        id: 'disc', name: 'Round Plate / Disc', category: 'plates', keywords: 'disc disk round plate circular flange blank',
+        icon: '<svg viewBox="0 0 24 24"><ellipse cx="12" cy="9" rx="8" ry="4"/><path d="M4 9 V13 A8 4 0 0 0 20 13 V9"/></svg>',
+        fields: [
+          { id: 'diameter', label: 'Diameter', kind: 'len', def: 500 },
+          { id: 'thickness', label: 'Thickness', kind: 'len', def: 10 },
+        ],
+        diagram: (p) => svg(`
+          <circle cx="130" cy="62" r="45" ${FILL} ${S} stroke-width="1.5"/>
+          <line x1="85" y1="62" x2="175" y2="62" ${S} stroke-dasharray="4"/>
+          ${T(130, 56, '⌀ ' + lenStr(p.diameter))}${T(130, 130, 't = ' + lenStr(p.thickness))}`),
+        compute: (p) => {
+          const A = Math.PI * p.diameter ** 2 / 4;
+          return {
+            volume: A * p.thickness,
+            extra: [{ label: 'Face area (one side)', kind: 'area', v: A }],
+            steps: [`A = πD²/4 = π × ${sig(p.diameter)}² / 4 = ${sig(A)} m²`, `V = A × t = ${sig(A)} × ${sig(p.thickness)} = ${sig(A * p.thickness)} m³`],
+            dims: `⌀${lenStr(p.diameter)} × ${lenStr(p.thickness)}`,
+          };
+        },
+      },
+      {
+        id: 'roundbar', name: 'Solid Round Bar', category: 'bars', keywords: 'round bar rod solid circular',
+        icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/></svg>',
+        fields: [
+          { id: 'diameter', label: 'Diameter', kind: 'len', def: 100 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <circle cx="130" cy="62" r="42" ${FILL} ${S} stroke-width="1.5"/>
+          <line x1="88" y1="62" x2="172" y2="62" ${S} stroke-dasharray="4"/>
+          ${T(130, 56, '⌀ ' + lenStr(p.diameter))}${T(130, 128, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => {
+          const A = Math.PI * p.diameter ** 2 / 4;
+          return {
+            area: A, length: p.length, volume: A * p.length, extra: [],
+            steps: [`A = πD²/4 = π × ${sig(p.diameter)}² / 4 = ${sig(A)} m²`],
+            dims: `⌀${lenStr(p.diameter)} × ${lenStr(p.length)}`,
+          };
+        },
+      },
+      {
+        id: 'squarebar', name: 'Square Bar', category: 'bars', keywords: 'square bar',
+        icon: '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/></svg>',
+        fields: [
+          { id: 'side', label: 'Side', kind: 'len', def: 50 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="90" y="20" width="80" height="80" rx="2" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 64, lenStr(p.side))}${T(130, 124, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => {
+          const A = p.side ** 2;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], steps: [`A = a² = ${sig(p.side)}² = ${sig(A)} m²`], dims: `${lenStr(p.side)} sq × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'rectbar', name: 'Rectangular Bar', category: 'bars', keywords: 'rectangular bar flat',
+        icon: '<svg viewBox="0 0 24 24"><rect x="4" y="6" width="16" height="12" rx="1"/></svg>',
+        fields: [
+          { id: 'width', label: 'Width', kind: 'len', def: 50 },
+          { id: 'height', label: 'Height', kind: 'len', def: 100 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="70" y="15" width="120" height="80" rx="2" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 60, lenStr(p.width) + ' × ' + lenStr(p.height))}${T(130, 120, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => {
+          const A = p.width * p.height;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], steps: [`A = W × H = ${sig(p.width)} × ${sig(p.height)} = ${sig(A)} m²`], dims: `${lenStr(p.width)} × ${lenStr(p.height)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'flatbar', name: 'Flat Bar', category: 'bars', keywords: 'flat bar strip',
+        icon: '<svg viewBox="0 0 24 24"><rect x="3" y="8" width="18" height="8" rx="1"/></svg>',
+        fields: [
+          { id: 'width', label: 'Width', kind: 'len', def: 100 },
+          { id: 'thickness', label: 'Thickness', kind: 'len', def: 10 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="40" y="45" width="180" height="30" rx="2" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 36, 't = ' + lenStr(p.thickness))}${T(130, 96, 'W = ' + lenStr(p.width))}${T(130, 124, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => {
+          const A = p.width * p.thickness;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], steps: [`A = W × t = ${sig(p.width)} × ${sig(p.thickness)} = ${sig(A)} m²`], dims: `${lenStr(p.width)} × ${lenStr(p.thickness)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'hexbar', name: 'Hexagonal Bar', category: 'bars', keywords: 'hex hexagonal bar',
+        icon: '<svg viewBox="0 0 24 24"><path d="M12 3 L20 7.5 L20 16.5 L12 21 L4 16.5 L4 7.5 Z"/></svg>',
+        fields: [
+          { id: 'acrossFlats', label: 'Across Flats', kind: 'len', def: 50 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <polygon points="130,15 173,40 173,90 130,115 87,90 87,40" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 68, 'F = ' + lenStr(p.acrossFlats))}${T(130, 134, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => {
+          const A = (Math.sqrt(3) / 2) * p.acrossFlats ** 2;
+          return {
+            area: A, length: p.length, volume: A * p.length,
+            extra: [{ label: 'Across corners', kind: 'len2', v: p.acrossFlats * 2 / Math.sqrt(3) }],
+            steps: [`A = (√3/2)·F² = (√3/2) × ${sig(p.acrossFlats)}² = ${sig(A)} m²`],
+            dims: `${lenStr(p.acrossFlats)} A/F × ${lenStr(p.length)}`,
+          };
+        },
+      },
+      {
+        id: 'pipe', name: 'Pipe / Round Tube', category: 'pipes', keywords: 'pipe tube circular hollow chs od id round',
+        icon: '<svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="8"/><circle cx="12" cy="12" r="4.5"/></svg>',
+        fields: [
+          { id: 'od', label: 'Outside Diameter', kind: 'len', def: 114.3 },
+          { id: 'wall', label: 'Wall Thickness', kind: 'len', def: 6.02 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <circle cx="130" cy="62" r="46" ${FILL} ${S} stroke-width="1.5"/>
+          <circle cx="130" cy="62" r="${Math.max(6, Math.min(44, 46 * (1 - 2 * p.wall / p.od)))}" fill="var(--surface)" ${S} stroke-width="1.5"/>
+          ${T(130, 66, 'ID ' + lenStr(p.od - 2 * p.wall))}${T(130, 124, 'OD ' + lenStr(p.od) + '  ·  L ' + lenStr(p.length))}`),
+        validate: (p) => (2 * p.wall >= p.od ? 'Wall thickness must be less than half the outside diameter.' : null),
+        compute: (p) => {
+          const ID = p.od - 2 * p.wall;
+          const A = Math.PI * (p.od ** 2 - ID ** 2) / 4;
+          return {
+            area: A, length: p.length, volume: A * p.length,
+            extra: [
+              { label: 'Inside diameter', kind: 'len2', v: ID },
+              { label: 'Internal capacity', kind: 'cap', v: Math.PI * ID ** 2 / 4 * p.length },
+            ],
+            steps: [`ID = OD − 2t = ${sig(p.od)} − 2 × ${sig(p.wall)} = ${sig(ID)} m`, `A = π(OD² − ID²)/4 = ${sig(A)} m²`],
+            dims: `OD ${lenStr(p.od)} × ${lenStr(p.wall)} wall × ${lenStr(p.length)}`,
+          };
+        },
+      },
+      {
+        id: 'shs', name: 'Square Hollow Section (SHS)', category: 'hollow', keywords: 'shs square hollow section tube box',
+        icon: '<svg viewBox="0 0 24 24"><rect x="5" y="5" width="14" height="14" rx="1"/><rect x="8" y="8" width="8" height="8" rx="0.5"/></svg>',
+        fields: [
+          { id: 'width', label: 'Outside Width', kind: 'len', def: 100 },
+          { id: 'wall', label: 'Wall Thickness', kind: 'len', def: 5 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="90" y="15" width="80" height="80" rx="2" ${FILL} ${S} stroke-width="1.5"/>
+          <rect x="${90 + Math.min(30, 80 * p.wall / p.width)}" y="${15 + Math.min(30, 80 * p.wall / p.width)}" width="${Math.max(8, 80 - 2 * Math.min(30, 80 * p.wall / p.width))}" height="${Math.max(8, 80 - 2 * Math.min(30, 80 * p.wall / p.width))}" fill="var(--surface)" ${S}/>
+          ${T(130, 114, lenStr(p.width) + ' sq · t ' + lenStr(p.wall))}${T(130, 132, 'L = ' + lenStr(p.length))}`),
+        validate: (p) => (2 * p.wall >= p.width ? 'Wall thickness must be less than half the width.' : null),
+        compute: (p) => {
+          const A = p.width ** 2 - (p.width - 2 * p.wall) ** 2;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], note: sharpNote, steps: [`A = B² − (B − 2t)² = ${sig(A)} m²`], dims: `${lenStr(p.width)} sq × ${lenStr(p.wall)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'rhs', name: 'Rectangular Hollow Section (RHS)', category: 'hollow', keywords: 'rhs rectangular hollow section tube box',
+        icon: '<svg viewBox="0 0 24 24"><rect x="3" y="6" width="18" height="12" rx="1"/><rect x="6" y="9" width="12" height="6" rx="0.5"/></svg>',
+        fields: [
+          { id: 'width', label: 'Outside Width', kind: 'len', def: 100 },
+          { id: 'height', label: 'Outside Height', kind: 'len', def: 50 },
+          { id: 'wall', label: 'Wall Thickness', kind: 'len', def: 4 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <rect x="60" y="20" width="140" height="70" rx="2" ${FILL} ${S} stroke-width="1.5"/>
+          <rect x="${60 + Math.min(25, 140 * p.wall / p.width)}" y="${20 + Math.min(25, 140 * p.wall / p.width)}" width="${Math.max(8, 140 - 2 * Math.min(25, 140 * p.wall / p.width))}" height="${Math.max(8, 70 - 2 * Math.min(25, 140 * p.wall / p.width))}" fill="var(--surface)" ${S}/>
+          ${T(130, 110, lenStr(p.width) + ' × ' + lenStr(p.height) + ' · t ' + lenStr(p.wall))}${T(130, 128, 'L = ' + lenStr(p.length))}`),
+        validate: (p) => (2 * p.wall >= Math.min(p.width, p.height) ? 'Wall thickness must be less than half the smaller side.' : null),
+        compute: (p) => {
+          const A = p.width * p.height - (p.width - 2 * p.wall) * (p.height - 2 * p.wall);
+          return { area: A, length: p.length, volume: A * p.length, extra: [], note: sharpNote, steps: [`A = B·H − (B − 2t)(H − 2t) = ${sig(A)} m²`], dims: `${lenStr(p.width)} × ${lenStr(p.height)} × ${lenStr(p.wall)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'angle', name: 'Angle Bar', category: 'structural', keywords: 'angle bar unequal equal leg l section',
+        icon: '<svg viewBox="0 0 24 24"><path d="M5 5 L5 19 L19 19"/></svg>',
+        fields: [
+          { id: 'legA', label: 'Leg A', kind: 'len', def: 50 },
+          { id: 'legB', label: 'Leg B', kind: 'len', def: 50 },
+          { id: 'thickness', label: 'Thickness', kind: 'len', def: 5 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <path d="M70 15 H84 V93 H190 V107 H70 Z" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 126, 'Leg A = ' + lenStr(p.legA))}${T(60, 62, 'B', 'font-weight="600"')}
+          ${T(150, 74, 'Leg B = ' + lenStr(p.legB))}${T(150, 54, 't = ' + lenStr(p.thickness))}`),
+        validate: (p) => (p.thickness >= Math.min(p.legA, p.legB) ? 'Thickness must be smaller than both legs.' : null),
+        compute: (p) => {
+          const A = p.thickness * (p.legA + p.legB - p.thickness);
+          return { area: A, length: p.length, volume: A * p.length, extra: [], note: sharpNote, steps: [`A = t(A + B − t) = ${sig(A)} m²`], dims: `${lenStr(p.legA)} × ${lenStr(p.legB)} × ${lenStr(p.thickness)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'channel', name: 'Channel Section (U / C)', category: 'structural', keywords: 'channel u section c section pfc upn',
+        icon: '<svg viewBox="0 0 24 24"><path d="M18 5 H6 V19 H18"/></svg>',
+        fields: [
+          { id: 'height', label: 'Overall Height (web)', kind: 'len', def: 100 },
+          { id: 'flangeWidth', label: 'Flange Width (overall)', kind: 'len', def: 50 },
+          { id: 'webThickness', label: 'Web Thickness', kind: 'len', def: 5 },
+          { id: 'flangeThickness', label: 'Flange Thickness', kind: 'len', def: 8 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <path d="M100 15 H165 V27 H112 V83 H165 V95 H100 Z" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(70, 58, 'H = ' + lenStr(p.height))}${T(132, 112, 'B = ' + lenStr(p.flangeWidth))}${T(132, 130, 'tw ' + lenStr(p.webThickness) + ' · tf ' + lenStr(p.flangeThickness))}`),
+        validate: (p) => (2 * p.flangeThickness >= p.height ? 'Flange thickness × 2 must be less than the height.'
+                        : p.webThickness >= p.flangeWidth ? 'Web thickness must be less than the flange width.' : null),
+        compute: (p) => {
+          // Web runs full height; flanges project (B − tw) beyond the web on one side.
+          const A = p.webThickness * p.height + 2 * (p.flangeWidth - p.webThickness) * p.flangeThickness;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], note: sharpNote.replace('corners', 'corners/parallel flanges'),
+            steps: [`A = tw·H + 2(B − tw)·tf = ${sig(A)} m²`],
+            dims: `${lenStr(p.height)} × ${lenStr(p.flangeWidth)} × ${lenStr(p.webThickness)}/${lenStr(p.flangeThickness)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'ibeam', name: 'I-Beam / H-Beam', category: 'structural', keywords: 'i beam h beam universal column wf ipe heb',
+        icon: '<svg viewBox="0 0 24 24"><path d="M12 5 V19 M5 5 H19 M5 19 H19"/></svg>',
+        fields: [
+          { id: 'height', label: 'Overall Height', kind: 'len', def: 200 },
+          { id: 'flangeWidth', label: 'Flange Width', kind: 'len', def: 100 },
+          { id: 'webThickness', label: 'Web Thickness', kind: 'len', def: 5.6 },
+          { id: 'flangeThickness', label: 'Flange Thickness', kind: 'len', def: 8.5 },
+          { id: 'length', label: 'Length', kind: 'len', def: 6000 },
+        ],
+        diagram: (p) => svg(`
+          <path d="M80 15 H180 V27 H136 V83 H180 V95 H80 V83 H124 V27 H80 Z" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 112, 'H = ' + lenStr(p.height) + ' · B = ' + lenStr(p.flangeWidth))}${T(130, 130, 'tw ' + lenStr(p.webThickness) + ' · tf ' + lenStr(p.flangeThickness))}`),
+        validate: (p) => (2 * p.flangeThickness >= p.height ? 'Flange thickness × 2 must be less than the height.'
+                        : p.webThickness > p.flangeWidth ? 'Web thickness must not exceed the flange width.' : null),
+        compute: (p) => {
+          const A = p.webThickness * (p.height - 2 * p.flangeThickness) + 2 * p.flangeWidth * p.flangeThickness;
+          return { area: A, length: p.length, volume: A * p.length, extra: [], note: 'Excludes root fillets, so real beams weigh ~3–5% more.',
+            steps: [`A = tw(H − 2tf) + 2·B·tf = ${sig(A)} m²`],
+            dims: `${lenStr(p.height)} × ${lenStr(p.flangeWidth)} × ${lenStr(p.webThickness)}/${lenStr(p.flangeThickness)} × ${lenStr(p.length)}` };
+        },
+      },
+      {
+        id: 'customarea', name: 'Custom Cross-Section', category: 'tools', keywords: 'custom area cross section known profile',
+        icon: '<svg viewBox="0 0 24 24"><path d="M4 18 L8 6 L14 10 L20 4 L18 18 Z"/></svg>',
+        fields: [
+          { id: 'area', label: 'Cross-sectional Area', kind: 'xsec', def: 1000 },
+          { id: 'length', label: 'Length', kind: 'len', def: 1000 },
+        ],
+        diagram: (p) => svg(`
+          <path d="M80 100 L100 30 L140 55 L185 20 L175 100 Z" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 80, 'A = ' + fmt(fromBase('xsec', p.area), 1) + ' ' + FIELD_UNIT.xsec[state.unit])}${T(130, 128, 'L = ' + lenStr(p.length))}`),
+        compute: (p) => ({ area: p.area, length: p.length, volume: p.area * p.length, extra: [], steps: [`A = ${sig(p.area)} m²`], dims: `A ${fmt(fromBase('xsec', p.area), 1)} ${FIELD_UNIT.xsec[state.unit]} × ${lenStr(p.length)}` }),
+      },
+      {
+        id: 'tank', name: 'Tank Shell', category: 'tanks', keywords: 'tank shell cylinder vessel drum',
+        icon: '<svg viewBox="0 0 24 24"><rect x="6" y="3" width="12" height="18" rx="2"/></svg>',
+        fields: [
+          { id: 'diameter', label: 'Outside Diameter', kind: 'len', def: 1000 },
+          { id: 'height', label: 'Shell Height', kind: 'len', def: 2000 },
+          { id: 'thickness', label: 'Wall Thickness', kind: 'len', def: 5 },
+          { id: 'includeTop', label: 'Top Plate', kind: 'sel', def: 0, opts: [[0, 'Not included'], [1, 'Included']] },
+          { id: 'includeBottom', label: 'Bottom Plate', kind: 'sel', def: 1, opts: [[0, 'Not included'], [1, 'Included']] },
+        ],
+        diagram: (p) => svg(`
+          <rect x="85" y="20" width="90" height="85" rx="6" ${FILL} ${S} stroke-width="1.5"/>
+          ${T(130, 66, '⌀ ' + lenStr(p.diameter))}${T(130, 124, 'H = ' + lenStr(p.height) + ' · t ' + lenStr(p.thickness))}`),
+        validate: (p) => (2 * p.thickness >= p.diameter ? 'Wall thickness must be less than half the diameter.' : null),
+        compute: (p) => {
+          const ID = p.diameter - 2 * p.thickness;
+          const shell = Math.PI * (p.diameter ** 2 - ID ** 2) / 4 * p.height;
+          const plate = Math.PI * p.diameter ** 2 / 4 * p.thickness;
+          const plates = plate * (p.includeTop + p.includeBottom);
+          return {
+            volume: shell + plates,
+            extra: [
+              { label: 'Shell volume', kind: 'vol', v: shell },
+              { label: 'End plates volume', kind: 'vol', v: plates },
+              { label: 'Internal capacity (shell)', kind: 'cap', v: Math.PI * ID ** 2 / 4 * p.height },
+            ],
+            note: 'Plain shell + flat discs. Excludes stiffeners, nozzles, heads and supports.',
+            steps: [`ID = OD − 2t = ${sig(ID)} m`, `Shell V = π(OD² − ID²)/4 × H = ${sig(shell)} m³`, `End plates V = ${p.includeTop + p.includeBottom} × πOD²/4 × t = ${sig(plates)} m³`],
+            dims: `⌀${lenStr(p.diameter)} × ${lenStr(p.height)} × ${lenStr(p.thickness)}${p.includeTop ? ' +top' : ''}${p.includeBottom ? ' +bottom' : ''}`,
+          };
+        },
+      },
+    ];
+
+    // ==================== CARDS ====================
+    function fieldUnitLabel(f) { return f.kind === 'sel' ? '' : FIELD_UNIT[f.kind][state.unit]; }
+
+    function defaultDisplay(f) {
+      if (f.kind === 'sel') return f.def;
+      const v = fromBase(f.kind, toBaseMetricDefault(f));
+      return +v.toPrecision(5);
+    }
+    function toBaseMetricDefault(f) { return f.kind === 'len' ? f.def / 1000 : f.def * 1e-6; }
+
+    function buildCard(calc) {
+      const card = document.createElement('section');
+      card.className = 'calc-card';
+      card.dataset.id = calc.id;
+      card.dataset.category = calc.category;
+      card.dataset.search = (calc.name + ' ' + calc.keywords).toLowerCase();
+
+      const fieldsHtml = calc.fields.map(f => {
+        const id = `${calc.id}_${f.id}`;
+        const control = f.kind === 'sel'
+          ? `<select id="${id}" data-field="${f.id}">${f.opts.map(([v, l]) => `<option value="${v}"${v === f.def ? ' selected' : ''}>${l}</option>`).join('')}</select>`
+          : `<div class="input-with-unit"><input type="number" inputmode="decimal" id="${id}" data-field="${f.id}" step="any" min="0" value="${defaultDisplay(f)}"><span class="input-unit" data-unit-for="${f.id}">${fieldUnitLabel(f)}</span></div>`;
+        return `<div class="field-group"><label for="${id}">${esc(f.label)}</label>${control}<div class="error-msg" id="err_${id}" aria-live="polite"></div></div>`;
+      }).join('');
+
+      card.innerHTML = `
+        <div class="card-header">${calc.icon}<h3>${esc(calc.name)}</h3></div>
+        <div class="card-body">
+          ${fieldsHtml}
+          <div class="field-group">
+            <label for="${calc.id}_qty">Quantity</label>
+            <div class="input-with-unit"><input type="number" inputmode="numeric" id="${calc.id}_qty" data-field="qty" step="1" min="1" value="1"><span class="input-unit">pcs</span></div>
+            <div class="error-msg" id="err_${calc.id}_qty" aria-live="polite"></div>
+          </div>
+          <div class="field-group">
+            <label for="${calc.id}_material">Material</label>
+            <select id="${calc.id}_material" data-field="material">
+              ${MATERIALS.map(m => `<option value="${m.id}">${m.name} (${m.density} kg/m³)</option>`).join('')}
+              <option value="custom">Custom density…</option>
+            </select>
+          </div>
+          <div class="field-group custom-density hidden">
+            <label for="${calc.id}_density">Custom density</label>
+            <div class="input-with-unit"><input type="number" inputmode="decimal" id="${calc.id}_density" data-field="density" step="any" min="0" value="7850"><span class="input-unit">kg/m³</span></div>
+            <div class="error-msg" id="err_${calc.id}_density" aria-live="polite"></div>
+          </div>
+          <div class="diagram-container"></div>
+          <div class="btn-row">
+            <button type="button" class="btn" data-action="save">Save to history</button>
+            <button type="button" class="btn btn-secondary" data-action="batch">+ Add to batch</button>
+          </div>
+          <div class="result" aria-live="polite"></div>
+        </div>`;
+      return card;
+    }
+
+    // Read + validate card inputs. Returns { ok, p (SI), disp (display values), qty, material }.
+    function readCard(calc, card) {
+      let ok = true;
+      const p = {}, disp = {};
+      const setErr = (key, msg) => {
+        const el = $(`#err_${calc.id}_${key}`, card);
+        const inp = $(`#${calc.id}_${key}`, card);
+        if (el) el.textContent = msg || '';
+        if (inp) inp.classList.toggle('error', !!msg);
+      };
+      for (const f of calc.fields) {
+        const el = $(`#${calc.id}_${f.id}`, card);
+        if (f.kind === 'sel') { p[f.id] = Number(el.value); continue; }
+        const v = parseFloat(el.value);
+        if (!isFinite(v) || v <= 0) { setErr(f.id, 'Enter a number greater than 0'); ok = false; continue; }
+        setErr(f.id, '');
+        disp[f.id] = v;
+        p[f.id] = toBase(f.kind, v);
+      }
+      const qEl = $(`#${calc.id}_qty`, card);
+      const qty = Number(qEl.value);
+      if (!Number.isInteger(qty) || qty < 1 || qty > 1e6) { setErr('qty', 'Whole number from 1 to 1,000,000'); ok = false; } else setErr('qty', '');
+
+      const matId = $(`#${calc.id}_material`, card).value;
+      let material;
+      if (matId === 'custom') {
+        const d = parseFloat($(`#${calc.id}_density`, card).value);
+        if (!isFinite(d) || d <= 0) { setErr('density', 'Enter a density greater than 0'); ok = false; } else setErr('density', '');
+        material = { id: 'custom', name: 'Custom material', density: d };
+      } else {
+        material = MATERIALS.find(m => m.id === matId) || MATERIALS[0];
+      }
+      return { ok, p, disp, qty, material };
+    }
+
+    function densityText(rho) {
+      return isImp() ? `${fmt(rho, 0)} kg/m³ (${fmt(rho / 16.01846337, 1)} lb/ft³)` : `${fmt(rho, 0)} kg/m³`;
+    }
+
+    function updateCard(card, { save = false } = {}) {
+      const calc = card._calc;
+      const resultEl = $('.result', card);
+      const r = readCard(calc, card);
+      card._last = null;
+
+      if (!r.ok) {
+        resultEl.innerHTML = '<div class="result-empty">Fix the highlighted fields to see results.</div>';
+        return;
+      }
+      const verr = calc.validate ? calc.validate(r.p) : null;
+      if (verr) {
+        resultEl.innerHTML = `<div class="result-panel"><div class="error-msg" style="min-height:0">${esc(verr)}</div></div>`;
+        return;
+      }
+
+      const rho = r.material.density;
+      const res = calc.compute(r.p, rho);
+      const massPiece = res.volume * rho;
+      const total = massPiece * r.qty;
+      const rows = [
+        { l: 'Material', v: esc(r.material.name) },
+        { l: 'Density', v: densityText(rho) },
+      ];
+      if (res.area) rows.push({ l: 'Cross-sectional area', v: out('xsec', res.area) });
+      if (res.area) rows.push({ l: 'Mass per length', v: out('linmass', res.area * rho) });
+      for (const e of res.extra || []) {
+        rows.push({ l: e.label, v: e.kind === 'len2' ? lenStr(e.v) : out(e.kind, e.v) });
+      }
+      rows.push({ l: 'Volume per piece', v: out('vol', res.volume) });
+      rows.push({ l: 'Mass per piece', v: out('mass', massPiece) });
+      if (r.qty > 1) rows.push({ l: 'Quantity', v: fmt(r.qty, 0) + ' pcs' });
+      rows.push({ l: 'Total mass', v: out('mass', total), hi: true });
+      rows.push({ l: 'Total mass (large unit)', v: out('ton', total) });
+
+      const steps = [
+        `Formula: m = ρ × V`,
+        `(calculation in SI units: m, m², m³, kg)`,
+        ...res.steps,
+        `ρ = ${sig(rho)} kg/m³`,
+        `V per piece = ${sig(res.volume)} m³`,
+        `m per piece = ρ × V = ${sig(massPiece)} kg`,
+        `Total (${r.qty} pcs) = ${sig(total)} kg`,
+      ].join('\n');
+
+      const wasOpen = !!$('details', resultEl)?.open;
+      resultEl.innerHTML = `<div class="result-panel">
+        ${rows.map(x => `<div class="result-row"><span class="result-label">${x.l}</span><span class="result-value${x.hi ? ' highlight' : ''}">${x.v}</span></div>`).join('')}
+        ${res.note ? `<div class="result-note">${esc(res.note)}</div>` : ''}
+        <details class="collapsible"${wasOpen ? ' open' : ''}><summary>Show calculation steps</summary><div class="steps-content">${esc(steps)}</div></details>
+      </div>`;
+
+      const dg = $('.diagram-container', card);
+      dg.innerHTML = calc.diagram(r.p);
+
+      card._last = { product: calc.name, material: r.material.name, dims: res.dims, qty: r.qty, unitMassKg: massPiece, totalKg: total };
+      if (save) { addHistory(card._last); showToast('Saved to history'); }
+    }
+
+    function renderAllCards() {
+      const grid = $('#calculatorsGrid');
+      grid.innerHTML = '';
+      calculators.forEach(calc => {
+        const card = buildCard(calc);
+        card._calc = calc;
+        grid.appendChild(card);
+        updateCard(card);
+      });
+      const none = document.createElement('p');
+      none.className = 'no-results hidden';
+      none.id = 'noResults';
+      none.textContent = 'No calculators match your search.';
+      grid.appendChild(none);
+    }
+
+    // Convert displayed values when switching unit system, then refresh labels & results.
+    function switchUnit(newUnit) {
+      if (newUnit === state.unit) return;
+      const oldUnit = state.unit;
+      $$('.calc-card').forEach(card => {
+        const calc = card._calc;
+        calc.fields.forEach(f => {
+          if (f.kind === 'sel') return;
+          const el = $(`#${calc.id}_${f.id}`, card);
+          const v = parseFloat(el.value);
+          if (!isFinite(v)) return;
+          state.unit = oldUnit;
+          const base = toBase(f.kind, v);
+          state.unit = newUnit;
+          el.value = +fromBase(f.kind, base).toPrecision(5);
+        });
+      });
+      state.unit = newUnit;
+      store.set('swc_unit', newUnit);
+      syncUnitUI();
+      $$('.calc-card').forEach(card => {
+        card._calc.fields.forEach(f => {
+          const u = $(`[data-unit-for="${f.id}"]`, card);
+          if (u) u.textContent = fieldUnitLabel(f);
+        });
+        updateCard(card);
+      });
+      renderHistory(); renderBatch();
+    }
+
+    function syncUnitUI() {
+      $$('#unitSelector button').forEach(b => {
+        const on = b.dataset.unit === state.unit;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', String(on));
+      });
+    }
+
+    // ==================== FILTER ====================
+    function filterCards() {
+      const q = $('#searchInput').value.toLowerCase().trim();
+      const cat = $('.cat-btn.active')?.dataset.cat || 'all';
+      let shown = 0;
+      $$('.calc-card').forEach(card => {
+        const show = (!q || card.dataset.search.includes(q)) && (cat === 'all' || card.dataset.category === cat);
+        card.classList.toggle('hidden', !show);
+        if (show) shown++;
+      });
+      $('#noResults').classList.toggle('hidden', shown > 0);
+    }
+
+    // ==================== HISTORY ====================
+    function persist() {
+      store.set('swc_history', JSON.stringify(state.history));
+      store.set('swc_batch', JSON.stringify(state.batch));
+    }
+    function addHistory(item) {
+      state.history.unshift({ product: item.product, material: item.material, dims: item.dims, qty: item.qty, totalKg: item.totalKg, time: new Date().toLocaleString() });
+      if (state.history.length > 50) state.history.pop();
+      persist(); renderHistory();
+    }
+    function renderHistory() {
+      $('#historyBadge').textContent = state.history.length;
+      $('#historyList').innerHTML = state.history.length ? state.history.map(h => `
+        <div class="history-item">
+          <div class="item-info"><strong>${esc(h.product)}</strong> — ${esc(h.material)}
+            <div class="item-sub">${esc(h.dims)} · ${fmt(h.qty, 0)} pcs · ${esc(h.time)}</div></div>
+          <span class="hist-total">${out('mass', h.totalKg)}</span>
+        </div>`).join('') : '<p class="text-sm">No history yet. Press “Save to history” on a calculator.</p>';
+    }
+
+    // ==================== BATCH ====================
+    function renderBatch() {
+      $('#batchBadge').textContent = state.batch.length;
+      const list = $('#batchListContainer');
+      const totals = $('#batchTotals');
+      if (!state.batch.length) {
+        list.innerHTML = '<p class="text-sm">The batch is empty.</p>';
+        totals.classList.add('hidden');
+        return;
+      }
+      totals.classList.remove('hidden');
+      list.innerHTML = state.batch.map((it, i) => `
+        <div class="batch-item" data-idx="${i}">
+          <div class="item-info"><strong>${esc(it.product)}</strong> — ${esc(it.material)}
+            <div class="item-sub">${esc(it.dims)} · ${out('mass', it.unitMassKg)} each → <strong>${out('mass', it.unitMassKg * it.qty)}</strong></div></div>
+          <label class="qty-edit">Qty <input type="number" min="1" step="1" value="${it.qty}" data-action="qty" aria-label="Quantity for item ${i + 1}"></label>
+          <div class="item-actions"><button type="button" data-action="dup">Duplicate</button><button type="button" data-action="del">Delete</button></div>
+        </div>`).join('');
+      const kg = state.batch.reduce((s, it) => s + it.unitMassKg * it.qty, 0);
+      const pcs = state.batch.reduce((s, it) => s + it.qty, 0);
+      totals.innerHTML = `
+        <div class="result-row"><span class="result-label">Line items / pieces</span><span class="result-value">${state.batch.length} / ${fmt(pcs, 0)}</span></div>
+        <div class="result-row"><span class="result-label">Grand total mass</span><span class="result-value highlight">${out('mass', kg)}</span></div>
+        <div class="result-row"><span class="result-label">Grand total (large unit)</span><span class="result-value">${out('ton', kg)}</span></div>`;
+    }
+
+    function csvCell(v) {
+      let s = String(v);
+      if (/^[=+\-@\t\r]/.test(s)) s = "'" + s;   // block spreadsheet formula injection
+      return '"' + s.replace(/"/g, '""') + '"';
+    }
+    function exportCsv() {
+      if (!state.batch.length) { showToast('Nothing to export'); return; }
+      const rows = [['Product', 'Material', 'Dimensions', 'Quantity', 'Unit mass (kg)', 'Total mass (kg)', 'Total mass (lb)']];
+      state.batch.forEach(it => {
+        const t = it.unitMassKg * it.qty;
+        rows.push([it.product, it.material, it.dims, it.qty, +it.unitMassKg.toFixed(4), +t.toFixed(4), +(t / LB).toFixed(4)]);
+      });
+      const kg = state.batch.reduce((s, it) => s + it.unitMassKg * it.qty, 0);
+      rows.push(['TOTAL', '', '', state.batch.reduce((s, i) => s + i.qty, 0), '', +kg.toFixed(4), +(kg / LB).toFixed(4)]);
+      const csv = '﻿' + rows.map(r => r.map(csvCell).join(',')).join('\r\n');
+      const url = URL.createObjectURL(new Blob([csv], { type: 'text/csv;charset=utf-8' }));
+      const a = document.createElement('a');
+      a.href = url; a.download = 'steel_batch.csv';
+      document.body.appendChild(a); a.click(); a.remove();
+      setTimeout(() => URL.revokeObjectURL(url), 1000);
+      showToast('CSV exported');
+    }
+
+    // ==================== MODALS ====================
+    let lastFocus = null;
+    function openModal(id) {
+      lastFocus = document.activeElement;
+      const m = $('#' + id);
+      m.classList.add('active');
+      m.querySelector('.modal-close')?.focus();
+    }
+    function closeModal(id) {
+      $('#' + id).classList.remove('active');
+      if (lastFocus && lastFocus.focus) lastFocus.focus();
+    }
+
+    // ==================== THEME ====================
+    function setTheme(t) {
+      state.theme = t;
+      document.body.classList.toggle('dark', t === 'dark');
+      store.set('swc_theme', t);
+    }
+
+    // ==================== INIT ====================
+    function loadJSON(key) {
+      try { const v = JSON.parse(store.get(key) || '[]'); return Array.isArray(v) ? v : []; } catch (e) { return []; }
+    }
+    function init() {
+      const savedTheme = store.get('swc_theme');
+      setTheme(savedTheme || (window.matchMedia && matchMedia('(prefers-color-scheme: dark)').matches ? 'dark' : 'light'));
+      if (store.get('swc_unit') === 'imperial') state.unit = 'imperial';
+      syncUnitUI();
+
+      state.history = loadJSON('swc_history').filter(h => h && typeof h.totalKg === 'number');
+      state.batch = loadJSON('swc_batch').filter(b => b && typeof b.unitMassKg === 'number' && Number.isInteger(b.qty) && b.qty > 0);
+
+      renderAllCards();
+      renderHistory();
+      renderBatch();
+
+      // Live calculation (debounced) + Enter to save
+      const grid = $('#calculatorsGrid');
+      const timers = new WeakMap();
+      grid.addEventListener('input', (e) => {
+        const card = e.target.closest('.calc-card');
+        if (!card) return;
+        if (e.target.dataset.field === 'material') {
+          $('.custom-density', card).classList.toggle('hidden', e.target.value !== 'custom');
+        }
+        clearTimeout(timers.get(card));
+        timers.set(card, setTimeout(() => updateCard(card), 120));
+      });
+      grid.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' && e.target.tagName === 'INPUT') {
+          const card = e.target.closest('.calc-card');
+          if (card) updateCard(card, { save: true });
+        }
+      });
+      grid.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        if (!btn) return;
+        const card = btn.closest('.calc-card');
+        updateCard(card);
+        if (!card._last) { showToast('Fix the inputs first'); return; }
+        if (btn.dataset.action === 'save') { addHistory(card._last); showToast('Saved to history'); }
+        if (btn.dataset.action === 'batch') {
+          const { product, material, dims, qty, unitMassKg } = card._last;
+          state.batch.push({ product, material, dims, qty, unitMassKg });
+          persist(); renderBatch(); showToast('Added to batch');
+        }
+      });
+
+      $$('#unitSelector button').forEach(b => b.addEventListener('click', () => { switchUnit(b.dataset.unit); showToast(`Units: ${state.unit === 'metric' ? 'Metric (mm, kg)' : 'Imperial (in, lb)'}`); }));
+      $('#themeToggle').addEventListener('click', () => setTheme(state.theme === 'light' ? 'dark' : 'light'));
+      $('#historyBtn').addEventListener('click', () => openModal('historyModal'));
+      $('#batchBtn').addEventListener('click', () => openModal('batchModal'));
+      $$('[data-close]').forEach(b => b.addEventListener('click', () => closeModal(b.dataset.close)));
+      $$('.modal-overlay').forEach(o => o.addEventListener('mousedown', (e) => { if (e.target === o) closeModal(o.id); }));
+      document.addEventListener('keydown', (e) => {
+        if (e.key === 'Escape') $$('.modal-overlay.active').forEach(o => closeModal(o.id));
+      });
+
+      $('#clearHistoryBtn').addEventListener('click', () => { state.history = []; persist(); renderHistory(); showToast('History cleared'); });
+      $('#clearBatchBtn').addEventListener('click', () => { state.batch = []; persist(); renderBatch(); showToast('Batch cleared'); });
+      $('#exportCsvBtn').addEventListener('click', exportCsv);
+      $('#printBatchBtn').addEventListener('click', () => {
+        if (!state.batch.length) { showToast('Nothing to print'); return; }
+        document.body.classList.add('print-batch');
+        window.print();
+      });
+      window.addEventListener('afterprint', () => document.body.classList.remove('print-batch'));
+
+      const bl = $('#batchListContainer');
+      bl.addEventListener('click', (e) => {
+        const btn = e.target.closest('button[data-action]');
+        const row = e.target.closest('.batch-item');
+        if (!btn || !row) return;
+        const i = Number(row.dataset.idx);
+        if (btn.dataset.action === 'del') state.batch.splice(i, 1);
+        if (btn.dataset.action === 'dup') state.batch.splice(i + 1, 0, { ...state.batch[i] });
+        persist(); renderBatch();
+      });
+      bl.addEventListener('change', (e) => {
+        if (e.target.dataset.action !== 'qty') return;
+        const i = Number(e.target.closest('.batch-item').dataset.idx);
+        const q = Number(e.target.value);
+        if (Number.isInteger(q) && q >= 1 && q <= 1e6) state.batch[i].qty = q;
+        persist(); renderBatch();
+      });
+
+      $('#searchInput').addEventListener('input', filterCards);
+      $$('.cat-btn').forEach(btn => btn.addEventListener('click', () => {
+        $$('.cat-btn').forEach(b => b.classList.remove('active'));
+        btn.classList.add('active');
+        filterCards();
+      }));
+    }
+
+    init();
+  })();
+  </script>
+</body>
+</html>
