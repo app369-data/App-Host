@@ -1,6 +1,16 @@
 {
  "apps": [
   {
+   "id": "c2y80lwx",
+   "name": "Steel Weight Calculator",
+   "desc": "Calculate steel weights instantly and accurately. Supports multiple steel profiles with simple, reliable calculations.",
+   "file": "apps/c2y80lwx.html",
+   "icon": "apps/c2y80lwx.png",
+   "size": 63460,
+   "updated": 1791886605373,
+   "published": true
+  },
+  {
    "id": "etjpsf07",
    "name": "Engineering Formula Calculator",
    "desc": "Smart engineering formulas. Fast, simple, accurate.",
