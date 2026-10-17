@@ -1,0 +1,905 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+  <title>Beam Analysis Pro · structural calculator</title>
+  <style>
+    * { margin: 0; padding: 0; box-sizing: border-box; font-family: system-ui, -apple-system, 'Segoe UI', Roboto, 'Helvetica Neue', sans-serif; }
+    :root {
+      --bg: #f4f7fb; --surface: #ffffff; --border: #d8e0e9; --border-light: #e8edf4;
+      --text: #1a2634; --text-secondary: #4b5e71; --text-muted: #7c8b9c;
+      --accent: #1e5b8c; --accent-light: #e8f0f9; --accent-dark: #0f3d62;
+      --danger: #b23b3b; --danger-light: #fdf0f0;
+      --success: #2e7d5e; --success-light: #eaf6f0;
+      --warning: #b87c1b;
+      --shadow-sm: 0 1px 3px rgba(0,20,40,0.06), 0 1px 2px rgba(0,20,40,0.04);
+      --radius: 14px; --radius-sm: 10px; --radius-xs: 8px;
+    }
+    html, body { background: var(--bg); color: var(--text); font-size: 18px; line-height: 1.5; -webkit-font-smoothing: antialiased; overflow-x: hidden; min-height: 100vh; }
+    body { padding: 14px 14px 60px; display: flex; flex-direction: column; align-items: center; }
+    .app { max-width: 1440px; width: 100%; display: flex; flex-direction: column; gap: 18px; }
+    .toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 10px 12px; background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); padding: 14px 18px; box-shadow: var(--shadow-sm); }
+    .toolbar h1 { font-size: 1.35rem; font-weight: 700; letter-spacing: -0.02em; color: var(--accent-dark); margin-right: auto; display: flex; align-items: center; gap: 8px; }
+    .toolbar h1 span { font-size: 0.8rem; font-weight: 600; color: var(--text-muted); background: var(--accent-light); padding: 3px 12px; border-radius: 40px; }
+    .btn { display: inline-flex; align-items: center; justify-content: center; gap: 6px; padding: 12px 20px; font-size: 1rem; font-weight: 600; line-height: 1.2; border-radius: var(--radius-sm); border: 1px solid var(--border); background: var(--surface); color: var(--text); cursor: pointer; transition: background 0.15s, border-color 0.15s, transform 0.05s; white-space: nowrap; user-select: none; min-height: 52px; -webkit-tap-highlight-color: transparent; }
+    .btn:hover { background: #f0f5fa; border-color: #c4cfdb; }
+    .btn:active { background: #e4ecf5; transform: scale(0.98); }
+    .btn.primary { background: var(--accent); border-color: var(--accent); color: #ffffff; font-weight: 700; }
+    .btn.primary:hover { background: var(--accent-dark); border-color: var(--accent-dark); }
+    .btn.small { padding: 10px 16px; font-size: 0.92rem; min-height: 46px; }
+    .btn.icon-only { padding: 12px; min-width: 52px; }
+    .btn:disabled { opacity: 0.4; cursor: not-allowed; pointer-events: none; }
+    .main-grid { display: flex; flex-direction: column; gap: 18px; }
+    @media (min-width: 1024px) {
+      .main-grid { flex-direction: row; align-items: flex-start; gap: 20px; }
+      .left-panel { flex: 0 0 480px; max-width: 480px; }
+      .right-panel { flex: 1; min-width: 0; }
+    }
+    .left-panel, .right-panel { display: flex; flex-direction: column; gap: 18px; min-width: 0; }
+    .card { background: var(--surface); border: 1px solid var(--border); border-radius: var(--radius); box-shadow: var(--shadow-sm); padding: 20px; overflow: hidden; }
+    .card-header { display: flex; align-items: center; justify-content: space-between; gap: 12px; margin-bottom: 16px; flex-wrap: wrap; }
+    .card-header h2 { font-size: 1.15rem; font-weight: 700; color: var(--accent-dark); display: flex; align-items: center; gap: 8px; }
+    .badge { font-size: 0.8rem; font-weight: 700; padding: 4px 12px; border-radius: 40px; background: var(--accent-light); color: var(--accent); text-transform: uppercase; }
+    .field-row { display: flex; flex-wrap: wrap; gap: 14px; align-items: flex-end; margin-bottom: 16px; }
+    .field { display: flex; flex-direction: column; gap: 6px; flex: 1 1 140px; min-width: 120px; }
+    .field label { font-size: 0.85rem; font-weight: 700; color: var(--text-secondary); text-transform: uppercase; }
+    .field input, .field select { width: 100%; padding: 14px 14px; font-size: 1.1rem; border: 1.5px solid var(--border); border-radius: var(--radius-xs); background: #fafbfd; color: var(--text); min-height: 56px; -webkit-appearance: none; appearance: none; }
+    .field select { background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='10' viewBox='0 0 16 10'%3E%3Cpath d='M1 1l7 7 7-7' stroke='%234b5e71' stroke-width='2' fill='none' stroke-linecap='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 14px center; padding-right: 42px; }
+    .field input:focus, .field select:focus { outline: none; border-color: var(--accent); box-shadow: 0 0 0 3px rgba(30,91,140,0.15); }
+    .field input.error { border-color: var(--danger); background: var(--danger-light); }
+    .unit-suffix { font-size: 0.8rem; color: var(--text-muted); margin-left: 4px; font-weight: 500; }
+    .item-list { display: flex; flex-direction: column; gap: 14px; margin-top: 12px; }
+    .load-item, .support-item { background: #f8fafd; border: 1.5px solid var(--border-light); border-radius: var(--radius-sm); padding: 16px; display: flex; flex-wrap: wrap; gap: 12px 14px; align-items: flex-end; position: relative; }
+    .load-item .field, .support-item .field { flex: 1 1 110px; min-width: 90px; }
+    .load-item .field label, .support-item .field label { font-size: 0.75rem; }
+    .load-item .field input, .load-item .field select, .support-item .field input, .support-item .field select { padding: 10px 12px; font-size: 1rem; min-height: 48px; }
+    .load-item .remove-btn, .support-item .remove-btn { position: absolute; top: 10px; right: 10px; width: 34px; height: 34px; border-radius: 50%; border: 1.5px solid #e0d0d0; background: #fff; color: var(--danger); font-size: 1.1rem; line-height: 1; display: flex; align-items: center; justify-content: center; cursor: pointer; padding: 0; }
+    .load-item .remove-btn:hover, .support-item .remove-btn:hover { background: var(--danger-light); }
+    .empty-message { font-size: 0.95rem; color: var(--text-muted); padding: 12px 0; font-style: italic; }
+    .results-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(180px, 1fr)); gap: 14px; margin-bottom: 16px; }
+    .result-card { background: #f9fbfe; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 16px 18px; display: flex; flex-direction: column; gap: 4px; }
+    .result-card .label { font-size: 0.8rem; font-weight: 700; color: var(--text-muted); text-transform: uppercase; }
+    .result-card .value { font-size: 1.5rem; font-weight: 800; color: var(--accent-dark); line-height: 1.2; word-break: break-word; }
+    .result-card .value .unit { font-size: 0.85rem; font-weight: 600; color: var(--text-muted); margin-left: 3px; }
+    .result-card .sub { font-size: 0.85rem; color: var(--text-muted); }
+    .equilibrium-row { display: flex; flex-wrap: wrap; gap: 12px 28px; font-size: 0.95rem; color: var(--text-secondary); background: #f4f8fd; padding: 14px 18px; border-radius: var(--radius-xs); border: 1px solid var(--border-light); margin-top: 12px; }
+    .equilibrium-row .eq-item { display: flex; align-items: center; gap: 6px; }
+    .eq-item .ok { color: var(--success); font-weight: 800; }
+    .eq-item .fail { color: var(--danger); font-weight: 800; }
+    .diagram-tabs { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 16px; background: #f2f6fa; padding: 6px; border-radius: var(--radius-sm); }
+    .diagram-tab { flex: 1 1 auto; padding: 12px 14px; font-size: 0.95rem; font-weight: 700; border: none; border-radius: var(--radius-xs); background: transparent; color: var(--text-secondary); cursor: pointer; min-height: 46px; text-align: center; }
+    .diagram-tab.active { background: var(--surface); color: var(--accent-dark); box-shadow: var(--shadow-sm); }
+    .diagram-tab:hover:not(.active) { background: rgba(255,255,255,0.6); }
+    .diagram-container { width: 100%; background: #fbfdff; border: 1px solid var(--border-light); border-radius: var(--radius-sm); padding: 8px; overflow: hidden; }
+    .diagram-container svg { display: block; width: 100%; height: auto; min-height: 240px; max-height: 500px; background: #ffffff; border-radius: var(--radius-xs); touch-action: pan-y pinch-zoom; }
+    .error-box { background: var(--danger-light); border: 1.5px solid #f0c8c8; color: var(--danger); padding: 14px 18px; border-radius: var(--radius-xs); font-size: 1rem; margin-top: 12px; display: none; font-weight: 500; }
+    .error-box.visible { display: block; }
+    .status-note { font-size: 0.85rem; color: var(--text-muted); margin-top: 10px; }
+    .action-row { display: flex; flex-wrap: wrap; gap: 12px; align-items: center; margin-bottom: 10px; }
+    @media (max-width: 480px) {
+      body { padding: 10px 10px 50px; }
+      .toolbar { padding: 12px 14px; gap: 8px; }
+      .toolbar h1 { font-size: 1.15rem; }
+      .toolbar h1 span { font-size: 0.7rem; padding: 2px 8px; }
+      .btn { padding: 10px 14px; font-size: 0.9rem; min-height: 48px; }
+      .btn.small { padding: 9px 12px; font-size: 0.85rem; min-height: 44px; }
+      .card { padding: 16px; }
+      .field input, .field select { padding: 12px 12px; font-size: 1rem; min-height: 52px; }
+      .result-card .value { font-size: 1.3rem; }
+      .diagram-tab { font-size: 0.85rem; padding: 10px 8px; min-height: 42px; }
+      .diagram-container svg { min-height: 220px; max-height: 380px; }
+    }
+  </style>
+</head>
+<body>
+<div class="app">
+  <div class="toolbar">
+    <h1>Beam Analysis <span>Pro</span></h1>
+    <button class="btn small icon-only" id="undoBtn" title="Undo" disabled>↶</button>
+    <button class="btn small icon-only" id="redoBtn" title="Redo" disabled>↷</button>
+    <button class="btn small" id="resetBtn">Reset</button>
+    <button class="btn small primary" id="exportPngBtn">Export PNG</button>
+    <button class="btn small" id="exportReportBtn">Print report</button>
+  </div>
+
+  <div class="main-grid">
+    <div class="left-panel">
+      <div class="card">
+        <div class="card-header"><h2>Beam &amp; material</h2></div>
+        <div class="field-row">
+          <div class="field"><label>Beam length L <span class="unit-suffix">(m)</span></label><input type="number" id="beamLength" value="6" step="0.1" min="0.1" max="100"></div>
+          <div class="field"><label>Young's modulus E <span class="unit-suffix">(GPa)</span></label><input type="number" id="youngModulus" value="200" step="1" min="1" max="1000"></div>
+          <div class="field"><label>Moment of inertia I <span class="unit-suffix">(cm⁴)</span></label><input type="number" id="momentInertia" value="8000" step="100" min="1" max="1e7"></div>
+        </div>
+        <div class="field-row" style="margin-bottom:0">
+          <div class="field"><label>Unit system</label><select id="unitSystem"><option value="SI" selected>SI (kN, m)</option><option value="imperial">Imperial (kip, ft)</option></select></div>
+        </div>
+        <div class="status-note">Deflection uses E and I. Change units to see converted values.</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Supports</h2><button class="btn small" id="addSupportBtn">+ Add</button></div>
+        <div id="supportList" class="item-list"></div>
+        <div id="supportEmptyMsg" class="empty-message">No supports defined. Add at least one pin and one roller (or fixed).</div>
+      </div>
+
+      <div class="card">
+        <div class="card-header"><h2>Loads</h2><button class="btn small" id="addLoadBtn">+ Add</button></div>
+        <div id="loadList" class="item-list"></div>
+        <div id="loadEmptyMsg" class="empty-message">No loads defined. Add point loads, moments, or distributed loads.</div>
+      </div>
+
+      <div class="action-row"><button class="btn primary" id="calculateBtn" style="flex:1;font-size:1.1rem;min-height:56px">Calculate</button></div>
+      <div id="errorBox" class="error-box"></div>
+    </div>
+
+    <div class="right-panel">
+      <div class="card">
+        <div class="card-header"><h2>Results</h2><span class="badge" id="analysisBadge">—</span></div>
+        <div class="results-grid">
+          <div class="result-card"><span class="label">Max shear</span><span class="value" id="maxShearVal">—</span><span class="sub" id="maxShearLoc">—</span></div>
+          <div class="result-card"><span class="label">Max bending moment</span><span class="value" id="maxMomentVal">—</span><span class="sub" id="maxMomentLoc">—</span></div>
+          <div class="result-card"><span class="label">Max deflection</span><span class="value" id="maxDeflectionVal">—</span><span class="sub" id="maxDeflectionLoc">—</span></div>
+          <div class="result-card"><span class="label">Reactions</span><span class="value" id="reactionSummary" style="font-size:0.95rem;font-weight:600">—</span><span class="sub">vertical &amp; moment</span></div>
+        </div>
+        <div class="equilibrium-row">
+          <div class="eq-item">ΣF<sub>y</sub>: <span id="eqFy">—</span></div>
+          <div class="eq-item">ΣM<sub>0</sub>: <span id="eqM0">—</span></div>
+        </div>
+      </div>
+
+      <div class="card" style="flex:1">
+        <div class="card-header"><h2>Diagrams</h2><span class="badge" id="diagramUnitBadge">kN, m</span></div>
+        <div class="diagram-tabs" id="diagramTabs">
+          <button class="diagram-tab active" data-diagram="beam">Beam</button>
+          <button class="diagram-tab" data-diagram="sfd">SFD</button>
+          <button class="diagram-tab" data-diagram="bmd">BMD</button>
+          <button class="diagram-tab" data-diagram="deflection">Deflection</button>
+        </div>
+        <div class="diagram-container"><svg id="diagramSvg" viewBox="0 0 700 540" preserveAspectRatio="xMidYMid meet"></svg></div>
+        <div class="status-note">Diagrams update after Calculate. Pinch-zoom for detail.</div>
+      </div>
+    </div>
+  </div>
+</div>
+
+<script>
+let state = { beamLength: 6, youngModulus: 200, momentInertia: 8000, unitSystem: 'SI', supports: [], loads: [], nextId: 1, analysis: null };
+let undoStack = [], redoStack = [];
+
+function uid() { return 'id_' + (state.nextId++); }
+function deepClone(o) { return JSON.parse(JSON.stringify(o)); }
+function formatNum(v, digits = 3) {
+  if (v === undefined || v === null || Number.isNaN(v) || !Number.isFinite(v)) return '—';
+  if (Math.abs(v) < 1e-10) return '0';
+  if (Math.abs(v) >= 1000) return v.toFixed(1);
+  if (Math.abs(v) >= 100) return v.toFixed(2);
+  return v.toFixed(digits);
+}
+
+const IMP = { m_to_ft: 3.28084, kN_to_kip: 0.224809, kNm_to_kipft: 0.737562, GPa_to_ksi: 145.038, cm4_to_in4: 0.0241 };
+function convertLengthFromSI(v) { return state.unitSystem === 'SI' ? v : v * IMP.m_to_ft; }
+function convertLengthToSI(v) { return state.unitSystem === 'SI' ? v : v / IMP.m_to_ft; }
+function convertForceFromSI(v) { return state.unitSystem === 'SI' ? v : v * IMP.kN_to_kip; }
+function convertForceToSI(v) { return state.unitSystem === 'SI' ? v : v / IMP.kN_to_kip; }
+function convertMomentFromSI(v) { return state.unitSystem === 'SI' ? v : v * IMP.kNm_to_kipft; }
+function convertMomentToSI(v) { return state.unitSystem === 'SI' ? v : v / IMP.kNm_to_kipft; }
+function lengthUnitLabel() { return state.unitSystem === 'SI' ? 'm' : 'ft'; }
+function forceUnitLabel() { return state.unitSystem === 'SI' ? 'kN' : 'kip'; }
+function momentUnitLabel() { return state.unitSystem === 'SI' ? 'kN·m' : 'kip·ft'; }
+
+function distributedResultant(load) {
+  const a = Math.min(load.start, load.end), b = Math.max(load.start, load.end);
+  let w1, w2;
+  if (load.type === 'udl') { w1 = load.intensity; w2 = load.intensity; }
+  else { w1 = load.intensityStart || 0; w2 = load.intensityEnd || 0; }
+  const L = b - a;
+  if (L <= 0) return { F: 0, xc: 0, M0: 0 };
+  const F = (w1 + w2) / 2 * L;
+  const term1 = (w1 - (w2 - w1) * a / L) * (b*b - a*a) / 2;
+  const term2 = (w2 - w1) / L * (b*b*b - a*a*a) / 3;
+  const integral_xw = term1 + term2;
+  return { F, xc: F ? integral_xw / F : 0, M0: -integral_xw };
+}
+
+function analyzeBeam() {
+  const L = state.beamLength;
+  if (!(L > 0) || !Number.isFinite(L)) throw new Error('Beam length must be positive.');
+  const supports = state.supports.filter(s => s.type && s.x >= -1e-9 && s.x <= L + 1e-9);
+  if (supports.length === 0) throw new Error('At least one support is required.');
+
+  const unknowns = [];
+  supports.forEach(s => {
+    unknowns.push({ supportId: s.id, type: 'Ry', x: s.x });
+    if (s.type === 'fixed') unknowns.push({ supportId: s.id, type: 'Mz', x: s.x });
+  });
+  if (unknowns.length === 0) throw new Error('No reaction unknowns.');
+  if (unknowns.length > 2) throw new Error('Statically indeterminate — max 2 reaction unknowns supported.');
+
+  let F_total = 0, M0_total = 0;
+  state.loads.forEach((load, idx) => {
+    if (load.type === 'point') {
+      if (!Number.isFinite(load.magnitude) || load.magnitude === 0) return;
+      if (load.x < -1e-9 || load.x > L + 1e-9) throw new Error(`Point load ${idx+1} outside beam.`);
+      F_total += load.magnitude; M0_total += -load.magnitude * load.x;
+    } else if (load.type === 'moment') {
+      if (!Number.isFinite(load.magnitude) || load.magnitude === 0) return;
+      if (load.x < -1e-9 || load.x > L + 1e-9) throw new Error(`Applied moment ${idx+1} outside beam.`);
+      M0_total += load.magnitude;
+    } else if (load.type === 'udl' || load.type === 'triangular') {
+      const a = Math.min(load.start, load.end), b = Math.max(load.start, load.end);
+      if (a < -1e-9 || b > L + 1e-9) throw new Error(`Distributed load ${idx+1} outside beam.`);
+      if (b <= a) throw new Error(`Distributed load ${idx+1}: end must exceed start.`);
+      const r = distributedResultant(load);
+      F_total += r.F; M0_total += r.M0;
+    }
+  });
+
+  const A = [
+    unknowns.map(u => u.type === 'Ry' ? 1 : 0),
+    unknowns.map(u => u.type === 'Ry' ? u.x : 1),
+  ];
+  const b = [F_total, -M0_total];
+
+  let solution = [];
+  if (unknowns.length === 1) {
+    if (Math.abs(A[0][0]) < 1e-12) throw new Error('Cannot solve reactions.');
+    const u0 = b[0] / A[0][0];
+    if (Math.abs(A[1][0] * u0 - b[1]) > 1e-5) throw new Error('Unstable support configuration.');
+    solution = [u0];
+  } else {
+    const det = A[0][0]*A[1][1] - A[0][1]*A[1][0];
+    if (Math.abs(det) < 1e-12) throw new Error('Unstable support configuration (singular).');
+    solution = [(b[0]*A[1][1] - b[1]*A[0][1]) / det, (A[0][0]*b[1] - A[1][0]*b[0]) / det];
+  }
+
+  const reactions = supports.map(s => ({ ...s, Ry: 0, Mz: 0 }));
+  unknowns.forEach((u, i) => {
+    const sup = reactions.find(r => r.id === u.supportId);
+    if (u.type === 'Ry') sup.Ry = solution[i];
+    if (u.type === 'Mz') sup.Mz = solution[i];
+  });
+
+  const sumRy = reactions.reduce((s, r) => s + (r.Ry || 0), 0);
+  const sumMz = reactions.reduce((s, r) => s + (r.Mz || 0), 0);
+  const sumM0R = reactions.reduce((s, r) => s + (r.Ry || 0) * r.x, 0) + sumMz;
+  const residualFy = sumRy - F_total;
+  const residualM0 = sumM0R + M0_total;
+
+  const nS = 501;
+  const xs = Array.from({ length: nS }, (_, i) => i / (nS - 1) * L);
+
+  function V(x) {
+    let s = 0;
+    reactions.forEach(r => { if (r.x < x - 1e-9 && r.Ry) s += r.Ry; });
+    state.loads.forEach(l => {
+      if (l.type === 'point') { if (l.x < x - 1e-9) s -= l.magnitude; }
+      else if (l.type === 'udl') { const a = Math.min(l.start, l.end), b2 = Math.max(l.start, l.end); if (x > a) { const xe = Math.min(x, b2); s -= l.intensity * (xe - a); } }
+      else if (l.type === 'triangular') {
+        const a = Math.min(l.start, l.end), b2 = Math.max(l.start, l.end);
+        const w1 = l.intensityStart || 0, w2 = l.intensityEnd || 0;
+        if (x > a) { const xe = Math.min(x, b2), len = xe - a; if (len > 0) { const wAt = w1 + (w2 - w1) * len / (b2 - a); s -= ((w1 + wAt) / 2) * len; } }
+      }
+    });
+    return s;
+  }
+  function M(x) {
+    let m = 0;
+    reactions.forEach(r => { if (r.x < x - 1e-9) { if (r.Ry) m += r.Ry * (x - r.x); if (r.Mz) m -= r.Mz; } });
+    state.loads.forEach(l => {
+      if (l.type === 'point') { if (l.x < x - 1e-9) m -= l.magnitude * (x - l.x); }
+      else if (l.type === 'moment') { if (l.x < x - 1e-9) m -= l.magnitude; }
+      else if (l.type === 'udl') { const a = Math.min(l.start, l.end), b2 = Math.max(l.start, l.end); if (x > a) { const xe = Math.min(x, b2), len = xe - a; if (len > 0) { const F = l.intensity * len, c = a + len/2; m -= F * (x - c); } } }
+      else if (l.type === 'triangular') {
+        const a = Math.min(l.start, l.end), b2 = Math.max(l.start, l.end);
+        const w1 = l.intensityStart || 0, w2 = l.intensityEnd || 0;
+        if (x > a) { const xe = Math.min(x, b2), len = xe - a; if (len > 0) { const wAt = w1 + (w2 - w1) * len / (b2 - a); const F = ((w1 + wAt)/2) * len; const c = a + len * (w1 + 2*wAt) / (3 * (w1 + wAt + 1e-15)); m -= F * (x - c); } }
+      }
+    });
+    return m;
+  }
+
+  const sfd = xs.map(V), bmd = xs.map(M);
+  const EI = state.youngModulus * 1e9 * state.momentInertia * 1e-8;
+  if (EI <= 0) throw new Error('E and I must be positive.');
+
+  const curv = bmd.map(m => m * 1e3 / EI);
+  const theta = new Array(nS).fill(0);
+  for (let i = 1; i < nS; i++) { const dx = xs[i] - xs[i-1]; theta[i] = theta[i-1] + 0.5 * (curv[i] + curv[i-1]) * dx; }
+  const vRaw = new Array(nS).fill(0);
+  for (let i = 1; i < nS; i++) { const dx = xs[i] - xs[i-1]; vRaw[i] = vRaw[i-1] + 0.5 * (theta[i] + theta[i-1]) * dx; }
+
+  function interp(arr, x) {
+    if (x <= xs[0]) return arr[0];
+    if (x >= xs[xs.length-1]) return arr[arr.length-1];
+    for (let i = 1; i < xs.length; i++) if (xs[i] >= x) { const t = (x - xs[i-1]) / (xs[i] - xs[i-1]); return arr[i-1] + t * (arr[i] - arr[i-1]); }
+    return arr[arr.length-1];
+  }
+  const supXs = supports.map(s => s.x);
+  let C1 = 0, C2 = 0;
+  if (supXs.length >= 2) {
+    const x1 = supXs[0], x2 = supXs[1];
+    const v1 = interp(vRaw, x1), v2 = interp(vRaw, x2);
+    const det = x1 - x2;
+    if (Math.abs(det) > 1e-12) { C1 = (v2 - v1) / (x1 - x2); C2 = -v1 - C1 * x1; }
+  } else if (supXs.length === 1) {
+    const x1 = supXs[0];
+    const v1 = interp(vRaw, x1), th1 = interp(theta, x1);
+    C1 = -th1; C2 = -v1 - C1 * x1;
+  }
+  const deflection = vRaw.map((v, i) => v + C1 * xs[i] + C2);
+
+  function extreme(arr, absVal = false) {
+    let best = -Infinity, idx = 0;
+    for (let i = 0; i < arr.length; i++) { const val = absVal ? Math.abs(arr[i]) : arr[i]; if (val > best) { best = val; idx = i; } }
+    return { value: arr[idx], x: xs[idx] };
+  }
+
+  return {
+    reactions, residualFy, residualM0, xs, sfd, bmd, deflection,
+    maxShear: extreme(sfd, true), maxMoment: extreme(bmd, true), maxDeflection: extreme(deflection, true), L,
+  };
+}
+
+const $ = (id) => document.getElementById(id);
+
+function renderSupports() {
+  const c = $('supportList'), e = $('supportEmptyMsg');
+  c.innerHTML = '';
+  if (state.supports.length === 0) { e.style.display = 'block'; return; }
+  e.style.display = 'none';
+  state.supports.forEach(sup => {
+    const div = document.createElement('div');
+    div.className = 'support-item';
+    const tf = document.createElement('div'); tf.className = 'field'; tf.innerHTML = `<label>Type</label>`;
+    const sel = document.createElement('select');
+    sel.innerHTML = `<option value="pin">Pin</option><option value="roller">Roller</option><option value="fixed">Fixed</option>`;
+    sel.value = sup.type; sel.onchange = (ev) => { pushUndo(); sup.type = ev.target.value; renderSupports(); clearAnalysis(); };
+    tf.appendChild(sel); div.appendChild(tf);
+
+    const pf = document.createElement('div'); pf.className = 'field';
+    pf.innerHTML = `<label>Position <span class="unit-suffix">(${lengthUnitLabel()})</span></label>`;
+    const inp = document.createElement('input');
+    inp.type = 'number'; inp.step = '0.01'; inp.min = '0'; inp.max = state.beamLength;
+    inp.value = convertLengthFromSI(sup.x).toFixed(2);
+    inp.onchange = (ev) => {
+      pushUndo();
+      const v = parseFloat(ev.target.value);
+      if (!Number.isFinite(v) || v < 0 || v > convertLengthFromSI(state.beamLength)) { ev.target.classList.add('error'); return; }
+      ev.target.classList.remove('error'); sup.x = convertLengthToSI(v); renderSupports(); clearAnalysis();
+    };
+    pf.appendChild(inp); div.appendChild(pf);
+
+    const rm = document.createElement('button'); rm.className = 'remove-btn'; rm.innerHTML = '×';
+    rm.onclick = () => { pushUndo(); state.supports = state.supports.filter(s => s.id !== sup.id); renderSupports(); clearAnalysis(); };
+    div.appendChild(rm);
+    c.appendChild(div);
+  });
+}
+
+function renderLoads() {
+  const c = $('loadList'), e = $('loadEmptyMsg');
+  c.innerHTML = '';
+  if (state.loads.length === 0) { e.style.display = 'block'; return; }
+  e.style.display = 'none';
+  state.loads.forEach(load => {
+    const div = document.createElement('div'); div.className = 'load-item';
+    const tf = document.createElement('div'); tf.className = 'field'; tf.innerHTML = `<label>Type</label>`;
+    const sel = document.createElement('select');
+    sel.innerHTML = `<option value="point">Point load</option><option value="moment">Moment</option><option value="udl">UDL</option><option value="triangular">Triangular</option>`;
+    sel.value = load.type;
+    sel.onchange = (ev) => {
+      pushUndo(); load.type = ev.target.value;
+      if (load.type === 'point' || load.type === 'moment') { load.x = load.x ?? state.beamLength/2; load.magnitude = load.magnitude ?? 10; }
+      else if (load.type === 'udl') { load.start = load.start ?? 0; load.end = load.end ?? state.beamLength; load.intensity = load.intensity ?? 5; }
+      else { load.start = load.start ?? 0; load.end = load.end ?? state.beamLength; load.intensityStart = load.intensityStart ?? 0; load.intensityEnd = load.intensityEnd ?? 5; }
+      renderLoads(); clearAnalysis();
+    };
+    tf.appendChild(sel); div.appendChild(tf);
+
+    if (load.type === 'point' || load.type === 'moment') {
+      const pf = document.createElement('div'); pf.className = 'field';
+      pf.innerHTML = `<label>Position <span class="unit-suffix">(${lengthUnitLabel()})</span></label>`;
+      const inp = document.createElement('input');
+      inp.type = 'number'; inp.step = '0.01'; inp.min = '0'; inp.max = state.beamLength;
+      inp.value = convertLengthFromSI(load.x).toFixed(2);
+      inp.onchange = (ev) => {
+        pushUndo(); const v = parseFloat(ev.target.value);
+        if (!Number.isFinite(v) || v < 0 || v > convertLengthFromSI(state.beamLength)) { ev.target.classList.add('error'); return; }
+        ev.target.classList.remove('error'); load.x = convertLengthToSI(v); renderLoads(); clearAnalysis();
+      };
+      pf.appendChild(inp); div.appendChild(pf);
+
+      const mf = document.createElement('div'); mf.className = 'field';
+      const u = load.type === 'point' ? forceUnitLabel() : momentUnitLabel();
+      mf.innerHTML = `<label>${load.type === 'point' ? 'Force' : 'Moment'} <span class="unit-suffix">(${u})</span></label>`;
+      const mi = document.createElement('input');
+      mi.type = 'number'; mi.step = '0.1';
+      mi.value = load.type === 'point' ? convertForceFromSI(load.magnitude || 0).toFixed(2) : convertMomentFromSI(load.magnitude || 0).toFixed(2);
+      mi.onchange = (ev) => {
+        pushUndo(); const v = parseFloat(ev.target.value);
+        if (!Number.isFinite(v)) { ev.target.classList.add('error'); return; }
+        ev.target.classList.remove('error');
+        load.magnitude = load.type === 'point' ? convertForceToSI(v) : convertMomentToSI(v);
+        renderLoads(); clearAnalysis();
+      };
+      mf.appendChild(mi); div.appendChild(mf);
+    }
+
+    if (load.type === 'udl' || load.type === 'triangular') {
+      const sf = document.createElement('div'); sf.className = 'field';
+      sf.innerHTML = `<label>Start <span class="unit-suffix">(${lengthUnitLabel()})</span></label>`;
+      const si = document.createElement('input');
+      si.type = 'number'; si.step = '0.01'; si.min = '0'; si.max = state.beamLength;
+      si.value = convertLengthFromSI(load.start || 0).toFixed(2);
+      si.onchange = (ev) => {
+        pushUndo(); const v = parseFloat(ev.target.value);
+        if (!Number.isFinite(v) || v < 0 || v > convertLengthFromSI(state.beamLength)) { ev.target.classList.add('error'); return; }
+        ev.target.classList.remove('error'); load.start = convertLengthToSI(v); renderLoads(); clearAnalysis();
+      };
+      sf.appendChild(si); div.appendChild(sf);
+
+      const ef = document.createElement('div'); ef.className = 'field';
+      ef.innerHTML = `<label>End <span class="unit-suffix">(${lengthUnitLabel()})</span></label>`;
+      const ei = document.createElement('input');
+      ei.type = 'number'; ei.step = '0.01'; ei.min = '0'; ei.max = state.beamLength;
+      ei.value = convertLengthFromSI(load.end || state.beamLength).toFixed(2);
+      ei.onchange = (ev) => {
+        pushUndo(); const v = parseFloat(ev.target.value);
+        if (!Number.isFinite(v) || v < 0 || v > convertLengthFromSI(state.beamLength)) { ev.target.classList.add('error'); return; }
+        ev.target.classList.remove('error'); load.end = convertLengthToSI(v); renderLoads(); clearAnalysis();
+      };
+      ef.appendChild(ei); div.appendChild(ef);
+
+      if (load.type === 'udl') {
+        const f = document.createElement('div'); f.className = 'field';
+        f.innerHTML = `<label>Intensity <span class="unit-suffix">(${forceUnitLabel()}/${lengthUnitLabel()})</span></label>`;
+        const inp = document.createElement('input');
+        inp.type = 'number'; inp.step = '0.1';
+        inp.value = convertForceFromSI(load.intensity || 0).toFixed(2);
+        inp.onchange = (ev) => {
+          pushUndo(); const v = parseFloat(ev.target.value);
+          if (!Number.isFinite(v)) { ev.target.classList.add('error'); return; }
+          ev.target.classList.remove('error'); load.intensity = convertForceToSI(v); renderLoads(); clearAnalysis();
+        };
+        f.appendChild(inp); div.appendChild(f);
+      } else {
+        const f1 = document.createElement('div'); f1.className = 'field';
+        f1.innerHTML = `<label>w<sub>start</sub> <span class="unit-suffix">(${forceUnitLabel()}/${lengthUnitLabel()})</span></label>`;
+        const i1 = document.createElement('input');
+        i1.type = 'number'; i1.step = '0.1';
+        i1.value = convertForceFromSI(load.intensityStart || 0).toFixed(2);
+        i1.onchange = (ev) => {
+          pushUndo(); const v = parseFloat(ev.target.value);
+          if (!Number.isFinite(v)) { ev.target.classList.add('error'); return; }
+          ev.target.classList.remove('error'); load.intensityStart = convertForceToSI(v); renderLoads(); clearAnalysis();
+        };
+        f1.appendChild(i1); div.appendChild(f1);
+
+        const f2 = document.createElement('div'); f2.className = 'field';
+        f2.innerHTML = `<label>w<sub>end</sub> <span class="unit-suffix">(${forceUnitLabel()}/${lengthUnitLabel()})</span></label>`;
+        const i2 = document.createElement('input');
+        i2.type = 'number'; i2.step = '0.1';
+        i2.value = convertForceFromSI(load.intensityEnd || 0).toFixed(2);
+        i2.onchange = (ev) => {
+          pushUndo(); const v = parseFloat(ev.target.value);
+          if (!Number.isFinite(v)) { ev.target.classList.add('error'); return; }
+          ev.target.classList.remove('error'); load.intensityEnd = convertForceToSI(v); renderLoads(); clearAnalysis();
+        };
+        f2.appendChild(i2); div.appendChild(f2);
+      }
+    }
+
+    const rm = document.createElement('button'); rm.className = 'remove-btn'; rm.innerHTML = '×';
+    rm.onclick = () => { pushUndo(); state.loads = state.loads.filter(l => l.id !== load.id); renderLoads(); clearAnalysis(); };
+    div.appendChild(rm);
+    c.appendChild(div);
+  });
+}
+
+function clearAnalysis() { state.analysis = null; updateResultsUI(); drawDiagram(); }
+
+function updateResultsUI() {
+  const a = state.analysis;
+  const badge = $('analysisBadge');
+  $('diagramUnitBadge').textContent = state.unitSystem === 'SI' ? 'kN, m' : 'kip, ft';
+  if (!a) {
+    badge.textContent = '—'; badge.style.background = 'var(--accent-light)'; badge.style.color = 'var(--accent)';
+    ['maxShearVal','maxMomentVal','maxDeflectionVal','reactionSummary','eqFy','eqM0'].forEach(id => $(id).innerHTML = '—');
+    ['maxShearLoc','maxMomentLoc','maxDeflectionLoc'].forEach(id => $(id).textContent = '—');
+    return;
+  }
+  badge.textContent = 'Solved'; badge.style.background = 'var(--success-light)'; badge.style.color = 'var(--success)';
+  const fu = forceUnitLabel(), mu = momentUnitLabel(), lu = lengthUnitLabel();
+  $('maxShearVal').innerHTML = `${formatNum(convertForceFromSI(a.maxShear.value), 2)} <span class="unit">${fu}</span>`;
+  $('maxShearLoc').textContent = `at x = ${formatNum(convertLengthFromSI(a.maxShear.x), 3)} ${lu}`;
+  $('maxMomentVal').innerHTML = `${formatNum(convertMomentFromSI(a.maxMoment.value), 2)} <span class="unit">${mu}</span>`;
+  $('maxMomentLoc').textContent = `at x = ${formatNum(convertLengthFromSI(a.maxMoment.x), 3)} ${lu}`;
+  const du = state.unitSystem === 'SI' ? 'mm' : 'in';
+  $('maxDeflectionVal').innerHTML = `${formatNum(convertLengthFromSI(a.maxDeflection.value) * 1000, 2)} <span class="unit">${du}</span>`;
+  $('maxDeflectionLoc').textContent = `at x = ${formatNum(convertLengthFromSI(a.maxDeflection.x), 3)} ${lu}`;
+  const rt = a.reactions.map(r => {
+    let t = `R<sub>${r.type[0]}</sub>@${formatNum(convertLengthFromSI(r.x), 2)}${lu}: ${formatNum(convertForceFromSI(r.Ry || 0), 2)}${fu}`;
+    if (Math.abs(r.Mz || 0) > 1e-9) t += `, M=${formatNum(convertMomentFromSI(r.Mz), 2)}${mu}`;
+    return t;
+  }).join(' · ');
+  $('reactionSummary').innerHTML = rt || '—';
+  const rFy = convertForceFromSI(a.residualFy), rM0 = convertMomentFromSI(a.residualM0);
+  const tol = 1e-4;
+  $('eqFy').innerHTML = `${formatNum(rFy, 5)} ${fu} ${Math.abs(rFy) < tol ? '<span class="ok">✓</span>' : '<span class="fail">✗</span>'}`;
+  $('eqM0').innerHTML = `${formatNum(rM0, 5)} ${mu} ${Math.abs(rM0) < tol ? '<span class="ok">✓</span>' : '<span class="fail">✗</span>'}`;
+}
+
+/* =====================================================================
+   DIAGRAM — corrected arrow markers
+   ===================================================================== */
+let activeDiagram = 'beam';
+
+function drawDiagram() {
+  const a = state.analysis;
+  const svg = $('diagramSvg');
+  const L = state.beamLength;
+
+  if (!a) {
+    svg.innerHTML = `<text x="350" y="270" text-anchor="middle" fill="#7c8b9c" font-size="20">Run Calculate to display diagrams</text>`;
+    return;
+  }
+
+  let content = '';
+  if (activeDiagram === 'beam') content = buildBeamDiagram(a, L);
+  else content = buildLineDiagram(a, L, activeDiagram);
+
+  /* CORRECTED MARKERS:
+     Standard arrowhead path M0,0 L10,5 L0,10 Z with refX=9, refY=5.
+     With orient="auto", the arrowhead aligns with the path tangent,
+     so downward lines get downward-pointing arrowheads. */
+  content += `
+    <defs>
+      <marker id="arrowDown" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#c0392b"/>
+      </marker>
+      <marker id="arrowUp" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#c0392b"/>
+      </marker>
+      <marker id="arrowMoment" markerWidth="10" markerHeight="10" refX="9" refY="5" orient="auto">
+        <path d="M0,0 L10,5 L0,10 Z" fill="#b87c1b"/>
+      </marker>
+      <marker id="arrowLeft" markerWidth="8" markerHeight="8" refX="0" refY="4" orient="auto">
+        <path d="M8,0 L0,4 L8,8 Z" fill="#7c8b9c"/>
+      </marker>
+      <marker id="arrowRight" markerWidth="8" markerHeight="8" refX="8" refY="4" orient="auto">
+        <path d="M0,0 L8,4 L0,8 Z" fill="#7c8b9c"/>
+      </marker>
+    </defs>`;
+  svg.innerHTML = content;
+}
+
+function buildBeamDiagram(a, L) {
+  const W = 700, H = 540;
+  const mL = 55, mR = 35;
+  const plotW = W - mL - mR;
+  const xS = (x) => mL + (x / L) * plotW;
+  const beamY = 195, beamH = 20;
+  const beamTop = beamY - beamH / 2;
+  const beamBottom = beamY + beamH / 2;
+
+  let maxMag = 1e-9;
+  state.loads.forEach(l => {
+    if (l.type === 'point') maxMag = Math.max(maxMag, Math.abs(l.magnitude));
+    else if (l.type === 'udl') maxMag = Math.max(maxMag, Math.abs(l.intensity));
+    else if (l.type === 'triangular') maxMag = Math.max(maxMag, Math.abs(l.intensityStart || 0), Math.abs(l.intensityEnd || 0));
+  });
+
+  let s = '';
+
+  // gridlines
+  for (let i = 0; i <= 4; i++) {
+    const x = mL + (i / 4) * plotW;
+    s += `<line x1="${x}" y1="40" x2="${x}" y2="${H - 60}" stroke="#eef2f7" stroke-width="1"/>`;
+  }
+
+  // beam
+  s += `<rect x="${mL}" y="${beamTop}" width="${plotW}" height="${beamH}" fill="#b8c8d8" stroke="#2c3e50" stroke-width="2" rx="3"/>`;
+  s += `<line x1="${mL}" y1="${beamY}" x2="${mL + plotW}" y2="${beamY}" stroke="#2c3e50" stroke-width="0.5" opacity="0.3"/>`;
+
+  // supports
+  a.reactions.forEach(r => {
+    const x = xS(r.x);
+    s += buildSupportSymbol(x, beamBottom, r.type, r.x < L / 2, r.x > L / 2, beamTop);
+    const typeLabel = r.type.charAt(0).toUpperCase() + r.type.slice(1);
+    s += `<text x="${x}" y="${beamBottom + 120}" text-anchor="middle" fill="#2c3e50" font-size="17" font-weight="700">${typeLabel}</text>`;
+    const ry = convertForceFromSI(r.Ry || 0);
+    s += `<text x="${x}" y="${beamBottom + 143}" text-anchor="middle" fill="#2e7d5e" font-size="15" font-weight="700">Ry = ${formatNum(ry, 2)} ${forceUnitLabel()}</text>`;
+    if (Math.abs(r.Mz || 0) > 1e-9) {
+      s += `<text x="${x}" y="${beamBottom + 163}" text-anchor="middle" fill="#b87c1b" font-size="14" font-weight="700">M = ${formatNum(convertMomentFromSI(r.Mz), 2)} ${momentUnitLabel()}</text>`;
+    }
+  });
+
+  // loads
+  state.loads.forEach(load => {
+    if (load.type === 'point') s += buildPointLoad(xS(load.x), load.magnitude, beamTop, maxMag);
+    else if (load.type === 'moment') s += buildMomentSymbol(xS(load.x), load.magnitude, beamTop);
+    else if (load.type === 'udl') s += buildUDL(xS(load.start), xS(load.end), load.intensity, beamTop, maxMag);
+    else if (load.type === 'triangular') s += buildTriangular(xS(load.start), xS(load.end), load.intensityStart || 0, load.intensityEnd || 0, beamTop, maxMag);
+  });
+
+  // dimension line
+  const dimY = 395;
+  s += `<line x1="${mL}" y1="${dimY}" x2="${mL + plotW}" y2="${dimY}" stroke="#7c8b9c" stroke-width="1.5"/>`;
+  s += `<line x1="${mL}" y1="${dimY - 8}" x2="${mL}" y2="${dimY + 8}" stroke="#2c3e50" stroke-width="2"/>`;
+  s += `<line x1="${mL + plotW}" y1="${dimY - 8}" x2="${mL + plotW}" y2="${dimY + 8}" stroke="#2c3e50" stroke-width="2"/>`;
+  s += `<text x="${mL + plotW / 2}" y="${dimY - 18}" text-anchor="middle" fill="#2c3e50" font-size="20" font-weight="700">L = ${formatNum(convertLengthFromSI(L), 3)} ${lengthUnitLabel()}</text>`;
+
+  a.reactions.forEach(r => {
+    const x = xS(r.x);
+    s += `<line x1="${x}" y1="${dimY - 8}" x2="${x}" y2="${dimY + 8}" stroke="#2c3e50" stroke-width="1.8"/>`;
+    s += `<text x="${x}" y="${dimY + 28}" text-anchor="middle" fill="#2c3e50" font-size="15" font-weight="600">${formatNum(convertLengthFromSI(r.x), 2)}${lengthUnitLabel()}</text>`;
+  });
+
+  s += `<text x="${W/2}" y="${H - 20}" text-anchor="middle" fill="#7c8b9c" font-size="14">Beam diagram · ${state.unitSystem} units · auto-scaled</text>`;
+  return s;
+}
+
+function buildSupportSymbol(x, beamBottom, type, isLeft, isRight, beamTop) {
+  let s = '';
+  if (type === 'pin') {
+    const triH = 34, halfW = 24;
+    const baseY = beamBottom + triH;
+    for (let i = -halfW; i <= halfW; i += 7) s += `<line x1="${x+i}" y1="${baseY}" x2="${x+i-6}" y2="${baseY+10}" stroke="#2c3e50" stroke-width="1.5"/>`;
+    s += `<line x1="${x-halfW-3}" y1="${baseY}" x2="${x+halfW+3}" y2="${baseY}" stroke="#2c3e50" stroke-width="2"/>`;
+    s += `<polygon points="${x-halfW},${baseY} ${x+halfW},${baseY} ${x},${beamBottom}" fill="#a8bdd4" stroke="#2c3e50" stroke-width="2"/>`;
+  } else if (type === 'roller') {
+    const triH = 26, halfW = 22, r = 6;
+    const baseY = beamBottom + triH;
+    s += `<polygon points="${x-halfW},${baseY} ${x+halfW},${baseY} ${x},${beamBottom}" fill="#a8bdd4" stroke="#2c3e50" stroke-width="2"/>`;
+    s += `<circle cx="${x - halfW*0.6}" cy="${baseY + r + 1}" r="${r}" fill="#fff" stroke="#2c3e50" stroke-width="1.8"/>`;
+    s += `<circle cx="${x + halfW*0.6}" cy="${baseY + r + 1}" r="${r}" fill="#fff" stroke="#2c3e50" stroke-width="1.8"/>`;
+    const gy = baseY + 2*r + 3;
+    s += `<line x1="${x-halfW-5}" y1="${gy}" x2="${x+halfW+5}" y2="${gy}" stroke="#2c3e50" stroke-width="2"/>`;
+    for (let i = -halfW-5; i <= halfW+5; i += 7) s += `<line x1="${x+i}" y1="${gy}" x2="${x+i-6}" y2="${gy+10}" stroke="#2c3e50" stroke-width="1.5"/>`;
+  } else if (type === 'fixed') {
+    const wallW = 16, wallH = 70;
+    const wallTop = beamTop - 15;
+    const leftFixed = isLeft && !isRight;
+    const rightFixed = isRight && !isLeft;
+    const wallX = leftFixed ? (x - wallW) : (rightFixed ? x : x - wallW/2);
+    s += `<rect x="${wallX}" y="${wallTop}" width="${wallW}" height="${wallH}" fill="#a8bdd4" stroke="#2c3e50" stroke-width="2"/>`;
+    const outerX = leftFixed ? wallX : wallX + wallW;
+    const dir = leftFixed ? -1 : 1;
+    for (let i = 0; i < wallH; i += 9) s += `<line x1="${outerX}" y1="${wallTop+i}" x2="${outerX + dir*11}" y2="${wallTop+i+9}" stroke="#2c3e50" stroke-width="1.5"/>`;
+  }
+  return s;
+}
+
+function buildPointLoad(x, mag, beamTop, maxMag) {
+  const magDisp = convertForceFromSI(mag);
+  const ratio = Math.min(1, Math.abs(mag) / maxMag);
+  const len = 50 + ratio * 45;
+  let s = '';
+  if (mag > 0) {
+    // downward — line drawn top→bottom, marker-end at bottom → arrowhead points down
+    s += `<line x1="${x}" y1="${beamTop - len}" x2="${x}" y2="${beamTop - 3}" stroke="#c0392b" stroke-width="3" marker-end="url(#arrowDown)"/>`;
+    s += `<text x="${x}" y="${beamTop - len - 12}" text-anchor="middle" fill="#c0392b" font-size="18" font-weight="800">${formatNum(magDisp, 2)} ${forceUnitLabel()}</text>`;
+  } else {
+    // upward — line drawn bottom→top, marker-end at top → arrowhead points up
+    s += `<line x1="${x}" y1="${beamTop - 3}" x2="${x}" y2="${beamTop - len}" stroke="#c0392b" stroke-width="3" marker-end="url(#arrowUp)"/>`;
+    s += `<text x="${x}" y="${beamTop - len - 12}" text-anchor="middle" fill="#c0392b" font-size="18" font-weight="800">${formatNum(magDisp, 2)} ${forceUnitLabel()}</text>`;
+  }
+  return s;
+}
+
+function buildMomentSymbol(x, mag, beamTop) {
+  const cy = beamTop - 55, r = 22;
+  const magDisp = convertMomentFromSI(mag);
+  let s = '';
+  if (mag > 0) s += `<path d="M ${x + r} ${cy} A ${r} ${r} 0 0 0 ${x - r} ${cy}" fill="none" stroke="#b87c1b" stroke-width="3" marker-end="url(#arrowMoment)"/>`;
+  else s += `<path d="M ${x - r} ${cy} A ${r} ${r} 0 0 1 ${x + r} ${cy}" fill="none" stroke="#b87c1b" stroke-width="3" marker-end="url(#arrowMoment)"/>`;
+  s += `<text x="${x}" y="${cy - r - 12}" text-anchor="middle" fill="#b87c1b" font-size="17" font-weight="800">${formatNum(magDisp, 2)} ${momentUnitLabel()}</text>`;
+  return s;
+}
+
+function buildUDL(x1, x2, intensity, beamTop, maxMag) {
+  const ratio = Math.min(1, Math.abs(intensity) / maxMag);
+  const height = 45 + ratio * 45;
+  const topY = beamTop - height;
+  const magDisp = convertForceFromSI(intensity);
+  let s = '';
+  s += `<line x1="${x1}" y1="${topY}" x2="${x2}" y2="${topY}" stroke="#c0392b" stroke-width="2"/>`;
+  const n = Math.max(3, Math.round((x2 - x1) / 30));
+  for (let i = 0; i <= n; i++) {
+    const xi = x1 + (i / n) * (x2 - x1);
+    if (intensity >= 0) s += `<line x1="${xi}" y1="${topY}" x2="${xi}" y2="${beamTop - 2}" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowDown)"/>`;
+    else s += `<line x1="${xi}" y1="${beamTop - 2}" x2="${xi}" y2="${topY}" stroke="#c0392b" stroke-width="2" marker-end="url(#arrowUp)"/>`;
+  }
+  s += `<text x="${(x1+x2)/2}" y="${topY - 12}" text-anchor="middle" fill="#c0392b" font-size="18" font-weight="800">${formatNum(magDisp, 2)} ${forceUnitLabel()}/${lengthUnitLabel()}</text>`;
+  return s;
+}
+
+function buildTriangular(x1, x2, w1, w2, beamTop, maxMag) {
+  const maxW = Math.max(Math.abs(w1), Math.abs(w2), 1e-9);
+  const len1 = 40 + (Math.abs(w1) / maxW) * 50;
+  const len2 = 40 + (Math.abs(w2) / maxW) * 50;
+  const y1Top = w1 >= 0 ? beamTop - len1 : beamTop + len1;
+  const y2Top = w2 >= 0 ? beamTop - len2 : beamTop + len2;
+  let s = '';
+  s += `<line x1="${x1}" y1="${y1Top}" x2="${x2}" y2="${y2Top}" stroke="#c0392b" stroke-width="2"/>`;
+  const n = Math.max(4, Math.round((x2 - x1) / 28));
+  for (let i = 0; i <= n; i++) {
+    const t = i / n;
+    const xi = x1 + t * (x2 - x1);
+    const yi = y1Top + t * (y2Top - y1Top);
+    const w = w1 + t * (w2 - w1);
+    if (w >= 0) s += `<line x1="${xi}" y1="${yi}" x2="${xi}" y2="${beamTop - 2}" stroke="#c0392b" stroke-width="1.8" marker-end="url(#arrowDown)"/>`;
+    else s += `<line x1="${xi}" y1="${beamTop - 2}" x2="${xi}" y2="${yi}" stroke="#c0392b" stroke-width="1.8" marker-end="url(#arrowUp)"/>`;
+  }
+  s += `<text x="${x1}" y="${y1Top - 12}" text-anchor="middle" fill="#c0392b" font-size="16" font-weight="800">${formatNum(convertForceFromSI(w1), 2)}</text>`;
+  s += `<text x="${x2}" y="${y2Top - 12}" text-anchor="middle" fill="#c0392b" font-size="16" font-weight="800">${formatNum(convertForceFromSI(w2), 2)}</text>`;
+  s += `<text x="${(x1+x2)/2}" y="${Math.min(y1Top, y2Top) - 34}" text-anchor="middle" fill="#c0392b" font-size="14" font-weight="600">${forceUnitLabel()}/${lengthUnitLabel()}</text>`;
+  return s;
+}
+
+function buildLineDiagram(a, L, type) {
+  const W = 700, H = 540;
+  const mL = 90, mR = 35, mT = 50, mB = 90;
+  const plotW = W - mL - mR, plotH = H - mT - mB;
+  const xS = (x) => mL + (x / L) * plotW;
+
+  let values, yLabel, yUnit, color, isDefl = false;
+  if (type === 'sfd') { values = a.sfd.map(v => convertForceFromSI(v)); yLabel = 'Shear force V'; yUnit = forceUnitLabel(); color = '#1e5b8c'; }
+  else if (type === 'bmd') { values = a.bmd.map(v => convertMomentFromSI(v)); yLabel = 'Bending moment M'; yUnit = momentUnitLabel(); color = '#b87c1b'; }
+  else { values = a.deflection.map(v => convertLengthFromSI(v) * 1000); yLabel = 'Deflection v'; yUnit = state.unitSystem === 'SI' ? 'mm' : 'in'; color = '#2e7d5e'; isDefl = true; }
+
+  const maxAbs = Math.max(...values.map(v => Math.abs(v)), 1e-9);
+  const yMax = maxAbs * 1.15;
+  const yZero = mT + plotH / 2;
+  const yS = (v) => yZero - (v / yMax) * (plotH / 2);
+
+  let s = '';
+  for (let i = -2; i <= 2; i++) {
+    if (i === 0) continue;
+    const gy = yZero + (i / 2) * (plotH / 2);
+    s += `<line x1="${mL}" y1="${gy}" x2="${mL + plotW}" y2="${gy}" stroke="#eef2f7" stroke-width="1"/>`;
+    s += `<text x="${mL - 8}" y="${gy + 5}" text-anchor="end" fill="#7c8b9c" font-size="12">${formatNum(-i / 2 * yMax, 1)}</text>`;
+  }
+  for (let i = 0; i <= 4; i++) s += `<line x1="${mL + i/4 * plotW}" y1="${mT}" x2="${mL + i/4 * plotW}" y2="${mT + plotH}" stroke="#eef2f7" stroke-width="1"/>`;
+
+  s += `<line x1="${mL}" y1="${yZero}" x2="${mL + plotW}" y2="${yZero}" stroke="#4b5e71" stroke-width="1.8"/>`;
+  s += `<text x="${mL - 8}" y="${yZero + 5}" text-anchor="end" fill="#4b5e71" font-size="13" font-weight="700">0</text>`;
+  s += `<line x1="${mL}" y1="${mT}" x2="${mL}" y2="${mT + plotH}" stroke="#4b5e71" stroke-width="1.8"/>`;
+  s += `<text x="${mL - 10}" y="${mT - 12}" text-anchor="end" fill="#4b5e71" font-size="15" font-weight="700">${yLabel} (${yUnit})</text>`;
+
+  let path = '';
+  a.xs.forEach((x, i) => { const px = xS(x), py = yS(values[i]); path += (i === 0 ? 'M' : 'L') + ` ${px} ${py}`; });
+  s += `<path d="${path}" fill="none" stroke="${color}" stroke-width="3" stroke-linejoin="round"/>`;
+
+  let fp = `M ${xS(a.xs[0])} ${yZero}`;
+  a.xs.forEach((x, i) => { fp += ` L ${xS(x)} ${yS(values[i])}`; });
+  fp += ` L ${xS(a.xs[a.xs.length-1])} ${yZero} Z`;
+  s += `<path d="${fp}" fill="${color}" opacity="0.1"/>`;
+
+  const maxV = Math.max(...values), minV = Math.min(...values);
+  const maxI = values.indexOf(maxV), minI = values.indexOf(minV);
+  if (maxI >= 0) {
+    const px = xS(a.xs[maxI]), py = yS(values[maxI]);
+    s += `<circle cx="${px}" cy="${py}" r="5" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    s += `<text x="${px}" y="${py - 12}" text-anchor="middle" fill="${color}" font-size="14" font-weight="800">${formatNum(values[maxI], 2)} ${yUnit}</text>`;
+  }
+  if (minI >= 0 && Math.abs(minV) > 1e-8 && Math.abs(minV - maxV) > 1e-8) {
+    const px = xS(a.xs[minI]), py = yS(values[minI]);
+    s += `<circle cx="${px}" cy="${py}" r="5" fill="${color}" stroke="#fff" stroke-width="2"/>`;
+    s += `<text x="${px}" y="${py + 24}" text-anchor="middle" fill="${color}" font-size="14" font-weight="800">${formatNum(values[minI], 2)} ${yUnit}</text>`;
+  }
+
+  for (let i = 0; i <= 4; i++) {
+    const x = i / 4 * L, px = xS(x);
+    s += `<line x1="${px}" y1="${mT + plotH}" x2="${px}" y2="${mT + plotH + 8}" stroke="#2c3e50" stroke-width="1.8"/>`;
+    s += `<text x="${px}" y="${mT + plotH + 28}" text-anchor="middle" fill="#2c3e50" font-size="15" font-weight="600">${formatNum(convertLengthFromSI(x), 2)}${lengthUnitLabel()}</text>`;
+  }
+
+  s += `<text x="${W/2}" y="${H - 18}" text-anchor="middle" fill="#7c8b9c" font-size="13">${isDefl ? 'Deflection diagram' : yLabel + ' diagram'}</text>`;
+  return s;
+}
+
+/* ---------- calc / undo / events ---------- */
+function calculate() {
+  const err = $('errorBox');
+  err.classList.remove('visible'); err.textContent = '';
+  const L = parseFloat($('beamLength').value);
+  const E = parseFloat($('youngModulus').value);
+  const I = parseFloat($('momentInertia').value);
+  if (!Number.isFinite(L) || L <= 0) { err.textContent = 'Beam length must be positive.'; err.classList.add('visible'); return; }
+  if (!Number.isFinite(E) || E <= 0) { err.textContent = "Young's modulus must be positive."; err.classList.add('visible'); return; }
+  if (!Number.isFinite(I) || I <= 0) { err.textContent = 'Moment of inertia must be positive.'; err.classList.add('visible'); return; }
+  state.beamLength = L; state.youngModulus = E; state.momentInertia = I;
+  try {
+    state.analysis = analyzeBeam();
+    updateResultsUI(); drawDiagram();
+  } catch (e) {
+    state.analysis = null;
+    updateResultsUI(); drawDiagram();
+    err.textContent = e.message || 'Calculation error.';
+    err.classList.add('visible');
+  }
+}
+
+function pushUndo() {
+  undoStack.push(deepClone({ beamLength: state.beamLength, youngModulus: state.youngModulus, momentInertia: state.momentInertia, unitSystem: state.unitSystem, supports: state.supports, loads: state.loads, nextId: state.nextId }));
+  if (undoStack.length > 50) undoStack.shift();
+  redoStack = []; updateUndoRedo();
+}
+function updateUndoRedo() { $('undoBtn').disabled = undoStack.length === 0; $('redoBtn').disabled = redoStack.length === 0; }
+function restoreState(s) {
+  state.beamLength = s.beamLength; state.youngModulus = s.youngModulus; state.momentInertia = s.momentInertia;
+  state.unitSystem = s.unitSystem; state.supports = s.supports; state.loads = s.loads; state.nextId = s.nextId;
+  $('beamLength').value = state.beamLength; $('youngModulus').value = state.youngModulus;
+  $('momentInertia').value = state.momentInertia; $('unitSystem').value = state.unitSystem;
+  renderSupports(); renderLoads(); clearAnalysis(); updateUndoRedo();
+}
+
+function initModel() {
+  state.beamLength = 6; state.youngModulus = 200; state.momentInertia = 8000;
+  state.unitSystem = 'SI'; state.nextId = 1;
+  state.supports = [{ id: uid(), type: 'pin', x: 0 }, { id: uid(), type: 'roller', x: 6 }];
+  state.loads = [
+    { id: uid(), type: 'point', x: 3, magnitude: 10 },
+    { id: uid(), type: 'udl', start: 1, end: 5, intensity: 4 },
+  ];
+  $('beamLength').value = 6; $('youngModulus').value = 200;
+  $('momentInertia').value = 8000; $('unitSystem').value = 'SI';
+  undoStack = []; redoStack = []; state.analysis = null;
+  renderSupports(); renderLoads(); updateResultsUI(); drawDiagram(); updateUndoRedo();
+}
+
+function setupEvents() {
+  $('beamLength').addEventListener('change', e => { pushUndo(); const v = parseFloat(e.target.value); if (!Number.isFinite(v) || v <= 0) { e.target.classList.add('error'); return; } e.target.classList.remove('error'); state.beamLength = v; clearAnalysis(); });
+  $('youngModulus').addEventListener('change', e => { pushUndo(); const v = parseFloat(e.target.value); if (!Number.isFinite(v) || v <= 0) { e.target.classList.add('error'); return; } e.target.classList.remove('error'); state.youngModulus = v; clearAnalysis(); });
+  $('momentInertia').addEventListener('change', e => { pushUndo(); const v = parseFloat(e.target.value); if (!Number.isFinite(v) || v <= 0) { e.target.classList.add('error'); return; } e.target.classList.remove('error'); state.momentInertia = v; clearAnalysis(); });
+  $('unitSystem').addEventListener('change', e => { pushUndo(); state.unitSystem = e.target.value; renderSupports(); renderLoads(); clearAnalysis(); });
+  $('addSupportBtn').addEventListener('click', () => { pushUndo(); state.supports.push({ id: uid(), type: 'roller', x: state.beamLength / 2 }); renderSupports(); clearAnalysis(); });
+  $('addLoadBtn').addEventListener('click', () => { pushUndo(); state.loads.push({ id: uid(), type: 'point', x: state.beamLength / 2, magnitude: 10 }); renderLoads(); clearAnalysis(); });
+  $('calculateBtn').addEventListener('click', calculate);
+  $('resetBtn').addEventListener('click', () => { pushUndo(); initModel(); });
+  $('undoBtn').addEventListener('click', () => {
+    if (undoStack.length === 0) return;
+    redoStack.push(deepClone({ beamLength: state.beamLength, youngModulus: state.youngModulus, momentInertia: state.momentInertia, unitSystem: state.unitSystem, supports: state.supports, loads: state.loads, nextId: state.nextId }));
+    restoreState(undoStack.pop());
+  });
+  $('redoBtn').addEventListener('click', () => {
+    if (redoStack.length === 0) return;
+    undoStack.push(deepClone({ beamLength: state.beamLength, youngModulus: state.youngModulus, momentInertia: state.momentInertia, unitSystem: state.unitSystem, supports: state.supports, loads: state.loads, nextId: state.nextId }));
+    restoreState(redoStack.pop());
+  });
+  document.querySelectorAll('.diagram-tab').forEach(tab => {
+    tab.addEventListener('click', () => {
+      document.querySelectorAll('.diagram-tab').forEach(t => t.classList.remove('active'));
+      tab.classList.add('active'); activeDiagram = tab.dataset.diagram; drawDiagram();
+    });
+  });
+  $('exportPngBtn').addEventListener('click', () => {
+    const svg = $('diagramSvg');
+    const str = new XMLSerializer().serializeToString(svg);
+    const blob = new Blob([str], { type: 'image/svg+xml;charset=utf-8' });
+    const url = URL.createObjectURL(blob);
+    const img = new Image();
+    img.onload = () => {
+      const c = document.createElement('canvas');
+      c.width = 1600; c.height = 1240;
+      const ctx = c.getContext('2d');
+      ctx.fillStyle = '#fff'; ctx.fillRect(0, 0, c.width, c.height);
+      ctx.drawImage(img, 0, 0, c.width, c.height);
+      const link = document.createElement('a');
+      link.download = 'beam-diagram.png';
+      link.href = c.toDataURL('image/png');
+      link.click(); URL.revokeObjectURL(url);
+    };
+    img.src = url;
+  });
+  $('exportReportBtn').addEventListener('click', () => window.print());
+}
+
+initModel();
+setupEvents();
+</script>
+</body>
+</html>
