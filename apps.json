@@ -1,6 +1,16 @@
 {
  "apps": [
   {
+   "id": "p2gehpkp",
+   "name": "Beam Analysis",
+   "desc": "Analyze beams with precision. Calculate support reactions, shear forces, bending moments, and deflection with clear engineering diagrams and a powerful, mobile-",
+   "file": "apps/p2gehpkp.html",
+   "icon": "apps/p2gehpkp.png",
+   "size": 55686,
+   "updated": 1792238447424,
+   "published": true
+  },
+  {
    "id": "c2y80lwx",
    "name": "Steel Weight Calculator",
    "desc": "Calculate steel weights instantly and accurately. Supports multiple steel profiles with simple, reliable calculations.",
